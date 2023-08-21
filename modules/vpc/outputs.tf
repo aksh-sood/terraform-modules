@@ -1,4 +1,4 @@
-output "vpc_id" {
+output "id" {
   description = "VPC id after creation "
   value       = module.vpc.vpc_id
 }

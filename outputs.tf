@@ -1,6 +1,6 @@
 output "vpc_id" {
   description = "VPC id of the cluster"
-  value       = module.vpc.vpc_id
+  value       = module.vpc.id
 }
 
 output "public_subnets" {

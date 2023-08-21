@@ -9,7 +9,7 @@ module "vpc" {
   cidr = var.vpc_cidr
 
   # private subnet config
-  private_subnets     = var.private_subnet_cidr
+  private_subnets     = var.private_subnet_cidrs
   private_subnet_tags = merge(var.cost_tags, var.private_subnet_tags)
   private_subnet_tags_per_az = {
     for az in local.azs : az => {
@@ -19,7 +19,7 @@ module "vpc" {
 
   # public subnet config
   map_public_ip_on_launch = false
-  public_subnets          = var.public_subnet_cidr
+  public_subnets          = var.public_subnet_cidrs
   public_subnet_tags      = merge(var.cost_tags, var.public_subnet_tags)
   public_subnet_tags_per_az = {
     for az in local.azs : az => {
@@ -31,10 +31,10 @@ module "vpc" {
   enable_nat_gateway     = var.enable_nat_gateway
   single_nat_gateway     = var.enable_nat_gateway
   one_nat_gateway_per_az = false
-  nat_gateway_tags       = merge(var.cost_tags, var.nat_tags)
+  nat_gateway_tags       = var.cost_tags
 
   # Internet Gateway config
-  igw_tags = merge(var.cost_tags, var.gateway_tags)
+  igw_tags = var.cost_tags
 
   # Route Table config
   public_route_table_tags  = merge(var.cost_tags, var.public_route_table_tags)
@@ -65,4 +65,3 @@ module "vpc" {
   tags = merge(var.cost_tags, var.vpc_tags)
 
 }
-
