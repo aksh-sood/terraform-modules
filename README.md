@@ -100,7 +100,7 @@ The isito module installs the isito service mesh onto the EKS cluster in `istio-
 └── vars.tf
 ```
 
-The [providers.tf](./providers.tf) file contains all the necessary plugins that are required to run the script i.e AWS provider.
+The [providers.tf](./providers.tf) file contains all the necessary plugins that are required to run the script i.e aws provider.
 
 The [root main.tf](./main.tf) file is the file that triggers the VPC module for creation of resources.
 

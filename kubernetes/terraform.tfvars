@@ -1,0 +1,6 @@
+efs_version                   = "2.2.0"
+lbc_version                   = "1.6.0"
+istio_version                 = "1.18.0"
+siem_storage_s3_bucket        = ""
+environment                   = ""
+acm_certificate_arn           = ""
