@@ -65,3 +65,8 @@ module "vpc" {
   tags = merge(var.cost_tags, var.vpc_tags)
 
 }
+
+#setting the ingress, egress rules of default security group to null 
+resource "aws_default_security_group" "default" {
+  vpc_id = module.vpc.vpc_id
+}

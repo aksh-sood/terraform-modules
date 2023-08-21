@@ -1,11 +1,8 @@
 locals {
   node_groups_list = lookup(var.eks_node_groups, "node_groups", var.node_groups)
 
-  # By converting the list to map, we use the keys instead of the indexes from the list 
-  # for maintenance of terraform state and resources created.
-  # This makes the entire state management order independent i.e the user can insert or delete 
-  # a resource configuration anywhere in the list without affecting other resources.
-  # It also increases the readability, dependency management and maintenance of the infrastructure.
+  # Terraform uses the key name to maintain the state of objects when having a loop on a resource and prevents
+  # any changes to the infrastructure with the same key name even if their index changes in a list.
   node_groups_map = {
     for ng in local.node_groups_list :
     ng.name => ng
@@ -113,6 +110,7 @@ module "istio" {
 
   acm_certificate_arn = var.acm_certificate_arn
   istio_version       = var.istio_version
+  siem_storage_s3_bucket = var.siem_storage_s3_bucket
 
   depends_on = [module.addons, module.eks_node, module.iam]
 }
