@@ -1,7 +1,3 @@
-variable "cost_tags" {}
-variable "region" {}
-variable "enable_nat_gateway" {}
-
 variable "vpc_cidr" {
   description = "vpc cidr range"
   type        = string
@@ -22,44 +18,12 @@ variable "az_code" {
   type        = list(string)
   default     = ["a", "b", "c", "d", "e", "f"]
 }
-
-variable "vpc_tags" {
-  description = "tags for VPC and any related resources that do not have tags associated with them"
-  type        = map(string)
-}
-
 variable "public_subnet_tags" {
   default = {}
 }
 
 variable "private_subnet_tags" {
   default = {}
-}
-
-variable "public_subnet_cidr" {
-  description = "list of public subnet cidr's to be created"
-  type        = list(string)
-}
-variable "private_subnet_cidr" {
-  description = "list of private subnet cidr's to be created"
-  type        = list(string)
-}
-
-
-variable "gateway_tags" {
-  description = "Tags for internet gateway"
-  type        = map(string)
-  default = {
-    Name = "VPC gateway"
-  }
-}
-
-variable "nat_tags" {
-  description = "Tags for nat gateway"
-  type        = map(string)
-  default = {
-    Name = "Nat Gateway"
-  }
 }
 
 variable "private_route_table_tags" {
@@ -82,20 +46,11 @@ variable "vpc_flow_log_tags" {
   description = "tags for vpc flow logging"
   type        = map(string)
   default = {
-    Name = "VPC Flow Log"
+    Description = "VPC Flow Log"
   }
 }
 
-#flow logging
-
-variable "siem_storage_s3_bucket" {
-  description = "ARN of the s3 bucket where logs are to be stored"
-  type        = string
-}
-
 #acl rules
-
-
 variable "private_acl_egress_rules" {
   description = "base egress rules for private subnet NACL"
   type        = list(map(string))
@@ -278,3 +233,25 @@ variable "default_acl_egress_rules" {
     },
   ]
 }
+
+variable "vpc_tags" {
+  description = "tags for VPC and any related resources that do not have tags associated with them"
+  type        = map(string)
+}
+
+variable "siem_storage_s3_bucket" {
+  description = "ARN of the s3 bucket where logs are to be stored"
+  type        = string
+}
+variable "public_subnet_cidrs" {
+  description = "list of public subnet cidr's to be created"
+  type        = list(string)
+}
+variable "private_subnet_cidrs" {
+  description = "list of private subnet cidr's to be created"
+  type        = list(string)
+}
+
+variable "cost_tags" {}
+variable "region" {}
+variable "enable_nat_gateway" {}

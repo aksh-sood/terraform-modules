@@ -5,3 +5,5 @@ terraform.tfstate
 terraform.tfstate.d
 terraform.tfstate.backup
 k8s
+alerts
+*.pem
