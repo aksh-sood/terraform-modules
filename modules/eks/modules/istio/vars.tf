@@ -4,3 +4,4 @@ variable "acm_certificate_arn" {
 }
 
 variable "istio_version" {}
+variable "siem_storage_s3_bucket" {}

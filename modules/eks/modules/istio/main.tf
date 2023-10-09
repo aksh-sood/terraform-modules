@@ -108,6 +108,8 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
       "alb.ingress.kubernetes.io/ssl-redirect"         = "443"
       "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
       "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+      # The flow logging for the ELB cannot work if the native region of the bucket does not match that is the ELB
+      "alb.ingress.kubernetes.io/load-balancer-attributes" = "access_logs.s3.enabled=true,access_logs.s3.bucket=${var.siem_storage_s3_bucket}"
     }
   }
 

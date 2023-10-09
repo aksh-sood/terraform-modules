@@ -41,3 +41,4 @@ variable "kms_key_arn" {}
 variable "eks_node_groups" {}
 variable "acm_certificate_arn" {}
 variable "istio_version" {}
+variable "siem_storage_s3_bucket" {}

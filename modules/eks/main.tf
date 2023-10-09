@@ -108,9 +108,9 @@ module "addons" {
 module "istio" {
   source = "./modules/istio"
 
-  acm_certificate_arn = var.acm_certificate_arn
-  istio_version       = var.istio_version
+  acm_certificate_arn    = var.acm_certificate_arn
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
+  istio_version          = var.istio_version
 
   depends_on = [module.addons, module.eks_node, module.iam]
 }

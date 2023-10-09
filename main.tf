@@ -52,12 +52,13 @@ module "eks" {
   kms_key_arn         = module.kms.key_arn
   acm_certificate_arn = module.domain_certificate.certificate_arn
 
-  region          = var.region
-  cluster_name    = var.environment
-  cluster_version = var.cluster_version
-  istio_version   = var.istio_version
-  eks_node_groups = var.eks_node_groups
-  eks_tags        = var.cost_tags
+  region                 = var.region
+  cluster_name           = var.environment
+  cluster_version        = var.cluster_version
+  istio_version          = var.istio_version
+  eks_node_groups        = var.eks_node_groups
+  eks_tags               = var.cost_tags
+  siem_storage_s3_bucket = var.siem_storage_s3_bucket
 
   depends_on = [module.vpc]
 }
