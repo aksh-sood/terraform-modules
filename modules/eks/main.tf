@@ -1,8 +1,11 @@
 locals {
   node_groups_list = lookup(var.eks_node_groups, "node_groups", var.node_groups)
 
-  # Terraform uses the key name to maintain the state of objects when having a loop on a resource and prevents
-  # any changes to the infrastructure with the same key name even if their index changes in a list.
+  # By converting the list to map, we use the keys instead of the indexes from the list 
+  # for maintenance of terraform state and resources created.
+  # This makes the entire state management order independent i.e the user can insert or delete 
+  # a resource configuration anywhere in the list without affecting other resources.
+  # It also increases the readability, dependency management and maintenance of the infrastructure.
   node_groups_map = {
     for ng in local.node_groups_list :
     ng.name => ng
