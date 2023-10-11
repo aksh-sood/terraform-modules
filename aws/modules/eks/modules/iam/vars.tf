@@ -29,6 +29,14 @@ variable "node_policies" {
   ]
 }
 
+variable "grafana_policies" {
+  description = "Policies for grafana cloudwatch role"
+  type        = list(string)
+  default = [
+    "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+  ]
+}
+
 variable "additional_node_policies" {
   description = "additional policies to attach to the eks node group"
   type        = list(string)

@@ -34,3 +34,4 @@ variable "eks_node_groups" {}
 variable "acm_certificate_arn" {}
 variable "siem_storage_s3_bucket" {}
 variable "azs" {}
+variable "private_subnets_cidr" {}

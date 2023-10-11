@@ -1,5 +1,5 @@
 output "azs" {
-  description = "public subnets of the VPC"
+  description = "azs in which the vpc is provisioned"
   value       = module.vpc.azs
 }
 

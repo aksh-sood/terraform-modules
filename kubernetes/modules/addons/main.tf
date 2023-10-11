@@ -4,13 +4,13 @@ resource "helm_release" "efs_driver" {
   repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
   chart      = "aws-efs-csi-driver"
   namespace  = "kube-system"
-  version    = var.efs_version
+  version    = var.efs_addon_version
 
   values = [
     <<-EOT
 replicaCount: 1 
 storageClasses:
-  - name: efs-sc
+  - name: efs
     reclaimPolicy: Retain
     parameters:
       provisioningMode: efs-ap
@@ -26,7 +26,7 @@ resource "helm_release" "lbc_addon" {
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-load-balancer-controller"
   namespace  = "kube-system"
-  version    = var.lbc_version
+  version    = var.lbc_addon_version
   set {
     name  = "clusterName"
     value = var.cluster_name

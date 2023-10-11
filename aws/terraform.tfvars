@@ -1,6 +1,6 @@
-region = "us-east-1"
+region = "us-west-2"
 
-environment = "test"
+environment = "one"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -36,7 +36,9 @@ acm_private_key = "batonsystems.com/cloudflare/origin_ca_rsa_root.pem"
 
 create_eks = true
 
-cluster_version = "1.27"
+subscribe_security_hub = false
+
+cluster_version = "1.28"
 
 eks_node_groups = {
 

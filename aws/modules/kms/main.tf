@@ -2,7 +2,8 @@ data "aws_caller_identity" "current" {}
 
 module "kms" {
   source  = "terraform-aws-modules/kms/aws"
-  version = "~> 1.5"
+  # https://registry.terraform.io/modules/terraform-aws-modules/kms/aws/2.1.0
+  version = "2.1.0"
 
   key_administrators = [
     data.aws_caller_identity.current.arn

@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 # Cluster associated Policies and role Creation
 resource "aws_iam_policy" "elb_policy" {
   name_prefix = "k8s_elb_policy_${var.cluster_name}_${var.region}"
@@ -133,4 +135,32 @@ resource "aws_iam_role_policy_attachment" "node_role" {
   role       = aws_iam_role.node_role.name
   policy_arn = each.value
 
+}
+
+resource "aws_iam_role" "grafana" {
+  name_prefix        = "grafana_${var.cluster_name}_${var.region}"
+  assume_role_policy = <<-EOF
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        },
+        "Action": "sts:AssumeRole"
+      }
+      
+    ]
+  }
+  EOF
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "grafana" {
+  for_each = { for k, v in var.grafana_policies : k => v }
+
+  role       = aws_iam_role.grafana.name
+  policy_arn = each.value
 }

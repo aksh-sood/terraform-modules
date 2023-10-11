@@ -1,8 +1,3 @@
-output "azs" {
-  description = "public subnets of the VPC"
-  value       = module.vpc.azs
-}
-
 output "vpc_id" {
   description = "VPC id of the cluster"
   value       = module.vpc.id
@@ -18,22 +13,17 @@ output "private_subnets" {
   value       = module.vpc.private_subnets
 }
 
-output "cluster_endpoint" {
-  description = "API endpoint for the cluster"
-  value       = try(module.eks.cluster_endpoint, null)
-}
-
-output "cluster_certificate_authority_data" {
-  description = "AWS Clutser certificate"
-  value       = try(module.eks.cluster_certificate_authority_data, null)
-}
-
-output "cluster_name" {
-  description = "EKS Cluster name"
-  value       = try(module.eks.cluster_name, null)
-}
-
 output "efs_id" {
   description = "EFS volume ID for EKS Cluster"
-  value       = try(module.eks.efs_id, null)
+  value       = var.create_eks ? module.eks[0].efs_id : null
+}
+
+output "acm_certificate_arn" {
+  description = "ARN of the domain certificate"
+  value       = module.domain_certificate.certificate_arn
+}
+
+output "grafana_role_arn" {
+  description = "role arn id for cloudwatch datasource in grafana"
+  value       = var.create_eks ? module.eks[0].grafana_role_arn : null
 }

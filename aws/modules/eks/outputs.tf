@@ -13,12 +13,12 @@ output "node_role_arn" {
   value       = module.iam.node_role_arn
 }
 
-output "cluster_endpoint" {
-  description = "API endpoint for the cluster"
-  value       = module.cluster.cluster_endpoint
+output "efs_id" {
+  description = "EFS volume ID for EKS Cluster"
+  value       = module.efs.efs_id
 }
 
-output "cluster_certificate_authority_data" {
-  description = "AWS Clutser certificate"
-  value       = module.cluster.cluster_certificate_authority_data
+output "grafana_role_arn" {
+  description = "role arn id for cloudwatch datasource in grafana"
+  value       = module.iam.grafana_role_arn
 }

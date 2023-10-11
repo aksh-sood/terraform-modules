@@ -1,6 +1,14 @@
 data "aws_caller_identity" "current" {}
 
-# handles the creation of VPC and its components for cluster creation
+module "security_hub" {
+  source = "./modules/security-hub"
+  count= var.subscribe_security_hub?1:0
+
+  region                         = var.region
+  security_hub_standards         = var.security_hub_standards
+  disabled_security_hub_controls = local.disabled_security_hub_controls
+}
+
 module "vpc" {
   source = "./modules/vpc"
 
@@ -60,6 +68,7 @@ module "eks" {
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
   private_subnet_cidrs   = var.private_subnet_cidrs
   eks_tags               = var.cost_tags
+  private_subnets_cidr   = var.private_subnet_cidrs
 
   depends_on = [module.vpc]
 }

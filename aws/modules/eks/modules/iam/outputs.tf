@@ -12,3 +12,8 @@ output "node_role_arn" {
   description = "role arn id for cluster nodes"
   value       = aws_iam_role.node_role.arn
 }
+
+output "grafana_role_arn" {
+  description = "role arn id for cloudwatch datasource in grafana"
+  value       = aws_iam_role.grafana.arn
+}

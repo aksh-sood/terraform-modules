@@ -105,3 +105,16 @@ module "addons" {
 
   depends_on = [module.cluster, module.eks_node, module.iam]
 }
+
+module "efs" {
+  source = "./modules/efs"
+
+  efs_name             = var.cluster_name
+  kms_key_arn          = var.kms_key_arn
+  vpc_id               = var.vpc_id
+  azs                  = var.azs
+  private_subnets      = var.private_subnet_ids
+  private_subnets_cidr = var.private_subnets_cidr
+  cost_tags            = var.eks_tags
+  whitelisted_sg       = module.cluster.primary_security_group_id
+}

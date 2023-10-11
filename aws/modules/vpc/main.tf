@@ -5,6 +5,9 @@ locals {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
+  # https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/5.2.0
+  version = "5.2.0"
+
   azs  = local.azs
   cidr = var.vpc_cidr
 
@@ -66,7 +69,11 @@ module "vpc" {
 
 }
 
-#setting the ingress, egress rules of default security group to null 
+# setting the ingress, egress rules of default security group created by vpc module to null 
+# this resource is required because of the default rules set in the vpc module for deault security group 
+# due to which we cannot make the ingress and egress as null 
 resource "aws_default_security_group" "default" {
   vpc_id = module.vpc.vpc_id
+
+  tags = merge(var.cost_tags, var.vpc_tags)
 }

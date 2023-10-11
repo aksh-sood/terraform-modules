@@ -2,6 +2,9 @@
 module "eks" {
   source = "terraform-aws-modules/eks/aws"
 
+  # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/19.20.0
+  version = "19.20.0"
+
   cluster_name    = var.cluster_name
   cluster_version = try(var.cluster_version, null)
   # IAM role for cluster
