@@ -1,0 +1,12 @@
+efs_addon_version      = "2.2.0"
+lbc_addon_version      = "1.6.0"
+istio_version          = "1.20.0"
+slack_web_hook         = "https://hooks.slack.com/services/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"
+slack_channel_name     = "terraform-test-alerts"
+siem_storage_s3_bucket = "eks-auto-vpc-flow-logs"
+environment            = "one"
+acm_certificate_arn    = "arn:aws:acm:us-west-2:130759691668:certificate/1c126e6c-6ca2-48e1-8443-5dbe588edf9c"
+efs_id                 = "fs-0f5aabc3bfd871e12"
+pagerduty_key          = "8d81b91f50e54dc09a2400fbeb019c84"
+custom_alerts          = []
+grafana_role_arn       = "arn:aws:iam::130759691668:role/grafana_one_us-west-22023120505563566530000000a"
