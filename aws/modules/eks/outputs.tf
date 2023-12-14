@@ -22,3 +22,7 @@ output "grafana_role_arn" {
   description = "role arn id for cloudwatch datasource in grafana"
   value       = module.iam.grafana_role_arn
 }
+
+output "primary_security_group_id" {
+  value = module.cluster.primary_security_group_id
+}

@@ -241,3 +241,17 @@ variable "disabled_security_hub_controls" {
     }
   }
 }
+
+variable "opensearch_ebs_volume" {
+  default = 20
+  type = number
+}
+
+variable "opensearch_instance_type" {
+  default = "t3.medium.search"
+}
+
+variable "opensearch_instance_count" {
+  default = 1
+  type = number
+}

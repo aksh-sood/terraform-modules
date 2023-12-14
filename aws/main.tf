@@ -72,3 +72,17 @@ module "eks" {
 
   depends_on = [module.vpc]
 }
+
+module "opensearch" {
+  source = "./modules/opensearch"
+  count = var.create_eks ? 1: 0
+
+  domain_name = var.environment
+  vpc_id = module.vpc.id
+  subnet_ids = module.vpc.private_subnets
+  instance_type = var.opensearch_instance_type
+  instance_count = var.opensearch_instance_count
+  kms_key_arn = module.kms.key_arn
+  eks_sg = module.eks[0].primary_security_group_id
+  ebs_volume = var.opensearch_ebs_volume
+}

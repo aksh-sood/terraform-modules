@@ -62,3 +62,6 @@ eks_node_groups = {
   ]
 }
 
+opensearch_ebs_volume = 20
+opensearch_instance_type = "t3.medium.search"
+opensearch_instance_count = 1
