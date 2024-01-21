@@ -242,7 +242,7 @@ variable "disabled_security_hub_controls" {
   }
 }
 
-variable "opensearch_ebs_volume" {
+variable "opensearch_ebs_volume_size" {
   default = 20
   type = number
 }
@@ -254,4 +254,9 @@ variable "opensearch_instance_type" {
 variable "opensearch_instance_count" {
   default = 1
   type = number
+}
+
+variable "opensearch_engine_version" {
+  default = "OpenSearch_2.11"
+  type = string
 }

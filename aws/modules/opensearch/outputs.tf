@@ -6,7 +6,10 @@ output "endpoint" {
   value = aws_opensearch_domain.domain.endpoint
 }
 
-output "master_user_password" {
+output "password" {
   value = random_password.password.result
-  sensitive = true
+}
+
+output "username" {
+  value = "master"
 }

@@ -19,49 +19,58 @@ resource "aws_security_group" "sg" {
 }
 
 resource "aws_opensearch_domain" "domain" {
-    domain_name = var.domain_name
-    engine_version = "OpenSearch_2.7"
+  domain_name    = var.domain_name
+  engine_version = var.engine_version
 
-    cluster_config {
-      instance_type = var.instance_type
-      instance_count = var.instance_count
+  cluster_config {
+    instance_type          = var.instance_type
+    instance_count         = var.instance_count
+    zone_awareness_enabled = true
+    zone_awareness_config {
+      availability_zone_count = 2
     }
+  }
 
-    ebs_options {
-      ebs_enabled = true
-      volume_size = var.ebs_volume
-    }
-    node_to_node_encryption {
-      enabled = true
-    }
-    advanced_security_options {
-      enabled = true
-      internal_user_database_enabled = true
-      master_user_options {
-        master_user_name = "master"
-        master_user_password = random_password.password.result
-      }
-    }
+  ebs_options {
+    ebs_enabled = true
+    volume_size = var.ebs_volume_size
+  }
+  node_to_node_encryption {
+    enabled = true
+  }
 
-    encrypt_at_rest {
-      enabled = true
-      kms_key_id = var.kms_key_arn
-    }
+  advanced_options = {
+    override_main_response_version : true
+  }
 
-    tags = {
-    "Terraform" = true
+  advanced_security_options {
+    enabled                        = true
+    internal_user_database_enabled = true
+    master_user_options {
+      master_user_name     = "master"
+      master_user_password = random_password.password.result
+    }
+  }
+
+  encrypt_at_rest {
+    enabled    = true
+    kms_key_id = var.kms_key_arn
+  }
+
+  tags = {
+    "Terraform"   = true
     "Environment" = "${var.domain_name}"
-    }
+  }
 
-    vpc_options {
-      security_group_ids = [aws_security_group.sg.id]
-      subnet_ids = [var.subnet_ids[2]]
-    }
+  vpc_options {
+    security_group_ids = [aws_security_group.sg.id]
+    subnet_ids         = [var.subnet_ids[2], var.subnet_ids[1]]
+  }
 
-    domain_endpoint_options {
-      enforce_https = true
-      tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
-    }
+  domain_endpoint_options {
+    enforce_https       = true
+    tls_security_policy = "Policy-Min-TLS-1-2-2019-07"
+  }
 }
 
 data "aws_iam_policy_document" "main" {
