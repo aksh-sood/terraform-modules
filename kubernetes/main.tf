@@ -21,6 +21,10 @@ module "istio" {
 module "monitoring" {
   source = "./modules/monitoring"
 
+  isito_dependency = module.istio
+
+  environment                   = var.environment
+  domain_name                   = var.domain_name
   slack_channel_name            = var.slack_channel_name
   kube_prometheus_stack_version = var.kube_prometheus_stack_version
   slack_web_hook                = var.slack_web_hook

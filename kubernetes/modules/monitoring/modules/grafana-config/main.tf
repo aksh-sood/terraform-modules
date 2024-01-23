@@ -21,14 +21,14 @@ resource "grafana_dashboard" "metrics" {
   for_each = fileset("${path.module}/dashboards", "*.json")
 
   config_json = file("${path.module}/dashboards/${each.key}")
-  folder = grafana_folder.custom.id
+  folder      = grafana_folder.custom.id
 
   depends_on = [var.dependency]
 }
 
 resource "random_string" "dev_password" {
-  length           = 10
-  special          = true
+  length  = 10
+  special = true
 }
 
 resource "grafana_user" "developer" {
@@ -41,8 +41,8 @@ resource "grafana_user" "developer" {
 }
 
 resource "grafana_data_source" "cloudwatch" {
-  name     = "CloudWatch"
-  type     = "cloudwatch"
+  name = "CloudWatch"
+  type = "cloudwatch"
 
   json_data_encoded = <<JSON
 {

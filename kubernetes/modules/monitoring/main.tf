@@ -1,6 +1,21 @@
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.7.0"
+    }
+  }
+}
+
+provider "kubectl" {
+  config_path = "~/.kube/${var.environment}"
+}
+
 resource "random_string" "grafana_password" {
-  length           = 10
-  special          = true
+  length  = 10
+  special = true
 }
 
 resource "helm_release" "kube_prometheus_stack" {
@@ -31,11 +46,59 @@ resource "helm_release" "kube_prometheus_stack" {
   ]
 }
 
+resource "kubectl_manifest" "monitoring_gateway" {
+  yaml_body = <<YAML
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: monitoring-gateway
+  namespace: monitoring
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - ${var.environment}-grafana.${var.domain_name}
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+YAML
+
+  depends_on = [var.isito_dependency]
+}
+
+resource "kubectl_manifest" "grafana_virtualservice" {
+  yaml_body = <<YAML
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  gateways:
+  - monitoring-gateway
+  - mesh
+  hosts:
+  - ${var.environment}-grafana.${var.domain_name}
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: grafana
+        port:
+          number: 80
+YAML
+
+  depends_on = [var.isito_dependency]
+}
 
 module "grafana_config" {
   source = "./modules/grafana-config"
 
   grafana_password = random_string.grafana_password.id
   dependency       = helm_release.kube_prometheus_stack
-  grafana_role_arn=var.grafana_role_arn
+  grafana_role_arn = var.grafana_role_arn
 }

@@ -22,6 +22,12 @@ variable "acm_certificate_arn" {
   default     = ""
 }
 
+variable "domain_name" {
+  description = "Domain Name registered in DNS service"
+  type        = string
+  default     = ""
+}
+
 variable "istio_version" {
   description = "istio helm chart version"
   type        = string

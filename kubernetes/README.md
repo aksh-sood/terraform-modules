@@ -12,9 +12,9 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 # Modules
 
 ##### [Istio](./kubernetes/module/istio)
-The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world.
+The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. 
 
-**Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB
+**Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB.
 
 ##### [Addons](./kubernetes/module/addons)
 Responsible for installation of helm based eks addons in cluster which are listed below.
@@ -26,7 +26,9 @@ The `aws-efs-csi-driver` is also responsible for creating a `StorageClass` objec
 
 ##### [Monitoring](./kubernetes/module/monitoring)
 
-Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/module/monitoring/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/alertmanager.yaml) file respectively. The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warining and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as 200Gi,5Gi and 10Gi respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf)
+Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/module/monitoring/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/alertmanager.yaml) file respectively. The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warining and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as 200Gi,5Gi and 10Gi respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
+
+This module also uses `kubectl` provider making it a legacy module as a `Gateway` and `VirtualService` object are created in this for Grafana.
 
 ###### [Grafana Config](./kubernetes/module/monitoring/modules/grafana-config)
 
@@ -106,6 +108,7 @@ terraform apply
 |efs_addon_version| Version of the efs driver | string  | `"2.2.0"`|
 |lbc_addon_version| Version of lbc driver|string|`"1.6.0"`|
 |environment|Environment for which the resources are being provisioned|string|`""`|
+|domain_name | Domain name registerd in the DNS service | string | `""` |
 |acm_certificate_arn|ARN of the domain certificate from the AWS script for istio ingress| string | `""`|
 |siem_storage_s3_bucket      |S3 bucket name for alerts and logging |string     |`""`|
 |custom_alerts|List of custom alerts for prometheus|[map(custom_alerts)](#markdown-header-custom-alerts-config)| `[]` |
