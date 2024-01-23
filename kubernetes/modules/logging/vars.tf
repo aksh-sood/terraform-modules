@@ -1,12 +1,12 @@
-variable "os_password" {
+variable "opensearch_password" {
 
 }
 
-variable "os_username" {
+variable "opensearch_username" {
 
 }
 
-variable "os_endpoint" {
+variable "opensearch_endpoint" {
 
 }
 

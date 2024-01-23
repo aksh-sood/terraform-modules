@@ -108,14 +108,14 @@ variable "prometheus_volume_size" {
   default     = "200Gi"
 }
 
-variable "os_password" {
+variable "opensearch_password" {
   
 }
 
-variable "os_username" {
+variable "opensearch_username" {
   
 }
 
-variable "os_endpoint" {
+variable "opensearch_endpoint" {
   
 }

@@ -1,8 +1,8 @@
 data "template_file" "init" {
   template = file("${path.module}/filebeat.yaml")
   vars = {
-    OS_USERNAME = var.os_username,
-    OS_PASSWORD = var.os_password
+    OPENSEARCH_USERNAME = var.opensearch_username,
+    OPENSEARCH_PASSWORD = var.opensearch_password
   }
 }
 
@@ -12,7 +12,7 @@ resource "kubernetes_service" "example" {
     namespace = "logging"
   }
   spec {
-    external_name = var.os_endpoint
+    external_name = var.opensearch_endpoint
     type          = "ExternalName"
     port {
       port        = 443
@@ -101,7 +101,7 @@ resource "kubernetes_manifest" "virtualservice_logging_kibana" {
           "route" = [
             {
               "destination" = {
-                "host" = var.os_endpoint
+                "host" = var.opensearch_endpoint
                 "port" = {
                   "number" = 443
                 }
@@ -124,7 +124,7 @@ resource "kubernetes_manifest" "serviceentry_logging_kibana" {
     }
     "spec" = {
       "hosts" = [
-        var.os_endpoint,
+        var.opensearch_endpoint,
       ]
       "location" = "MESH_EXTERNAL"
       "ports" = [
@@ -148,7 +148,7 @@ resource "kubernetes_manifest" "destinationrule_logging_kibana" {
       "namespace" = "logging"
     }
     "spec" = {
-      "host" = var.os_endpoint
+      "host" = var.opensearch_endpoint
       "trafficPolicy" = {
         "tls" = {
           "mode" = "SIMPLE"

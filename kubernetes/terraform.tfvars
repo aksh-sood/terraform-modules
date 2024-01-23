@@ -15,3 +15,4 @@ os_endpoint            = "vpc-malayil-cqxlemydwt5bdnqq6k7mznye5y.us-west-2.es.am
 os_username            = "master"
 os_password            = "2Ab$2g_gPSG#Y1p#"
 domain_name            = "batonsystems.com"
+

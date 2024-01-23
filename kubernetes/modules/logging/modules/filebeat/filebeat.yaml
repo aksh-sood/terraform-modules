@@ -15,8 +15,8 @@ daemonset:
                    - /var/log/pods/*$${data.kubernetes.pod.uid}/$${data.kubernetes.container.name}/*.log
       output.elasticsearch:
         hosts: ["https://aws-es:443"]
-        username: "${OS_USERNAME}"
-        password: "${OS_PASSWORD}"
+        username: "${OPENSEARCH_USERNAME}"
+        password: "${OPENSEARCH_PASSWORD}"
         ssl.verification_mode: none
 
   securityContext:

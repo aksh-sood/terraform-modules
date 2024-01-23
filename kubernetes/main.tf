@@ -38,7 +38,7 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
   environment_name = var.environment
-  os_endpoint = var.os_endpoint
-  os_password = var.os_password
-  os_username = var.os_username
+  opensearch_endpoint = var.opensearch_endpoint
+  opensearch_password = var.opensearch_password
+  opensearch_username = var.opensearch_username
 }

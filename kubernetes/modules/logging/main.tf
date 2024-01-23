@@ -1,7 +1,7 @@
 module "filebeat" {
   source           = "./modules/filebeat"
-  os_endpoint      = var.os_endpoint
-  os_username      = var.os_username
-  os_password      = var.os_password
+  opensearch_endpoint      = var.opensearch_endpoint
+  opensearch_username      = var.opensearch_username
+  opensearch_password      = var.opensearch_password
   environment_name = var.environment_name
 }
