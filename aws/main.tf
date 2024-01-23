@@ -1,19 +1,14 @@
 data "aws_caller_identity" "current" {}
 
-<<<<<<< HEAD
+
 module "security_hub" {
   source = "./modules/security-hub"
   count  = var.subscribe_security_hub ? 1 : 0
-=======
-# module "security_hub" {
-#   source = "./modules/security-hub"
-#   count= var.subscribe_security_hub?1:0
->>>>>>> dbe1e27 (OPS-262 filebeat agent)
 
-#   region                         = var.region
-#   security_hub_standards         = var.security_hub_standards
-#   disabled_security_hub_controls = local.disabled_security_hub_controls
-# }
+  region                         = var.region
+  security_hub_standards         = var.security_hub_standards
+  disabled_security_hub_controls = local.disabled_security_hub_controls
+}
 
 module "vpc" {
   source = "./modules/vpc"
@@ -81,15 +76,16 @@ module "eks" {
 
 module "opensearch" {
   source = "./modules/opensearch"
-  count = var.create_eks ? 1: 0
+  count  = var.create_eks ? 1 : 0
 
-  domain_name = var.environment
-  engine_version = var.opensearch_engine_version
-  vpc_id = module.vpc.id
-  subnet_ids = module.vpc.public_subnets
-  instance_type = var.opensearch_instance_type
-  instance_count = var.opensearch_instance_count
-  kms_key_arn = module.kms.key_arn
-  eks_sg = module.eks[0].primary_security_group_id
+  domain_name     = var.environment
+  engine_version  = var.opensearch_engine_version
+  vpc_id          = module.vpc.id
+  subnet_ids      = module.vpc.public_subnets
+  instance_type   = var.opensearch_instance_type
+  instance_count  = var.opensearch_instance_count
+  kms_key_arn     = module.kms.key_arn
+  eks_sg          = module.eks[0].primary_security_group_id
   ebs_volume_size = var.opensearch_ebs_volume_size
+  cost_tags       = var.cost_tags
 }

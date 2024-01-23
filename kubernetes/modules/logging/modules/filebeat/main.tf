@@ -1,3 +1,28 @@
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = ">= 1.7.0"
+    }
+  }
+}
+
+provider "kubectl" {
+  config_path = "~/.kube/${var.environment}"
+}
+
+data "template_file" "istio_logging_config" {
+  template = file("${path.module}/istio_logging_config.yaml")
+
+  vars = {
+    opensearch_endpoint = var.opensearch_endpoint
+    environment         = var.environment
+    domain_name         = var.domain_name
+  }
+}
+
 data "template_file" "init" {
   template = file("${path.module}/filebeat.yaml")
   vars = {
@@ -6,7 +31,7 @@ data "template_file" "init" {
   }
 }
 
-resource "kubernetes_service" "example" {
+resource "kubernetes_service" "proxy" {
   metadata {
     name      = "aws-es"
     namespace = "logging"
@@ -29,131 +54,10 @@ resource "helm_release" "filebeat" {
   namespace        = "logging"
   create_namespace = true
 
-
   values = [data.template_file.init.rendered]
+  depends_on = [ kubernetes_service.proxy ]
 }
 
-resource "kubernetes_manifest" "gateway_logging_logging" {
-  manifest = {
-    "apiVersion" = "networking.istio.io/v1beta1"
-    "kind"       = "Gateway"
-    "metadata" = {
-      "name"      = "logging"
-      "namespace" = "logging"
-    }
-    "spec" = {
-      "selector" = {
-        "istio" = "ingressgateway"
-      }
-      "servers" = [
-        {
-          "hosts" = [
-            "test-kibana.batonsystems.com",
-          ]
-          "port" = {
-            "name"     = "http"
-            "number"   = 80
-            "protocol" = "HTTP"
-          }
-        },
-      ]
-    }
-  }
-}
-
-resource "kubernetes_manifest" "virtualservice_logging_kibana" {
-  manifest = {
-    "apiVersion" = "networking.istio.io/v1beta1"
-    "kind"       = "VirtualService"
-    "metadata" = {
-      "name"      = "kibana"
-      "namespace" = "logging"
-    }
-    "spec" = {
-      "gateways" = [
-        "logging",
-      ]
-      "hosts" = [
-        "${var.environment_name}-kibana.batonsystems.com",
-      ]
-      "http" = [
-        {
-          "match" = [
-            {
-              "uri" = {
-                "exact" = "/"
-              }
-            },
-          ]
-          "redirect" = {
-            "authority" = "${var.environment_name}-kibana.batonsystems.com"
-            "uri"       = "/_dashboards/"
-          }
-        },
-        {
-          "match" = [
-            {
-              "uri" = {
-                "prefix" = "/_dashboards/"
-              }
-            },
-          ]
-          "route" = [
-            {
-              "destination" = {
-                "host" = var.opensearch_endpoint
-                "port" = {
-                  "number" = 443
-                }
-              }
-            },
-          ]
-        },
-      ]
-    }
-  }
-}
-
-resource "kubernetes_manifest" "serviceentry_logging_kibana" {
-  manifest = {
-    "apiVersion" = "networking.istio.io/v1beta1"
-    "kind"       = "ServiceEntry"
-    "metadata" = {
-      "name"      = "kibana"
-      "namespace" = "logging"
-    }
-    "spec" = {
-      "hosts" = [
-        var.opensearch_endpoint,
-      ]
-      "location" = "MESH_EXTERNAL"
-      "ports" = [
-        {
-          "name"     = "https"
-          "number"   = 443
-          "protocol" = "TLS"
-        },
-      ]
-      "resolution" = "DNS"
-    }
-  }
-}
-
-resource "kubernetes_manifest" "destinationrule_logging_kibana" {
-  manifest = {
-    "apiVersion" = "networking.istio.io/v1beta1"
-    "kind"       = "DestinationRule"
-    "metadata" = {
-      "name"      = "kibana"
-      "namespace" = "logging"
-    }
-    "spec" = {
-      "host" = var.opensearch_endpoint
-      "trafficPolicy" = {
-        "tls" = {
-          "mode" = "SIMPLE"
-        }
-      }
-    }
-  }
+resource "kubectl_manifest" "apply_manifest" {
+  yaml_body = data.template_file.istio_logging_config.rendered
 }

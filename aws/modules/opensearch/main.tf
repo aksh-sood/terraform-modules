@@ -23,12 +23,8 @@ resource "aws_opensearch_domain" "domain" {
   engine_version = var.engine_version
 
   cluster_config {
-    instance_type          = var.instance_type
-    instance_count         = var.instance_count
-    zone_awareness_enabled = true
-    zone_awareness_config {
-      availability_zone_count = 2
-    }
+    instance_type  = var.instance_type
+    instance_count = var.instance_count
   }
 
   ebs_options {
@@ -57,14 +53,21 @@ resource "aws_opensearch_domain" "domain" {
     kms_key_id = var.kms_key_arn
   }
 
-  tags = {
+  tags = merge(var.cost_tags, {
     "Terraform"   = true
     "Environment" = "${var.domain_name}"
-  }
+  })
 
+  # TODO: Multi-AZ Implementation
+
+  # OpenSearch Terraform resource requires the following for Multi-AZ setup
+  # Ensure that instance_count aligns with the number of AZs
+  # For 2 AZs, requires instance_count as multiples of 2; for 3 AZs, multiples of 3
+  # Distribute subnets to match the instance count's
+  # Aim for a more straightforward and reliable Multi-AZ implementation without unnecessary complexity
   vpc_options {
     security_group_ids = [aws_security_group.sg.id]
-    subnet_ids         = [var.subnet_ids[2], var.subnet_ids[1]]
+    subnet_ids         = [var.subnet_ids[0]]
   }
 
   domain_endpoint_options {

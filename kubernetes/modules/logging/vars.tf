@@ -10,6 +10,9 @@ variable "opensearch_endpoint" {
 
 }
 
-variable "environment_name" {
+variable "environment" {
+
+}
+variable "domain_name" {
 
 }

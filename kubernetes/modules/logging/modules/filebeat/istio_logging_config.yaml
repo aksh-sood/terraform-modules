@@ -1,0 +1,67 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: logging
+  namespace: logging
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - ${environment}-kibana.${domain_name}
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  gateways:
+    - logging
+  hosts:
+    - ${environment}-kibana.${domain_name}
+  http:
+  - match:
+    - uri:
+        exact: "/"
+    redirect:
+      uri: "/_dashboards/"
+      authority: ${environment}-kibana.${domain_name}
+  - match:
+    - uri:
+        prefix: "/_dashboards/"
+    route:
+      - destination:
+          host: ${opensearch_endpoint}
+          port:
+            number: 443
+---
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  hosts:
+    - ${opensearch_endpoint}
+  location: MESH_EXTERNAL
+  ports:
+    - number: 443
+      name: https
+      protocol: TLS
+  resolution: DNS
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  host: ${opensearch_endpoint}
+  trafficPolicy:
+    tls:
+      mode: SIMPLE

@@ -1,6 +1,6 @@
 region = "us-west-2"
 
-environment = "malayil"
+environment = "test"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -62,7 +62,7 @@ eks_node_groups = {
   ]
 }
 
-opensearch_ebs_volume_size = 20
-opensearch_instance_type = "t3.medium.search"
-opensearch_instance_count = 2
-opensearch_engine_version = "OpenSearch_2.11"
+opensearch_ebs_volume_size = 200
+opensearch_instance_type   = "m6g.large.search"
+opensearch_instance_count  = 1
+opensearch_engine_version  = "OpenSearch_2.11"

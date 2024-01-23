@@ -15,3 +15,5 @@ variable "instance_count" {}
 variable "instance_type" {}
 
 variable "engine_version" {}
+
+variable "cost_tags" {}
