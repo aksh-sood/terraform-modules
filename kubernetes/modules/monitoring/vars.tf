@@ -12,3 +12,6 @@ variable "kube_prometheus_stack_version" {}
 variable "pagerduty_key" {}
 variable "custom_alerts" {}
 variable "grafana_role_arn" {}
+variable "environment" {}
+variable "domain_name" {}
+variable "isito_dependency" {}

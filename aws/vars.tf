@@ -157,8 +157,8 @@ variable "eks_node_groups" {
 
 variable "subscribe_security_hub" {
   description = "Wheather to subscribe to seecurity hub or not"
-  type = bool
-  default = false
+  type        = bool
+  default     = false
 }
 
 variable "security_hub_standards" {

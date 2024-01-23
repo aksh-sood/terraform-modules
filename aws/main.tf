@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 module "security_hub" {
   source = "./modules/security-hub"
-  count= var.subscribe_security_hub?1:0
+  count  = var.subscribe_security_hub ? 1 : 0
 
   region                         = var.region
   security_hub_standards         = var.security_hub_standards
