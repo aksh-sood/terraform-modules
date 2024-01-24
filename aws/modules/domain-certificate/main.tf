@@ -6,9 +6,9 @@
 resource "null_resource" "metadata_update" {
   provisioner "local-exec" {
     command = <<-EOT
-     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.public_key} --key ${var.public_key} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
-     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.cert_key} --key ${var.cert_key} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
-     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.pem_key} --key ${var.pem_key} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
+     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.certificate} --key ${var.certificate} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
+     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.cert_chain} --key ${var.cert_chain} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
+     aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.private_key} --key ${var.private_key} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
     EOT
   }
 }
@@ -25,7 +25,7 @@ data "aws_s3_object" "private_key" {
   provider = aws.east
 
   bucket = var.acm_certificate_bucket
-  key    = "/${var.public_key}"
+  key    = "/${var.private_key}"
 
   depends_on = [null_resource.metadata_update]
 }
@@ -35,7 +35,7 @@ data "aws_s3_object" "certificate" {
   provider = aws.east
 
   bucket = var.acm_certificate_bucket
-  key    = "/${var.cert_key}"
+  key    = "/${var.certificate}"
 
   depends_on = [null_resource.metadata_update]
 }
@@ -45,7 +45,7 @@ data "aws_s3_object" "key_chain" {
   provider = aws.east
 
   bucket = var.acm_certificate_bucket
-  key    = "/${var.pem_key}"
+  key    = "/${var.cert_chain}"
 
   depends_on = [null_resource.metadata_update]
 }

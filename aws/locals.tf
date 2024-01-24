@@ -11,7 +11,6 @@ locals {
   } : {}
 }
 
-
 #KMS KEY
 locals {
   key_user_arns = var.create_eks ? [

@@ -152,11 +152,12 @@ terraform apply
 |siem_storage_s3_bucket      |S3 bucket name for alerts and logging |string     |`"aes-siem-800161367015-log"`|
 |additional_cluster_policies |additional cluster policies for EKS cluster |map(string)|`{}`|
 |cluster_version |EKS cluster version |string| `"1.28"`|
+|additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]`|
 |eks_node_groups |EKS node configuration to provision in cluster|map(eks-node-group-config)|[EKS Node Group Config](#markdown-header-eks-node-group-config)|
 |acm_certificate_bucket |S3 bucket name where domain certificate data is stored|string|`"baton-domain-certificates"`|
-|public_key| S3 object key for domain certificate public key |string |`"batonsystems.com/cloudflare/batonsystems.com.key"`|
-|cert_key | S3 object key for domain certificate certificate|string |`"batonsystems.com/cloudflare/batonsystems.com.crt"`|
-|pem_key  |S3 object for domain certificate private key|string|`"batonsystems.com/cloudflare/origin_ca_rsa_root.pem"`|
+|acm_private_key| S3 object key for domain certificate private key |string |`"batonsystem.com/cloudflare/batonsystem.com.key"`|
+|acm_certificate | S3 object key for domain certificate body|string |`"batonsystem.com/cloudflare/batonsystem.com.crt"`|
+|acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
 |security_hub_standards | Security hub standards to to enabled |list(string)| ```["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]```|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
 

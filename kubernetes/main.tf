@@ -3,9 +3,22 @@ module "addons" {
 
   cluster_name      = var.environment
   lbc_addon_version = var.lbc_addon_version
-  efs_addon_version = var.efs_addon_version
-  efs_id            = var.efs_id
+}
 
+
+resource "kubernetes_storage_class_v1" "efs" {
+  metadata {
+    name = "efs"
+  }
+  storage_provisioner = "efs.csi.aws.com"
+  reclaim_policy      = "Retain"
+  parameters = {
+    provisioningMode = "efs-ap"
+    fileSystemId     = "${var.efs_id}"
+    directoryPerms   = "700"
+  }
+
+  depends_on = [module.addons]
 }
 
 module "istio" {
@@ -23,6 +36,8 @@ module "monitoring" {
 
   isito_dependency = module.istio
 
+  loadbalancer_url = module.istio.loadbalancer_url
+
   environment                   = var.environment
   domain_name                   = var.domain_name
   slack_channel_name            = var.slack_channel_name
@@ -33,6 +48,8 @@ module "monitoring" {
   alert_manager_volume_size     = var.alert_manager_volume_size
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
+  cloudflare_api_token          = var.cloudflare_api_token
+  efs_id                        = var.efs_id
 }
 
 module "logging" {

@@ -15,10 +15,10 @@ module "vpc" {
   enable_nat_gateway     = var.enable_nat_gateway
   public_subnet_cidrs    = var.public_subnet_cidrs
   private_subnet_cidrs   = var.private_subnet_cidrs
-  az_count               = var.az_count
   region                 = var.region
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
   cost_tags              = var.cost_tags
+  az_count               = local.az_count
   vpc_tags               = merge(var.vpc_tags, { Name = var.environment })
   public_subnet_tags     = merge(var.public_subnet_tags, local.eks_public_subnet_tags)
   private_subnet_tags    = merge(var.private_subnet_tags, local.eks_private_subnet_tags)
@@ -28,9 +28,9 @@ module "domain_certificate" {
   source = "./modules/domain-certificate"
 
   acm_certificate_bucket = var.acm_certificate_bucket
-  public_key             = var.acm_certificate
-  cert_key               = var.acm_certificate_chain
-  pem_key                = var.acm_private_key
+  certificate            = var.acm_certificate
+  cert_chain             = var.acm_certificate_chain
+  private_key            = var.acm_private_key
 
   acm_tags = var.cost_tags
 }
@@ -68,6 +68,7 @@ module "eks" {
   private_subnet_cidrs   = var.private_subnet_cidrs
   eks_tags               = var.cost_tags
   private_subnets_cidr   = var.private_subnet_cidrs
+  additional_eks_addons  = var.additional_eks_addons
 
   depends_on = [module.vpc]
 }

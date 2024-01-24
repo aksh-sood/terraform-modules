@@ -87,19 +87,19 @@ variable "acm_certificate_bucket" {
 variable "acm_certificate" {
   description = "S3 path to ACM Domain key"
   type        = string
-  default     = "batonsystems.com/cloudflare/batonsystems.com.key"
+  default     = "batonsystem.com/cloudflare/batonsystem.com.crt"
 }
 
 variable "acm_certificate_chain" {
   description = "S3 path to ACM certificate key"
   type        = string
-  default     = "batonsystems.com/cloudflare/batonsystems.com.crt"
+  default     = "batonsystem.com/cloudflare/origin_ca_rsa_root.pem"
 }
 
 variable "acm_private_key" {
   description = "S3 path to ACM private key"
   type        = string
-  default     = "batonsystems.com/cloudflare/origin_ca_rsa_root.pem"
+  default     = "batonsystem.com/cloudflare/batonsystem.com.key"
 }
 
 variable "create_eks" {
@@ -110,6 +110,12 @@ variable "cluster_version" {
   description = "eks cluster verison"
   type        = string
   default     = "1.28"
+}
+
+variable "additional_eks_addons" {
+  description = "additional addons for EKS cluster"
+  type=list(string)
+  default = []
 }
 
 variable "eks_node_groups" {
