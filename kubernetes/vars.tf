@@ -119,7 +119,3 @@ variable "opensearch_username" {
 variable "opensearch_endpoint" {
 
 }
-
-variable "domain_name" {
-
-}
