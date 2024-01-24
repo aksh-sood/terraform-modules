@@ -5,5 +5,5 @@ output "grafana_dev_password" {
 
 output "grafana_password" {
   description = "user password for grafana admin role"
-  value       = random_string.grafana_password.id
+  value       = random_password.password.result
 }

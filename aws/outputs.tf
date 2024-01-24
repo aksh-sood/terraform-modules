@@ -34,8 +34,8 @@ output "opensearch_endpoint" {
 }
 
 output "opensearch_password" {
-  value = var.create_eks ? module.opensearch[0].password : null
   sensitive = true
+  value     = var.create_eks ? module.opensearch[0].password : null
 }
 
 output "opensearch_username" {

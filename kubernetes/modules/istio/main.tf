@@ -93,6 +93,7 @@ resource "helm_release" "istio_ingress" {
 }
 
 resource "kubernetes_ingress_v1" "alb_ingress" {
+  wait_for_load_balancer = true
   metadata {
     name      = "istio-alb"
     namespace = "istio-system"
