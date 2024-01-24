@@ -11,7 +11,7 @@ module "kms" {
 
   key_service_users                 = var.key_user_arns
   key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
-  aliases                           = var.aliases
+  aliases                           = ["${var.alias}-${var.environment}"]
 
   tags = var.kms_tags
 }

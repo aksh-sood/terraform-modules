@@ -1,0 +1,10 @@
+docker_registry: 150399859526.dkr.ecr.us-west-2.amazonaws.com
+customer: collateral-nightly
+health_endpoint: /health
+targetPort: 8080
+endpoint: api
+url_prefix: /cme
+domain: batonsystems.com
+env: {"APP_ENVIRONMENT": "aksh","SPRING_PROFILES_ACTIVE": "aksh2"}
+  
+  

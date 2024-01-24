@@ -31,6 +31,14 @@ module "istio" {
   depends_on = [module.addons]
 }
 
+module "baton_application_namespaces" {
+  source = "./modules/baton-application-namespace"
+
+  domain_name=var.domain_name
+  environment=var.environment
+  baton_application_namespaces = var.baton_application_namespaces
+}
+
 module "monitoring" {
   source = "./modules/monitoring"
 
@@ -49,6 +57,7 @@ module "monitoring" {
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
   cloudflare_api_token          = var.cloudflare_api_token
+  zone_id                       = var.cloudflare_zone_id
   efs_id                        = var.efs_id
 }
 

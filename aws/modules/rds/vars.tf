@@ -31,63 +31,63 @@ variable "rds_reader_needed" {
 }
 
 variable "db_cluster_parameter_group_parameters" {
-  default     = []
   description = "Custom DB cluster parameter group parameters."
+  default     = []
 }
 
 variable "create_db_cluster_parameter_group" {
-  default     = true
-  type        = bool
   description = "Create a custom DB cluster parameter group (true/false)."
+  type        = bool
+  default     = true
 }
 
 variable "enable_deletion_protection" {
-  default     = false
-  type        = bool
   description = "Enable deletion protection for the RDS cluster (true/false)."
+  type        = bool
+  default     = false
 }
 
 variable "kms_key_id" {
-  default     = "aws/"
   description = "The KMS key ID for encryption."
+  default     = "aws/"
 }
 
 variable "enable_auto_minor_version_upgrade" {
-  default     = false
-  type        = bool
   description = "Enable auto minor version upgrade (true/false)."
+  type        = bool
+  default     = false
 }
 
 variable "preferred_backup_window" {
-  default     = "07:00-09:00"
   description = "Preferred backup window for the RDS cluster."
+  default     = "07:00-09:00"
 }
 
 variable "backup_retention_period" {
-  default     = 7
   description = "Backup retention period in days."
+  default     = 7
 }
 
 variable "enable_performance_insights" {
-  default     = false
-  type        = bool
   description = "Enable performance insights (true/false)."
+  type        = bool
+  default     = false
 }
 
 variable "performance_insights_retention_period" {
-  default = 7
-  type = number
   description = "Amount of time in days to retain Performance Insights data."
+  type = number
+  default = 7
 }
 
 variable "ca_cert_identifier" {
-  default     = "rds-ca-rsa2048-g1"
   description = "CA certificate identifier for the RDS cluster."
+  default     = "rds-ca-rsa2048-g1"
 }
 
 variable "enable_rds_event_notifications" {
-  default = true
   type = bool
+  default = true
 }
 
 variable "publicly_accessible" {
@@ -98,12 +98,12 @@ variable "enabled_cloudwatch_logs_exports" {
 }
 
 variable "db_parameter_group_parameters" {
-  default = []
   type = list(object({
     name = string
     value = string
     apply_method = string
   }))
+  default = []
 }
 
 variable "reader_instance_type" {
