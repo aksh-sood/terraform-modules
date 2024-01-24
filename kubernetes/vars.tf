@@ -107,3 +107,19 @@ variable "prometheus_volume_size" {
   description = "Volume Claims size for alert manager"
   default     = "200Gi"
 }
+
+variable "opensearch_password" {
+
+}
+
+variable "opensearch_username" {
+
+}
+
+variable "opensearch_endpoint" {
+
+}
+
+variable "domain_name" {
+
+}

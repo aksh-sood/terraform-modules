@@ -34,3 +34,12 @@ module "monitoring" {
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
 }
+
+module "logging" {
+  source              = "./modules/logging"
+  environment         = var.environment
+  opensearch_endpoint = var.opensearch_endpoint
+  opensearch_password = var.opensearch_password
+  opensearch_username = var.opensearch_username
+  domain_name         = var.domain_name
+}

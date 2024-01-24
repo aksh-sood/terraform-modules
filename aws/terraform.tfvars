@@ -1,6 +1,6 @@
 region = "us-west-2"
 
-environment = "one"
+environment = "test"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -36,7 +36,7 @@ acm_private_key = "batonsystems.com/cloudflare/origin_ca_rsa_root.pem"
 
 create_eks = true
 
-subscribe_security_hub = false
+subscribe_security_hub = true
 
 cluster_version = "1.28"
 
@@ -52,8 +52,8 @@ eks_node_groups = {
 
     instance_types = ["m5.large"]
 
-    min_size = 1
-    max_size = 1
+    min_size = 2
+    max_size = 2
 
     additional_security_groups = []
 
@@ -62,3 +62,7 @@ eks_node_groups = {
   ]
 }
 
+opensearch_ebs_volume_size = 200
+opensearch_instance_type   = "m6g.large.search"
+opensearch_instance_count  = 1
+opensearch_engine_version  = "OpenSearch_2.11"

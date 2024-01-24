@@ -1,5 +1,6 @@
 data "aws_caller_identity" "current" {}
 
+
 module "security_hub" {
   source = "./modules/security-hub"
   count  = var.subscribe_security_hub ? 1 : 0
@@ -71,4 +72,20 @@ module "eks" {
   private_subnets_cidr   = var.private_subnet_cidrs
 
   depends_on = [module.vpc]
+}
+
+module "opensearch" {
+  source = "./modules/opensearch"
+  count  = var.create_eks ? 1 : 0
+
+  domain_name     = var.environment
+  engine_version  = var.opensearch_engine_version
+  vpc_id          = module.vpc.id
+  subnet_ids      = module.vpc.public_subnets
+  instance_type   = var.opensearch_instance_type
+  instance_count  = var.opensearch_instance_count
+  kms_key_arn     = module.kms.key_arn
+  eks_sg          = module.eks[0].primary_security_group_id
+  ebs_volume_size = var.opensearch_ebs_volume_size
+  cost_tags       = var.cost_tags
 }

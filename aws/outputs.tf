@@ -27,3 +27,17 @@ output "grafana_role_arn" {
   description = "role arn id for cloudwatch datasource in grafana"
   value       = var.create_eks ? module.eks[0].grafana_role_arn : null
 }
+
+
+output "opensearch_endpoint" {
+  value = module.opensearch[0].endpoint
+}
+
+output "opensearch_password" {
+  value = module.opensearch[0].password
+  sensitive = true
+}
+
+output "opensearch_username" {
+  value = module.opensearch[0].username
+}
