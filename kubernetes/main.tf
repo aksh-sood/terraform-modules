@@ -36,7 +36,10 @@ module "monitoring" {
 }
 
 module "logging" {
-  source              = "./modules/logging"
+  source = "./modules/logging"
+
+  isito_dependency = module.istio
+
   environment         = var.environment
   opensearch_endpoint = var.opensearch_endpoint
   opensearch_password = var.opensearch_password
