@@ -259,3 +259,99 @@ variable "opensearch_engine_version" {
   default = "OpenSearch_2.11"
   type    = string
 }
+
+variable "create_rds" {
+  default = true
+  type    = bool
+}
+
+variable "rds_mysql_version" {
+  description = "mysql version for rds aurora"
+  type        = string
+}
+
+variable "rds_instance_type" {
+  description = "RDS Instance Type"
+  type        = string
+}
+
+variable "rds_master_username" {
+  description = "Master Username for RDS"
+  type        = string
+  default     = "master"
+}
+
+variable "rds_reader_needed" {
+  description = "Enable reader for RDS"
+  type        = bool
+  default     = false
+}
+
+variable "rds_parameter_group_family" {
+  description = "Parameter group Family name. Will be applied to both parameter group and db cluster parameter group"
+  type        = string
+}
+
+variable "rds_enable_performance_insights" {
+  type = bool
+}
+variable "rds_performance_insights_retention_period" {
+  type    = number
+  default = 7
+}
+
+variable "rds_enable_event_notifications" {
+  default = true
+  type    = bool
+}
+
+variable "rds_reader_instance_type" {}
+
+variable "rds_ingress_whitelist" {
+  type = list(string)
+}
+
+variable "rds_enable_deletion_protection" {
+  default = true
+  type    = bool
+}
+
+variable "rds_enable_auto_minor_version_upgrade" {
+  type    = bool
+  default = false
+}
+
+variable "rds_db_cluster_parameter_group_parameters" {
+  default = []
+}
+
+variable "rds_preferred_backup_window" {
+  default = "07:00-09:00"
+}
+
+variable "rds_publicly_accessible" {
+  default = false
+}
+
+variable "rds_db_parameter_group_parameters" {
+  default = [
+    {
+      name         = "long_query_time"
+      value        = "10"
+      apply_method = "immediate"
+    }
+  ]
+}
+
+variable "rds_enabled_cloudwatch_logs_exports" {
+  default = ["slowquery", "audit", "error"]
+}
+
+variable "rds_ca_cert_identifier" {
+  type = string
+}
+
+variable "rds_backup_retention_period" {
+  type    = number
+  default = 7
+}

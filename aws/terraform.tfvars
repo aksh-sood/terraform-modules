@@ -1,6 +1,6 @@
-region = "us-west-1"
+region = "us-east-1"
 
-environment = "test"
+environment = "malayil"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -64,3 +64,30 @@ opensearch_ebs_volume_size = 200
 opensearch_instance_type   = "m6g.large.search"
 opensearch_instance_count  = 1
 opensearch_engine_version  = "OpenSearch_2.11"
+
+create_rds = true
+rds_mysql_version = "8.0"
+rds_instance_type = "db.t4g.large"
+rds_master_username = "root"
+rds_reader_needed = true
+rds_parameter_group_family = "aurora-mysql8.0"
+rds_enable_performance_insights = true
+rds_performance_insights_retention_period = 7
+rds_reader_instance_type = "db.t4g.large"
+rds_enable_deletion_protection = false
+rds_enable_auto_minor_version_upgrade = false
+rds_enable_event_notifications = true
+rds_ingress_whitelist = []
+rds_db_cluster_parameter_group_parameters = []
+rds_preferred_backup_window = "07:00-09:00"
+rds_publicly_accessible = false
+rds_db_parameter_group_parameters = [
+    {
+      name         = "long_query_time"
+      value        = "10"
+      apply_method = "immediate"
+    }
+  ]
+rds_enabled_cloudwatch_logs_exports = ["slowquery", "audit", "error"]
+rds_ca_cert_identifier="rds-ca-rsa2048-g1"
+rds_backup_retention_period = 7

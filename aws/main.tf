@@ -89,3 +89,36 @@ module "opensearch" {
   ebs_volume_size = var.opensearch_ebs_volume_size
   cost_tags       = var.cost_tags
 }
+
+module "rds_cluster" {
+  source     = "./modules/rds"
+  count      = var.create_rds ? 1 : 0
+  depends_on = [module.vpc, module.kms]
+
+  name                                  = var.environment
+  mysql_version                         = var.rds_mysql_version
+  rds_instance_type                     = var.rds_instance_type
+  master_username                       = var.rds_master_username
+  rds_reader_needed                     = var.rds_reader_needed
+  subnets                               = module.vpc.private_subnets
+  vpc_id                                = module.vpc.id
+  whitelist_eks                         = var.create_eks
+  eks_sg                                = var.create_eks ? module.eks[0].primary_security_group_id : null
+  ingress_whitelist                     = var.rds_ingress_whitelist
+  kms_key_id                            = module.kms.key_arn
+  enable_performance_insights           = var.rds_enable_performance_insights
+  performance_insights_retention_period = var.rds_performance_insights_retention_period
+  enable_rds_event_notifications        = var.rds_enable_event_notifications
+  enable_deletion_protection            = var.rds_enable_deletion_protection
+  enable_auto_minor_version_upgrade     = var.rds_enable_auto_minor_version_upgrade
+  preferred_backup_window               = var.rds_preferred_backup_window
+  backup_retention_period               = var.rds_backup_retention_period
+  publicly_accessible                   = var.rds_publicly_accessible
+  ca_cert_identifier                    = var.rds_ca_cert_identifier
+  enabled_cloudwatch_logs_exports       = var.rds_enabled_cloudwatch_logs_exports
+  reader_instance_type                  = var.rds_reader_instance_type
+  parameter_group_family                = var.rds_parameter_group_family
+  db_cluster_parameter_group_parameters = var.rds_db_cluster_parameter_group_parameters
+  db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
+  cost_tags                             = var.cost_tags
+}

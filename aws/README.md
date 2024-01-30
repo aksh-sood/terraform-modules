@@ -1,5 +1,5 @@
 # Description
-The following folder is a sub part of the entire Terraform IAAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS resources can be optionally executed depending upon the users needs .
+The following folder is a sub part of the entire Terraform IAAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS and RDS resources can be optionally executed depending upon the users needs .
 
 - VPC
 - Private Public Subnets
@@ -14,6 +14,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - EKS Managed Node Groups
 - IAM roles and policies for EKS Cluster and Nodes
 - EFS Drive for persistent volume and security Group For EFS
+- RDS Cluster
 
 # Modules
 
@@ -72,6 +73,9 @@ The IAM module is used to create the user managed policies and map them to clust
 
 5. [EFS](./aws/modules/eks/modules/efs)
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
+
+##### [RDS](./aws/modules/rds/)
+RDS Module creates a Aurora Mysql RDS Cluster within the VPC private subnets.
 
 # Folder Structure
 Below is the structure of AWS Folder.
@@ -160,6 +164,27 @@ terraform apply
 |acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
 |security_hub_standards | Security hub standards to to enabled |list(string)| ```["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]```|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
+|create_rds|Determines whether to create an RDS instance|bool|`true`|
+|rds_mysql_version|MySQL version for RDS Aurora|string|`-`|
+|rds_instance_type|RDS Instance Type|string|`-`|
+|rds_master_password|Master Password for RDS|string|`-`|
+|rds_master_username|Master Username for RDS|string|`master`|
+|rds_reader_needed|Enable reader for RDS|bool|`false`|
+|rds_parameter_group_family|Parameter group Family name|string|`-`|
+|rds_enable_performance_insights|Enable performance insights for RDS|bool|`-`|
+|rds_performance_insights_retention_period|Performance Insights retention period|number|`7`|
+|rds_enable_event_notifications|Enable event notifications for RDS|bool|`true`|
+|rds_reader_instance_type|Reader instance type for RDS|`-`|`-`|
+|rds_ingress_whitelist|Ingress whitelist for RDS|list|`-`|
+|rds_enable_deletion_protection|Enable deletion protection for RDS|bool|`true`|
+|rds_enable_auto_minor_version_upgrade|Enable auto minor version upgrade for RDS|bool|`false`|
+|rds_db_cluster_parameter_group_parameters|DB cluster parameter group parameters|list|`[]`|
+|rds_preferred_backup_window|Preferred backup window for RDS|string|`"07:00-09:00"`|
+|rds_publicly_accessible|Make RDS publicly accessible|bool|`false`|
+|rds_db_parameter_group_parameters|DB parameter group parameters|list(map)|`[{"name": "long_query_time", "value": "10", "apply_method": "immediate"}]`|
+|rds_enabled_cloudwatch_logs_exports|Enabled CloudWatch Logs Exports for RDS|list(string)|`["slowquery", "audit", "error"]`|
+|rds_ca_cert_identifier|CA certificate identifier for RDS|string|`-`|
+|rds_backup_retention_period|Backup retention period for RDS in days|number|`7`|
 
 #### EKS Node Group Config
 
@@ -287,13 +312,18 @@ The following map lists the security controls that are disabled for each of the 
 
 ### Output
 
-The script takes 40-50 mins to complete a run after which the VPC, EKS ,ACM and KMS key are configured with other necessary components with below elements as outputs.
+The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM and KMS key are configured with other necessary components with below elements as outputs.
 
 | Name  | Type | Description |
 |:-----------|:---------|:-----------|
-|vpc_id              |string        | VPC id for the new VPC created              |
-|public_subnets      |list(string)  | List of IDs of public subnets               |
-|private_subnets     |list(string)  | List of IDs of private subnets              |
-|efs_id              |string        | EFS Volume ID for persistent storage        |
-|acm_certificate_arn |string        | ARN of domain certificate for istio ingress |
-|grafana_role_arn    |string        | ARN of the Grafana role                     |
+|vpc_id                   |string        | VPC id for the new VPC created                       |
+|public_subnets           |list(string)  | List of IDs of public subnets                        |
+|private_subnets          |list(string)  | List of IDs of private subnets                       |
+|efs_id                   |string        | EFS Volume ID for persistent storage                 |
+|acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
+|grafana_role_arn         |string        | ARN of the Grafana role                              |
+|rds_writer_endpoint      |string        |Writer endpoint of the RDS cluster                    |
+|rds_reader_endpoint      |string        |Reader endpoint of the RDS cluster                    |
+|rds_cloudwatch_log_groups|string        |CloudWatch log groups associated with the RDS cluster |
+|rds_master_username      |string        |MYSQL Username for the master user                    |
+|rds_master_password      |string        |MYSQL Password for the master user                    |
