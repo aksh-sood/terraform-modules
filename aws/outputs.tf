@@ -30,14 +30,14 @@ output "grafana_role_arn" {
 
 
 output "opensearch_endpoint" {
-  value = module.opensearch[0].endpoint
+  value = var.create_eks ? module.opensearch[0].endpoint : null
 }
 
 output "opensearch_password" {
-  value = module.opensearch[0].password
+  value = var.create_eks ? module.opensearch[0].password : null
   sensitive = true
 }
 
 output "opensearch_username" {
-  value = module.opensearch[0].username
+  value = var.create_eks ? module.opensearch[0].username : null
 }
