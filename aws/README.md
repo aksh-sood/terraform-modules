@@ -22,6 +22,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 The VPC module deals with the creation of VPC in the given region with internet and NAT gateway and also the different different public and private subnets with different ACL's as well. The VPC has flow logging enabled and has dedicated public and private network ACL and rules set . It also provisions one NAT gateway by default in the first az.
 
 **Note:** Make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB depending upon the resources being provisioned.
+**Note:** If the `create_eks` variable is set to `true` then minimum AZs requried in that region should be 3 .
 
 
 ##### [Security Hub Module](./aws/modules/domain-certificate/)

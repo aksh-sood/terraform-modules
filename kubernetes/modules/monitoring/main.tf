@@ -13,9 +13,17 @@ provider "kubectl" {
   config_path = "~/.kube/${var.environment}"
 }
 
-resource "random_string" "grafana_password" {
-  length  = 10
-  special = true
+resource "random_password" "password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+  min_special      = 1
+  lower            = true
+  min_lower        = 1
+  numeric          = true
+  min_numeric      = 1
+  upper            = true
+  min_upper        = 1
 }
 
 resource "helm_release" "kube_prometheus_stack" {
@@ -30,7 +38,7 @@ resource "helm_release" "kube_prometheus_stack" {
     templatefile("${path.module}/config.yaml", {
       prometheus_volume_size = var.prometheus_volume_size
       grafana_volume_size    = var.grafana_volume_size
-      grafana_password       = random_string.grafana_password.id
+      grafana_password       = random_password.password.result
       alerts = templatefile("${path.module}/alerts.yaml", {
         custom_alerts = jsonencode(var.custom_alerts)
         #  prometheus_volume_size=var.prometheus_volume_size

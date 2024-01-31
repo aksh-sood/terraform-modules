@@ -1,4 +1,4 @@
-region = "us-west-2"
+region = "us-west-1"
 
 environment = "test"
 
@@ -35,8 +35,6 @@ acm_certificate_chain = "batonsystems.com/cloudflare/batonsystems.com.crt"
 acm_private_key = "batonsystems.com/cloudflare/origin_ca_rsa_root.pem"
 
 create_eks = true
-
-subscribe_security_hub = true
 
 cluster_version = "1.28"
 

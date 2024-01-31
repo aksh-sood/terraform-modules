@@ -49,11 +49,10 @@ variable "az_count" {
   type        = number
   validation {
     condition     = var.az_count > 0 || var.az_count < 6
-    error_message = "number should be a greater than 0 and less than 6"
+    error_message = "Number should be greater than 0 and less than 6"
   }
   default = 3
 }
-
 
 variable "enable_nat_gateway" {
   description = "Enable single NAT Gateway for vpc"
@@ -155,12 +154,6 @@ variable "eks_node_groups" {
   }
 }
 
-variable "subscribe_security_hub" {
-  description = "Wheather to subscribe to seecurity hub or not"
-  type        = bool
-  default     = false
-}
-
 variable "security_hub_standards" {
   description = "List security hub standards enabled"
   type        = list(string)
@@ -244,7 +237,7 @@ variable "disabled_security_hub_controls" {
 
 variable "opensearch_ebs_volume_size" {
   default = 20
-  type = number
+  type    = number
 }
 
 variable "opensearch_instance_type" {
@@ -253,10 +246,10 @@ variable "opensearch_instance_type" {
 
 variable "opensearch_instance_count" {
   default = 1
-  type = number
+  type    = number
 }
 
 variable "opensearch_engine_version" {
   default = "OpenSearch_2.11"
-  type = string
+  type    = string
 }

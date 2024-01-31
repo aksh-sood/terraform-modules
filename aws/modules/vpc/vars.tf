@@ -9,15 +9,10 @@ variable "az_count" {
   type        = number
   validation {
     condition     = var.az_count > 0 || var.az_count < 6
-    error_message = "number should be a greater than 0 and less than 6"
+    error_message = "Number should be greater than 0 and less than 6"
   }
 }
 
-variable "az_code" {
-  description = "alphbetic list of az codes"
-  type        = list(string)
-  default     = ["a", "b", "c", "d", "e", "f"]
-}
 variable "public_subnet_tags" {
   default = {}
 }
@@ -243,10 +238,12 @@ variable "siem_storage_s3_bucket" {
   description = "ARN of the s3 bucket where logs are to be stored"
   type        = string
 }
+
 variable "public_subnet_cidrs" {
   description = "list of public subnet cidr's to be created"
   type        = list(string)
 }
+
 variable "private_subnet_cidrs" {
   description = "list of private subnet cidr's to be created"
   type        = list(string)

@@ -1,5 +1,17 @@
-locals {
-  azs = formatlist("${var.region}%s", slice(var.az_code, 0, var.az_count))
+data "aws_availability_zones" "this" {
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
+
+resource "null_resource" "azs_list_validation" {
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_availability_zones.this.names) > var.az_count - 1
+      error_message = "Provided regions doesn't have the minimum of ${var.az_count} availability zone"
+    }
+  }
 }
 
 module "vpc" {
@@ -8,14 +20,14 @@ module "vpc" {
   # https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/5.2.0
   version = "5.2.0"
 
-  azs  = local.azs
+  azs  = slice(data.aws_availability_zones.this.names, 0, var.az_count)
   cidr = var.vpc_cidr
 
   # private subnet config
   private_subnets     = var.private_subnet_cidrs
   private_subnet_tags = merge(var.cost_tags, var.private_subnet_tags)
   private_subnet_tags_per_az = {
-    for az in local.azs : az => {
+    for az in data.aws_availability_zones.this.names : az => {
       Name = "Private Subnet - ${az}"
     }
   }
@@ -25,7 +37,7 @@ module "vpc" {
   public_subnets          = var.public_subnet_cidrs
   public_subnet_tags      = merge(var.cost_tags, var.public_subnet_tags)
   public_subnet_tags_per_az = {
-    for az in local.azs : az => {
+    for az in data.aws_availability_zones.this.names : az => {
       Name = "Public Subnet - ${az}"
     }
   }
@@ -67,6 +79,7 @@ module "vpc" {
 
   tags = merge(var.cost_tags, var.vpc_tags)
 
+  depends_on = [null_resource.azs_list_validation]
 }
 
 # setting the ingress, egress rules of default security group created by vpc module to null 
