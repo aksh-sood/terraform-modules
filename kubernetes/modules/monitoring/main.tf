@@ -3,22 +3,16 @@ terraform {
 
   required_providers {
     kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.7.0"
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
     }
     cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "~> 4.0"
+      source                = "cloudflare/cloudflare"
+      version               = "~> 4.0"
+      configuration_aliases = [cloudflare.this]
     }
   }
-}
-
-provider "kubectl" {
-  config_path = "~/.kube/${var.environment}"
-}
-
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
 }
 
 resource "random_password" "password" {
@@ -35,11 +29,16 @@ resource "random_password" "password" {
 }
 
 data "cloudflare_zone" "this" {
+
+  provider = cloudflare.this
+
   name = var.domain_name
 }
 
 resource "cloudflare_record" "cnames" {
-  count = length(var.cname)
+  count = length(var.cnames)
+
+  provider = cloudflare.this
 
   name    = "${var.environment}-${var.cnames[count.index]}"
   zone_id = data.cloudflare_zone.this.id
@@ -78,6 +77,9 @@ resource "helm_release" "kube_prometheus_stack" {
 }
 
 resource "kubectl_manifest" "monitoring_gateway" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
@@ -98,10 +100,13 @@ spec:
       protocol: HTTP
 YAML
 
-  depends_on = [var.isito_dependency, helm_release.kube_prometheus_stack]
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "kubectl_manifest" "kube_stack_virtualservices" {
+
+  provider = kubectl.this
+
   for_each = {
     for pair in [
       for yaml in split(
@@ -121,7 +126,7 @@ resource "kubectl_manifest" "kube_stack_virtualservices" {
 
   yaml_body = each.value
 
-  depends_on = [var.isito_dependency, helm_release.kube_prometheus_stack, kubectl_manifest.monitoring_gateway]
+  depends_on = [helm_release.kube_prometheus_stack, kubectl_manifest.monitoring_gateway]
 }
 
 module "grafana_config" {

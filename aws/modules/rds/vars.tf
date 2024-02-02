@@ -76,8 +76,8 @@ variable "enable_performance_insights" {
 
 variable "performance_insights_retention_period" {
   description = "Amount of time in days to retain Performance Insights data."
-  type = number
-  default = 7
+  type        = number
+  default     = 7
 }
 
 variable "ca_cert_identifier" {
@@ -86,7 +86,7 @@ variable "ca_cert_identifier" {
 }
 
 variable "enable_rds_event_notifications" {
-  type = bool
+  type    = bool
   default = true
 }
 
@@ -99,8 +99,8 @@ variable "enabled_cloudwatch_logs_exports" {
 
 variable "db_parameter_group_parameters" {
   type = list(object({
-    name = string
-    value = string
+    name         = string
+    value        = string
     apply_method = string
   }))
   default = []
@@ -113,10 +113,10 @@ variable "reader_instance_type" {
 variable "ingress_whitelist" {}
 variable "cost_tags" {}
 variable "eks_sg" {
-  type = string
+  type    = string
   default = null
 }
 variable "whitelist_eks" {
-  type = bool
+  type    = bool
   default = false
 }

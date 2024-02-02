@@ -99,53 +99,26 @@ variable "cloudflare_api_token" {
 }
 
 variable "baton_application_namespaces" {
-  description=""
-  type=list(object({
-    namespace = string
+  description = "List of namespaces, services and there required attributes"
+  type = list(object({
+    namespace       = string
     istio_injection = bool
+    common_env      = optional(map(string), {})
     services = list(object({
-      name = string
-      customer=string
-health_endpoint=string
-target_port=number
-endpoint=string
-url_prefix=string
-env=map(string)
+      name             = string
+      customer         = string
+      health_endpoint  = string
+      target_port      = number
+      subdomain_suffix = optional(string, "")
+      url_prefix       = string
+      env              = map(string)
+      image_tag        = optional(string, "latest")
     }))
   }))
+}
 
-  default = [
-    {
-      namespace = "aksh"
-      istio_injection = true
-      services = [
-        {
-          name="aksh2"
-          customer="aksh2"
-          health_endpoint="/health"
-          target_port=8080
-          endpoint="api"
-          url_prefix="/aksh2"
-          env={"key1"="v1","key2"="v2"}
-        }
-      ]
-    },
-    {
-      namespace = "sood"
-      istio_injection = false
-      services = [
-        {
-          name="sood2"
-          customer="sood2"
-          health_endpoint="/health"
-          target_port=8080
-          endpoint="api"
-          url_prefix="/sood2"
-          env={"key3"="v3","key4"="v4"}
-        }
-      ]
-    }
-  ]
+variable "enable_siem" {
+  default = true
 }
 
 variable "opensearch_password" {}

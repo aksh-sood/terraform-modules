@@ -249,11 +249,7 @@ variable "private_subnet_cidrs" {
   type        = list(string)
 }
 
-variable "create_eks" {
-  type    = bool
-  default = false
-}
-
 variable "cost_tags" {}
 variable "region" {}
 variable "enable_nat_gateway" {}
+variable "enable_siem" {}

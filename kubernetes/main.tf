@@ -5,7 +5,6 @@ module "addons" {
   lbc_addon_version = var.lbc_addon_version
 }
 
-
 resource "kubernetes_storage_class_v1" "efs" {
   metadata {
     name = "efs"
@@ -24,6 +23,7 @@ resource "kubernetes_storage_class_v1" "efs" {
 module "istio" {
   source = "./modules/istio"
 
+  enable_siem            = var.enable_siem
   acm_certificate_arn    = var.acm_certificate_arn
   istio_version          = var.istio_version
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
@@ -34,16 +34,21 @@ module "istio" {
 module "baton_application_namespaces" {
   source = "./modules/baton-application-namespace"
 
-  domain_name=var.domain_name
-  environment=var.environment
+  domain_name                  = var.domain_name
+  environment                  = var.environment
   baton_application_namespaces = var.baton_application_namespaces
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.istio]
 }
 
 module "monitoring" {
   source = "./modules/monitoring"
 
   isito_dependency = module.istio
-
   loadbalancer_url = module.istio.loadbalancer_url
 
   environment                   = var.environment
@@ -56,19 +61,26 @@ module "monitoring" {
   alert_manager_volume_size     = var.alert_manager_volume_size
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
-  cloudflare_api_token          = var.cloudflare_api_token
-  zone_id                       = var.cloudflare_zone_id
-  efs_id                        = var.efs_id
+
+  providers = {
+    kubectl.this    = kubectl.this
+    cloudflare.this = cloudflare.this
+  }
+
 }
 
 module "logging" {
   source = "./modules/logging"
-
-  isito_dependency = module.istio
 
   environment         = var.environment
   opensearch_endpoint = var.opensearch_endpoint
   opensearch_password = var.opensearch_password
   opensearch_username = var.opensearch_username
   domain_name         = var.domain_name
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.istio]
 }

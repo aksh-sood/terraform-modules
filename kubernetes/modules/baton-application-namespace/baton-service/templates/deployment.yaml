@@ -7,7 +7,7 @@ metadata:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}
 spec:
-  replicas: 0
+  replicas: 1
   selector:
     matchLabels:
       application: {{ .Release.Name }}
@@ -20,7 +20,7 @@ spec:
       serviceAccountName: {{ .Release.Name }}
       containers:
         - name: {{ .Release.Name }}
-          image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:latest
+          image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
           imagePullPolicy: Always
           readinessProbe:
             failureThreshold: 1
@@ -31,10 +31,6 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 10
-          resources:
-            requests:
-              cpu: 100m
-              memory: 400Mi
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}

@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-    - {{ .Release.Namespace }}-{{ .Values.endpoint }}.{{ .Values.domain }}
+    - {{ .Release.Namespace }}{{ .Values.endpoint }}.{{ .Values.domain }}
   gateways:
     - {{ .Release.Namespace }}-gateway
     - mesh

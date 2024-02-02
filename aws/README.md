@@ -159,7 +159,9 @@ terraform apply
 |public_subnet_cidrs      |List of CIDR blocks to create public subnets|list(string)   |`["10.0.0.0/19", "10.0.32.0/19", "10.0.64.0/19"]`| 
 |private_subnet_cidrs     |List of CIDR blocks to create private subnets|list(string)  |`["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]`| 
 |subscribe_security_hub|Optional subscription to secuirty hub | bool | `false` |
-|siem_storage_s3_bucket      |S3 bucket name for alerts and logging |string     |`"aes-siem-800161367015-log"`|
+|create_certificate |Optional creation of ACM certificate | bool | `true` |
+|enable_siem |Optional enabling of logging components for VPC | bool | `true` |
+|siem_storage_s3_bucket      |S3 bucket name for siem alerts and logging |string |`"aes-siem-800161367015-log"`|
 |additional_cluster_policies |additional cluster policies for EKS cluster |map(string)|`{}`|
 |cluster_version |EKS cluster version |string| `"1.28"`|
 |additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]`|
@@ -168,7 +170,7 @@ terraform apply
 |acm_private_key| S3 object key for domain certificate private key |string |`"batonsystem.com/cloudflare/batonsystem.com.key"`|
 |acm_certificate | S3 object key for domain certificate body|string |`"batonsystem.com/cloudflare/batonsystem.com.crt"`|
 |acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
-|security_hub_standards | Security hub standards to to enabled |list(string)| ```["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]```|
+|security_hub_standards | Security hub standards to to enabled |list(string)| `["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]`|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
 |create_rds|Determines whether to create an RDS instance|bool|`true`|
 |rds_mysql_version|MySQL version for RDS Aurora|string|`-`|
@@ -199,6 +201,8 @@ terraform apply
 |activemq_publicly_accessible|Specify whether the ActiveMQ instance should be publicly accessible |bool|`true`|
 |activemq_username|Username to authenticate into the ActiveMQ server|String|`"admin"`|
 
+**Note: If `enable_siem` is `true` , `siem_s3_bucket` is required parameter for logging VPC traffic** 
+
 #### EKS Node Group Config
 
 The following object defines the entire required configuraiton for the eks managed node_groups as well as the global settings. With the following parameters .
@@ -207,9 +211,9 @@ The following object defines the entire required configuraiton for the eks manag
 |:-----------|:---------|:-----------|:---------|
 |additional_node_inline_policies| inline policy to attach to nodes| string | `null`|
 |additional_node_policies|additional aws managed node policies for EKS nodes |map(string)|`null`|
-|volume_type(required)| type of EBS volume for each node | string |`"gp3"`|
-|volume_size(required)| size of EBS volmue for each node | number |`20`|
-|node_groups **(required)**| configuration for multiple node groups| list(node_groups) | [Node Groups](#markdown-header-node-groups)|
+|volume_type*| type of EBS volume for each node | string |`"gp3"`|
+|volume_size*| size of EBS volmue for each node | number |`20`|
+|node_groups *****| configuration for multiple node groups| list(node_groups) | [Node Groups](#markdown-header-node-groups)|
 
 #### Node Groups
 
@@ -217,11 +221,12 @@ The following object defines the differnet node group settings with parameters m
 
 | Name  | Description |Type | Default | 
 |:-----------|:---------|:-----------|:---------|
-| name(required) | name of the node group | string | `"node1"`|
-| min_size(required) | minimum and desired number of nodes in node group | number | `1`|
-| max_size(required) | maximum number of nodes in node group | number | `1`|
+| name* | name of the node group | string | `"node1"`|
+| min_size* | minimum and desired number of nodes in node group | number | `1`|
+| max_size* | maximum number of nodes in node group | number | `1`|
 | additional_security_groups | additional custom security groups for EKS nodes |list(string) |`[]`|
-| instance_types(required) | List of types of EC2 instances to create nodes| list(string) | `["m5.large"]`|
+| instance_types* | List of types of EC2 instances to create nodes| list(string) | `["m5.large"]`|
+| labels| Lables for EKS nodes | map(string)| `{}` |
 | tags| Tags to associate with nodes| map(string)| `{}`|
 
 **Example of Node Config and Node Groups**

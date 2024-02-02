@@ -1,6 +1,6 @@
 # VPC
 locals {
-  az_count = var.create_eks ? (var.az_count > 2 ? var.az_count : 3) : var.az_count
+  az_count = var.create_eks ? (var.az_count >= 3 ? var.az_count : 3) : var.az_count
   eks_private_subnet_tags = var.create_eks ? {
     "kubernetes.io/cluster/${var.environment}" = "owned"
     "kubernetes.io/role/internal-elb"          = "1"

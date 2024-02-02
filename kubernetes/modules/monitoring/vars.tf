@@ -9,7 +9,6 @@ variable "cnames" {
   default = ["prometheus", "grafana", "alertmanager"]
 }
 
-variable "cloudflare_api_token" {}
 variable "alert_manager_volume_size" {}
 variable "prometheus_volume_size" {}
 variable "slack_web_hook" {}
