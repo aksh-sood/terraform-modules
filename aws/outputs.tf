@@ -43,20 +43,39 @@ output "opensearch_username" {
 }
 
 output "rds_writer_endpoint" {
-  value = var.create_rds ? module.rds_cluster[0].writer_endpoint : null
+  value       = var.create_rds ? module.rds_cluster[0].writer_endpoint : null
   description = "Writer endpoint of the RDS cluster."
 }
 
 output "rds_reader_endpoint" {
-  value = var.create_rds ? module.rds_cluster[0].reader_endpoint : null
+  value       = var.create_rds ? module.rds_cluster[0].reader_endpoint : null
   description = "Reader endpoint of the RDS cluster."
 }
 
 output "rds_master_password" {
-  value = var.create_rds ? module.rds_cluster[0].master_password : null
+  value     = var.create_rds ? module.rds_cluster[0].master_password : null
   sensitive = true
 }
 
 output "rds_master_username" {
   value = var.create_rds ? module.rds_cluster[0].master_username : null
+}
+
+output "activemq_url" {
+
+  value = module.activemq.activemq_url
+
+}
+
+output "activemq_password" {
+
+  value     = module.activemq.activemq_password
+  sensitive = true
+
+}
+
+output "activemq_username" {
+
+  value     = var.activemq_username
+  sensitive = true
 }

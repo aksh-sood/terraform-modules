@@ -122,3 +122,21 @@ module "rds_cluster" {
   db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
   cost_tags                             = var.cost_tags
 }
+
+module "activemq" {
+  source                       = "./modules/activemq"
+  activemq_engine_version      = var.activemq_engine_version
+  activemq_host_instance_type  = var.activemq_host_instance_type
+  activemq_publicly_accessible = var.activemq_publicly_accessible
+  apply_immediately            = var.apply_immediately
+  activemq_storage_type        = var.activemq_storage_type
+  activemq_username            = var.activemq_username
+  auto_minor_version_upgrade   = var.auto_minor_version_upgrade
+  environment                  = var.environment
+  subnet_ids                   = module.vpc.public_subnets
+  vpc_id                       = module.vpc.id
+  security_group               = module.eks[0].primary_security_group_id
+  tags                         = var.cost_tags
+
+
+}

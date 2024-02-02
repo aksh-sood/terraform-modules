@@ -20,6 +20,7 @@ Below is a list of resources created :-
     - IAM roles and policies for EKS Cluster and Nodes
     - EFS Drive for persistent volume and security Group For EFS
     - RDS Cluster
+    - ActiveMQ
   
   - Kubernetes
     - EFS and EBS Addons 
