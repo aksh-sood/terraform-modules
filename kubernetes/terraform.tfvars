@@ -16,4 +16,3 @@ acm_certificate_arn          = "arn:aws:acm:us-west-2:130759691668:certificate/e
 efs_id                       = "fs-0f16fe8e775f44dad"
 cloudflare_api_token         = ""
 enable_siem                  = false
-baton_application_namespaces = []

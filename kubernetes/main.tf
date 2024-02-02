@@ -5,7 +5,6 @@ module "addons" {
   lbc_addon_version = var.lbc_addon_version
 }
 
-
 module "cloudflare" {
   source = "./modules/cloudflare"
   count = var.create_dns_records ? 1 : 0
@@ -46,20 +45,6 @@ module "istio" {
   depends_on = [module.addons]
 }
 
-module "baton_application_namespaces" {
-  source = "./modules/baton-application-namespace"
-
-  domain_name                  = var.domain_name
-  environment                  = var.environment
-  baton_application_namespaces = var.baton_application_namespaces
-
-  providers = {
-    kubectl.this = kubectl.this
-  }
-
-  depends_on = [module.istio]
-}
-
 module "monitoring" {
   source = "./modules/monitoring"
 
@@ -85,9 +70,6 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
 
-  loadbalancer_url     = module.istio.loadbalancer_url
-  depends_on = [module.istio]
-
   environment         = var.environment
   opensearch_endpoint = var.opensearch_endpoint
   opensearch_password = var.opensearch_password
@@ -96,7 +78,7 @@ module "logging" {
 
   providers = {
     kubectl.this = kubectl.this
-    cloudflare.this = cloudflare.this
   }
 
+  depends_on = [module.istio]
 }
