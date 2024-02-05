@@ -1,7 +1,7 @@
 #aws eks addons
 variable "eks_addons" {
   type    = set(string)
-  default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver"]
+  default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver"]
 }
 
 variable "node_groups" {
@@ -35,3 +35,4 @@ variable "acm_certificate_arn" {}
 variable "siem_storage_s3_bucket" {}
 variable "azs" {}
 variable "private_subnets_cidr" {}
+variable "additional_eks_addons" {}

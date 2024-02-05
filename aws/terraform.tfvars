@@ -26,13 +26,13 @@ private_subnet_cidrs = ["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]
 
 siem_storage_s3_bucket = "eks-auto-vpc-flow-logs"
 
-acm_certificate_bucket = "baton-domain-certificates"
+acm_certificate_bucket = "test-certificate-iaac"
 
-acm_certificate = "batonsystems.com/cloudflare/batonsystems.com.key"
+acm_certificate = "cert.pem"
 
-acm_certificate_chain = "batonsystems.com/cloudflare/batonsystems.com.crt"
+acm_certificate_chain = "origin_ca_rsa_root.pem"
 
-acm_private_key = "batonsystems.com/cloudflare/origin_ca_rsa_root.pem"
+acm_private_key = "key.pem"
 
 create_eks = true
 

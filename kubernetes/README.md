@@ -8,13 +8,15 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - Kube Prometheus Stack installation 
 - Prometheus Alerts
 - Grafana Dashboards and Users
+- Cloudflare CNAME records
 
 # Modules
 
 ##### [Istio](./kubernetes/module/istio)
 The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. 
 
-**Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB.
+**Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB. 
+**WARNING:** If the S3 logging bucket is not in the same region then `loadbalancer_url` is not generated leading to failiure of script.
 
 ##### [Addons](./kubernetes/module/addons)
 Responsible for installation of helm based eks addons in cluster which are listed below.
@@ -26,9 +28,13 @@ The `aws-efs-csi-driver` is also responsible for creating a `StorageClass` objec
 
 ##### [Monitoring](./kubernetes/module/monitoring)
 
-Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/module/monitoring/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/alertmanager.yaml) file respectively. The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warining and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as 200Gi,5Gi and 10Gi respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
+Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/module/monitoring/configs/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/configs/alertmanager.yaml) file respectively. 
 
-This module also uses `kubectl` provider making it a legacy module as a `Gateway` and `VirtualService` object are created in this for Grafana.
+The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warning and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as `200Gi`,`5Gi` and `10Gi` respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
+
+CNAME records are also created via this module for prometheus, grafana and alertmanager exposing the services at `{environment}-{service}-{domain}` EXAMPLE `test-grafana-123.com`.
+
+This module also uses `kubectl` and `cloudflare` provider making it a legacy module as  `Gateway`,`CNAME` records and `VirtualService` objects are created here.
 
 ###### [Grafana Config](./kubernetes/module/monitoring/modules/grafana-config)
 
@@ -36,7 +42,7 @@ This module is a legacy module as it uses grafana provider to create the dashboa
 
 The Grafana provider uses the URL to access grafana and admin credentials are configured in it for authentication. The [dashboards](./kubernetes/module/monitoring/modules/grafana-config/dashboards) folder contains the json files for creating different grafana dashboards. Also a no admin user (developer) is also created. 
 
-**Note:** The grafana service needs to be exposed to the outside world and the URL must be configured for access and creation of grafana resources.
+**Note:** The grafana service needs to be exposed via main monitoring module which is used by the grafana provider to create the objects.
 
 # Folder Structure
 
@@ -51,10 +57,12 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 |       ├── modules
 |       |   └── grafana-config(legacy module)
 |       |       └── dashboards
-│       ├── alertmanager.yaml
-│       ├── alerts.yaml
-│       ├── config.yaml
-│       └── dashboards
+|       └── configs
+│           ├── alertmanager.yaml
+│           ├── alerts.yaml
+│           ├── config.yaml
+│           ├── virtualServices.yaml
+│           └── dashboards
 ├── providers.tf
 ├── terraform.tfvars
 └── vars.tf
@@ -101,21 +109,22 @@ terraform apply
 |:-----------|:---------|:-----------|:---------|
 |kube_prometheus_stack_version| Prometheus version to be installed| string| `"49.2.0"`|
 |istio_version| isito version to be installed| string| `"1.20.0"`|
-|slack_channel_name| slack channnel name to recieve prometheus alerts| string|`""`|
-|slack_web_hook| slack applicaiton webhook for prometheus alerts| string|  `""`|
-|pagerduty_key      | PagerDuty key for prometheus alerts|string|`""`|
-|efs_id| EFS ID from aws script for persistent storage| string | `""`|
+|slack_channel_name| slack channnel name to recieve prometheus alerts| string|`required`|
+|slack_web_hook| slack applicaiton webhook for prometheus alerts| string|  `required`|
+|pagerduty_key      | PagerDuty key for prometheus alerts|string|`required`|
+|efs_id| EFS ID from aws script for persistent storage| string | `required`|
 |efs_addon_version| Version of the efs driver | string  | `"2.2.0"`|
 |lbc_addon_version| Version of lbc driver|string|`"1.6.0"`|
-|environment|Environment for which the resources are being provisioned|string|`""`|
-|domain_name | Domain name registerd in the DNS service | string | `""` |
-|acm_certificate_arn|ARN of the domain certificate from the AWS script for istio ingress| string | `""`|
+|environment|Environment for which the resources are being provisioned|string|`required`|
+|domain_name | Domain name registerd in the DNS service | string | `required` |
+|acm_certificate_arn|ARN of the domain certificate from the AWS script for istio ingress| string | `required`|
 |siem_storage_s3_bucket      |S3 bucket name for alerts and logging |string     |`""`|
 |custom_alerts|List of custom alerts for prometheus|[map(custom_alerts)](#markdown-header-custom-alerts-config)| `[]` |
-|pagerduty_key|Key for Pager Duty alerts|string|`""`|
-|grafana_role_arn|ARN for the grafana role|string|`""`|
-|prometheus_volume_size|PVC size for prometheus|`"200Gi"`|
-|alert_manager_volume_size|PVC size for aleretmanager|`"5Gi"`|
+|pagerduty_key|Key for Pager Duty alerts|string|`requried`|
+|grafana_role_arn|ARN for the grafana role|string|`required`|
+|prometheus_volume_size|PVC size for prometheus|string|`"200Gi"`|
+|alert_manager_volume_size|PVC size for alertmanager|string|`"5Gi"`|
+|cloudflare_api_token|cloudflare API access token |string|`required`|
 
 ### Custom Alerts Config
 
@@ -167,3 +176,4 @@ custom_alerts=[{
 |:-----------|:---------|:-----------|
 |grafana_password     |string      |Admin passwrod for grafana dashboard|
 |grafana_dev_password |string      |Developer password for grafana dashboard|
+|loadbalancer_url     |string      |URL of ALB LoadBalancer|
