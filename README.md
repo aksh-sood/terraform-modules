@@ -19,6 +19,7 @@ Below is a list of resources created :-
     - EKS Managed Node Groups
     - IAM roles and policies for EKS Cluster and Nodes
     - EFS Drive for persistent volume and security Group For EFS
+    - RDS Cluster
   
   - Kubernetes
     - EFS and EBS Addons 
@@ -61,6 +62,7 @@ Module versions
 
 | Resource   | Version |
 |:-----------|:--------|
+| RDS        | 8.5.0   |
 | EKS        | 19.20.0 |
 | EFS        | 1.3.1   | 
 | KMS        | 2.1.0   |
