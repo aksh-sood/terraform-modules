@@ -1,0 +1,88 @@
+data "aws_availability_zones" "this" {
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
+}
+
+# Printing list of azs available
+resource "null_resource" "azs_list" {
+  provisioner "local-exec" {
+    command = <<-EOT
+    echo -e "\033[1;33m The ${var.region} has total of ${length(data.aws_availability_zones.this.names)} AZS available listed below.\033[0m \n \033[1;33m Please make sure the region has 3 or more AZS \033[0m"
+    echo -e "\033[1;33m ${join(" ", data.aws_availability_zones.this.names)} \033[0m"
+    EOT
+  }
+
+}
+
+module "vpc" {
+  source = "terraform-aws-modules/vpc/aws"
+
+  # https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/5.2.0
+  version = "5.2.0"
+
+  azs  = slice(data.aws_availability_zones.this.names, 0, var.az_count)
+  cidr = var.vpc_cidr
+
+  # private subnet config
+  private_subnets     = var.private_subnet_cidrs
+  private_subnet_tags = merge(var.cost_tags, var.private_subnet_tags)
+  private_subnet_tags_per_az = {
+    for az in data.aws_availability_zones.this.names : az => {
+      Name = "Private Subnet - ${az}"
+    }
+  }
+
+  # public subnet config
+  map_public_ip_on_launch = false
+  public_subnets          = var.public_subnet_cidrs
+  public_subnet_tags      = merge(var.cost_tags, var.public_subnet_tags)
+  public_subnet_tags_per_az = {
+    for az in data.aws_availability_zones.this.names : az => {
+      Name = "Public Subnet - ${az}"
+    }
+  }
+
+  # NAT gateway config
+  enable_nat_gateway     = var.enable_nat_gateway
+  single_nat_gateway     = var.enable_nat_gateway
+  one_nat_gateway_per_az = false
+  nat_gateway_tags       = var.cost_tags
+
+  # Internet Gateway config
+  igw_tags = var.cost_tags
+
+  # Route Table config
+  public_route_table_tags  = merge(var.cost_tags, var.public_route_table_tags)
+  private_route_table_tags = merge(var.cost_tags, var.private_route_table_tags)
+
+  #default acl configuration
+  default_network_acl_ingress = var.default_acl_ingress_rules
+  default_network_acl_egress  = var.default_acl_egress_rules
+
+  #private network acl 
+  private_dedicated_network_acl = true
+
+  private_inbound_acl_rules  = concat(var.common_acl_ingress_rules, var.private_acl_ingress_rules)
+  private_outbound_acl_rules = concat(var.common_acl_egress_rules, var.private_acl_egress_rules)
+
+  #public network acl
+  public_dedicated_network_acl = true
+
+  public_inbound_acl_rules  = concat(var.common_acl_ingress_rules, var.public_acl_ingress_rules)
+  public_outbound_acl_rules = concat(var.common_acl_egress_rules, var.public_acl_egress_rules)
+
+  tags = merge(var.cost_tags, var.vpc_tags)
+
+  depends_on = [null_resource.azs_list]
+}
+
+# setting the ingress, egress rules of default security group created by vpc module to null 
+# this resource is required because of the default rules set in the vpc module for deault security group 
+# due to which we cannot make the ingress and egress as null 
+resource "aws_default_security_group" "default" {
+  vpc_id = module.vpc.vpc_id
+
+  tags = merge(var.cost_tags, var.vpc_tags)
+}
