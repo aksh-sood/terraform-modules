@@ -15,6 +15,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - IAM roles and policies for EKS Cluster and Nodes
 - EFS Drive for persistent volume and security Group For EFS
 - RDS Cluster
+- ActiveMQ
 
 # Modules
 
@@ -77,6 +78,10 @@ The EFS module creates a EFS drive for persistent volume to be used in the EKS c
 ##### [RDS](./aws/modules/rds/)
 RDS Module creates a Aurora Mysql RDS Cluster within the VPC private subnets.
 
+#### [ActiveMQ](./aws/modules/activemq/)
+ActiveMQ module provisions a new ActiveMQ broker , which is deployed into a public subnet.
+
+
 # Folder Structure
 Below is the structure of AWS Folder.
 
@@ -86,6 +91,7 @@ Below is the structure of AWS Folder.
 ├── locals.tf
 ├── main.tf
 ├── modules
+|   ├── activemq
 │   ├── security-hub
 │   ├── domain-certificate
 │   ├── eks
@@ -185,6 +191,13 @@ terraform apply
 |rds_enabled_cloudwatch_logs_exports|Enabled CloudWatch Logs Exports for RDS|list(string)|`["slowquery", "audit", "error"]`|
 |rds_ca_cert_identifier|CA certificate identifier for RDS|string|`-`|
 |rds_backup_retention_period|Backup retention period for RDS in days|number|`7`|
+|activemq_engine_version|Version of ActiveMQ engine|String |`"5.15.16"`|
+|activemq_storage_type|Preferred storage type for ActiveMQ|String|`"efs"`|
+|activemq_host_instance_type|ActiveMQ host's instance type |String|`"mq.t2.micro"`|
+|apply_immediately|Specifies whether any broker modifications are applied immediately, or during the next maintenance window|bool|`true`|
+|auto_minor_version_upgrade|Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.|bool|`false`|
+|activemq_publicly_accessible|Specify whether the ActiveMQ instance should be publicly accessible |bool|`true`|
+|activemq_username|Username to authenticate into the ActiveMQ server|String|`"admin"`|
 
 #### EKS Node Group Config
 
@@ -327,3 +340,6 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 |rds_cloudwatch_log_groups|string        |CloudWatch log groups associated with the RDS cluster |
 |rds_master_username      |string        |MYSQL Username for the master user                    |
 |rds_master_password      |string        |MYSQL Password for the master user                    |
+|activemq_url             |string        |URL of the ActiveMQ broker                            |
+|activemq_username        |string        |Username for ActiveMQ                                 |
+|activemq_password        |string        |Password for ActiveMQ                                 |

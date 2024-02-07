@@ -114,8 +114,8 @@ variable "cluster_version" {
 
 variable "additional_eks_addons" {
   description = "additional addons for EKS cluster"
-  type=list(string)
-  default = []
+  type        = list(string)
+  default     = []
 }
 
 variable "eks_node_groups" {
@@ -354,4 +354,47 @@ variable "rds_ca_cert_identifier" {
 variable "rds_backup_retention_period" {
   type    = number
   default = 7
+}
+
+variable "activemq_engine_version" {
+  type    = string
+  default = "5.15.16"
+
+}
+
+variable "activemq_storage_type" {
+  type    = string
+  default = "efs"
+
+}
+
+variable "activemq_host_instance_type" {
+  type    = string
+  default = "mq.t2.micro"
+
+}
+
+variable "apply_immediately" {
+  type    = bool
+  default = true
+
+}
+
+variable "auto_minor_version_upgrade" {
+  type    = bool
+  default = false
+
+}
+
+variable "activemq_publicly_accessible" {
+  type    = bool
+  default = true
+
+}
+
+variable "activemq_username" {
+  type      = string
+  sensitive = true
+  default   = "admin"
+
 }
