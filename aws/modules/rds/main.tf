@@ -99,7 +99,7 @@ module "rds_cluster" {
   security_group_rules           = local.security_group_rules
 
   # Tags
-  tags = merge(var.cost_tags,{
+  tags = merge(var.cost_tags, {
     Name      = "${var.name}-RDS"
     Terraform = "true"
   })
@@ -147,12 +147,12 @@ resource "aws_db_event_subscription" "event_subscriptions" {
 }
 
 resource "aws_security_group_rule" "eks_sg" {
-  count = var.whitelist_eks  ? 1 : 0
+  count = var.whitelist_eks ? 1 : 0
 
-  type              = "ingress"
-  from_port         = 3306
-  to_port           = 3306
-  protocol          = "tcp"
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
   source_security_group_id = var.eks_sg
-  security_group_id = module.rds_cluster.security_group_id
+  security_group_id        = module.rds_cluster.security_group_id
 }

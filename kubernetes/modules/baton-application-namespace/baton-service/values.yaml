@@ -1,0 +1,9 @@
+docker_registry: 150399859526.dkr.ecr.us-west-2.amazonaws.com
+customer: aksh3
+domain: batonsystem.com
+endpoint: -api2
+env: {"APP_ENVIRONMENT":"test3"' ,"SPRING_PROFILES_ACTIVE":"cust"' ,"common":"something"' ,"key10":"v10"' ,"key9":"v9"}
+health_endpoint: /health
+image_tag: latest
+targetPort: 8080
+url_prefix: /aksh3

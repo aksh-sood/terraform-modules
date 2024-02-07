@@ -8,7 +8,7 @@ data "aws_availability_zones" "this" {
 resource "null_resource" "azs_list_validation" {
   lifecycle {
     precondition {
-      condition     = length(data.aws_availability_zones.this.names) > var.az_count - 1
+      condition     = length(data.aws_availability_zones.this.names) >= var.az_count
       error_message = "Provided regions doesn't have the minimum of ${var.az_count} availability zone"
     }
   }
@@ -56,10 +56,10 @@ module "vpc" {
   private_route_table_tags = merge(var.cost_tags, var.private_route_table_tags)
 
   #vpc flow logging
-  enable_flow_log           = true
-  flow_log_destination_type = "s3"
-  flow_log_destination_arn  = "arn:aws:s3:::${var.siem_storage_s3_bucket}"
-  vpc_flow_log_tags         = merge(var.cost_tags, var.vpc_flow_log_tags)
+  enable_flow_log           = var.enable_siem ? true : false
+  flow_log_destination_type = var.enable_siem ? "s3" : null
+  flow_log_destination_arn  = var.enable_siem ? "arn:aws:s3:::${var.siem_storage_s3_bucket}" : null
+  vpc_flow_log_tags         = var.enable_siem ? merge(var.cost_tags, var.vpc_flow_log_tags) : null
 
   #default acl configuration
   default_network_acl_ingress = var.default_acl_ingress_rules

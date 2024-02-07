@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ .Release.Namespace }}{{ .Values.endpoint }}.{{ .Values.domain }}
+  gateways:
+    - {{ .Release.Namespace }}-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: {{ .Values.url_prefix }}/
+      route:
+        - destination:
+            port:
+              number: 8080
+            host: {{ .Release.Name }}

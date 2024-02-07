@@ -8,6 +8,7 @@ terraform {
 }
 
 provider "grafana" {
+
   url  = "https://${var.environment}-grafana.${var.domain_name}"
   auth = "admin:${var.grafana_password}"
 }
