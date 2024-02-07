@@ -20,7 +20,7 @@ output "efs_id" {
 
 output "acm_certificate_arn" {
   description = "ARN of the domain certificate"
-  value       = module.domain_certificate.certificate_arn
+  value       = module.domain_certificate[0].certificate_arn
 }
 
 output "grafana_role_arn" {

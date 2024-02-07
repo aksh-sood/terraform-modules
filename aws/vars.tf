@@ -72,10 +72,22 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]
 }
 
+
+variable "enable_siem" {
+  description = "Whether to enable siem setup and logging"
+  default     = true
+}
+
 variable "siem_storage_s3_bucket" {
   description = "bucket id for alerts and logging"
   type        = string
   default     = "aes-siem-800161367015-log"
+}
+
+variable "create_certificate" {
+  description = "Whether to create an AWS ACM certificate or not.If true variables starting with acm area required"
+  type        = bool
+  default     = true
 }
 
 variable "acm_certificate_bucket" {
@@ -130,6 +142,7 @@ variable "eks_node_groups" {
       instance_types             = list(string)
       min_size                   = number
       max_size                   = number
+      labels                     = optional(map(string), {})
       additional_security_groups = optional(list(string), [])
       tags                       = optional(map(string), {})
     }))
@@ -158,6 +171,12 @@ variable "eks_node_groups" {
     ]
 
   }
+}
+
+variable "subscribe_security_hub" {
+  description = "Wheather to subscribe security hub or not"
+  type        = bool
+  default     = false
 }
 
 variable "security_hub_standards" {
@@ -242,27 +261,28 @@ variable "disabled_security_hub_controls" {
 }
 
 variable "opensearch_ebs_volume_size" {
-  default = 20
   type    = number
+  default = 20
 }
 
 variable "opensearch_instance_type" {
+  type    = string
   default = "t3.medium.search"
 }
 
 variable "opensearch_instance_count" {
-  default = 1
   type    = number
+  default = 1
 }
 
 variable "opensearch_engine_version" {
-  default = "OpenSearch_2.11"
   type    = string
+  default = "OpenSearch_2.11"
 }
 
 variable "create_rds" {
-  default = true
   type    = bool
+  default = true
 }
 
 variable "rds_mysql_version" {
@@ -301,11 +321,10 @@ variable "rds_performance_insights_retention_period" {
 }
 
 variable "rds_enable_event_notifications" {
-  default = true
   type    = bool
+  default = true
 }
 
-variable "rds_reader_instance_type" {}
 
 variable "rds_ingress_whitelist" {
   type = list(string)
@@ -398,3 +417,4 @@ variable "activemq_username" {
   default   = "admin"
 
 }
+variable "rds_reader_instance_type" {}

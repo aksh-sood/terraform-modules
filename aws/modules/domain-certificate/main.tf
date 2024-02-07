@@ -1,4 +1,14 @@
-# Verifying the certificate data is in correct foramt for streaming and reading
+terraform {
+  required_providers {
+    aws = {
+      source                = "hashicorp/aws"
+      version               = ">= 2.7.0"
+      configuration_aliases = [aws.east]
+    }
+  }
+}
+
+# Verifying the certificate data is in correct format for streaming and reading
 # The metadata of the objects in s3 bucket should be either in text format or json format for the aws_s3_object data resource to read the files.
 # Terraform does not provide support to change the metadata options of the object hence a cli approach was taken here
 # https://github.com/hashicorp/terraform-provider-aws/issues/5248
@@ -11,13 +21,6 @@ resource "null_resource" "metadata_update" {
      aws s3api copy-object --copy-source ${var.acm_certificate_bucket}/${var.private_key} --key ${var.private_key} --bucket ${var.acm_certificate_bucket} --metadata-directive REPLACE --content-type 'text/plain';
     EOT
   }
-}
-
-#This provider is specially configured for the below data sources to read the acm_certificate_bucket 
-#when not using the buckets native region
-provider "aws" {
-  region = "us-east-1"
-  alias  = "east"
 }
 
 data "aws_s3_object" "private_key" {

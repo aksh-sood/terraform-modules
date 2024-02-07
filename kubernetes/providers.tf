@@ -4,6 +4,16 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "=2.10.0"
     }
+    kubectl = {
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
+    }
+    cloudflare = {
+      source                = "cloudflare/cloudflare"
+      version               = "~> 4.0"
+      configuration_aliases = [cloudflare.this]
+    }
     helm = {
       source  = "hashicorp/helm"
       version = "=2.10.1"
@@ -21,3 +31,12 @@ provider "helm" {
   }
 }
 
+provider "kubectl" {
+  config_path = "~/.kube/${var.environment}"
+  alias       = "this"
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+  alias     = "this"
+}

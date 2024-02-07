@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 
 module "security_hub" {
   source = "./modules/security-hub"
+  count  = var.subscribe_security_hub ? 1 : 0
 
   region                         = var.region
   security_hub_standards         = var.security_hub_standards
@@ -11,6 +12,7 @@ module "security_hub" {
 module "vpc" {
   source = "./modules/vpc"
 
+  enable_siem            = var.enable_siem
   vpc_cidr               = var.vpc_cidr
   enable_nat_gateway     = var.enable_nat_gateway
   public_subnet_cidrs    = var.public_subnet_cidrs
@@ -26,11 +28,15 @@ module "vpc" {
 
 module "domain_certificate" {
   source = "./modules/domain-certificate"
+  count  = var.create_certificate ? 1 : 0
 
   acm_certificate_bucket = var.acm_certificate_bucket
   certificate            = var.acm_certificate
   cert_chain             = var.acm_certificate_chain
   private_key            = var.acm_private_key
+  providers = {
+    aws.east = aws.east
+  }
 
   acm_tags = var.cost_tags
 }
@@ -44,7 +50,8 @@ module "kms" {
 
   key_user_arns = local.key_user_arns
 
-  kms_tags = var.cost_tags
+  environment = var.environment
+  kms_tags    = var.cost_tags
 
   depends_on = [aws_ebs_encryption_by_default.default_encrypt]
 }
@@ -58,7 +65,7 @@ module "eks" {
   private_subnet_ids  = module.vpc.private_subnets
   public_subnet_ids   = module.vpc.public_subnets
   kms_key_arn         = module.kms.key_arn
-  acm_certificate_arn = module.domain_certificate.certificate_arn
+  acm_certificate_arn = module.domain_certificate[0].certificate_arn
 
   region                 = var.region
   cluster_name           = var.environment
@@ -91,21 +98,21 @@ module "opensearch" {
 }
 
 module "rds_cluster" {
-  source     = "./modules/rds"
-  count      = var.create_rds ? 1 : 0
-  depends_on = [module.vpc, module.kms]
+  source = "./modules/rds"
+  count  = var.create_rds ? 1 : 0
+
+  kms_key_id = module.kms.key_arn
+  subnets    = module.vpc.private_subnets
+  vpc_id     = module.vpc.id
+  eks_sg     = var.create_eks ? module.eks[0].primary_security_group_id : null
 
   name                                  = var.environment
   mysql_version                         = var.rds_mysql_version
   rds_instance_type                     = var.rds_instance_type
   master_username                       = var.rds_master_username
   rds_reader_needed                     = var.rds_reader_needed
-  subnets                               = module.vpc.private_subnets
-  vpc_id                                = module.vpc.id
   whitelist_eks                         = var.create_eks
-  eks_sg                                = var.create_eks ? module.eks[0].primary_security_group_id : null
   ingress_whitelist                     = var.rds_ingress_whitelist
-  kms_key_id                            = module.kms.key_arn
   enable_performance_insights           = var.rds_enable_performance_insights
   performance_insights_retention_period = var.rds_performance_insights_retention_period
   enable_rds_event_notifications        = var.rds_enable_event_notifications
@@ -121,6 +128,8 @@ module "rds_cluster" {
   db_cluster_parameter_group_parameters = var.rds_db_cluster_parameter_group_parameters
   db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
   cost_tags                             = var.cost_tags
+
+  depends_on = [module.vpc, module.kms]
 }
 
 module "activemq" {

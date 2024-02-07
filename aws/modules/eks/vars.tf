@@ -1,6 +1,6 @@
 #aws eks addons
 variable "eks_addons" {
-  type    = set(string)
+  type    = list(string)
   default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver"]
 }
 

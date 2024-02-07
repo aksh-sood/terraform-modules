@@ -1,6 +1,6 @@
-region = "us-east-1"
+region = "us-west-2"
 
-environment = "malayil"
+environment = "aksh"
 
 vpc_cidr = "10.0.0.0/16"
 
