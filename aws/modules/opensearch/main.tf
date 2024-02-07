@@ -50,7 +50,7 @@ resource "aws_opensearch_domain" "domain" {
     enabled                        = true
     internal_user_database_enabled = true
     master_user_options {
-      master_user_name     = "master"
+      master_user_name     = var.master_username
       master_user_password = random_password.password.result
     }
   }

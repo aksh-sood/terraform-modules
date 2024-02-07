@@ -261,38 +261,51 @@ variable "disabled_security_hub_controls" {
 }
 
 variable "opensearch_ebs_volume_size" {
-  type    = number
-  default = 20
+  description = "Size of EBS volumes attached to data nodes (in GiB)"
+  type        = number
+  default     = 20
 }
 
 variable "opensearch_instance_type" {
-  type    = string
-  default = "t3.medium.search"
+  description = "Instance type of data nodes in the cluster"
+  type        = string
+  default     = "t3.medium.search"
+}
+
+variable "opensearch_master_username" {
+  description = "Master Username of Opensearch"
+  type        = string
+  default     = "master"
 }
 
 variable "opensearch_instance_count" {
-  type    = number
-  default = 1
+  description = "Number of instances in the cluster"
+  default     = 1
+  type        = number
 }
 
 variable "opensearch_engine_version" {
-  type    = string
-  default = "OpenSearch_2.11"
+  description = "Specify the engine version for the Amazon OpenSearch Service domain"
+  default     = "OpenSearch_2.11"
+  type        = string
 }
 
 variable "create_rds" {
-  type    = bool
-  default = true
+  description = "Create a RDS Cluster"
+  default     = true
+  type        = bool
 }
 
 variable "rds_mysql_version" {
   description = "mysql version for rds aurora"
   type        = string
+  default     = "5.7"
 }
 
 variable "rds_instance_type" {
   description = "RDS Instance Type"
   type        = string
+  default     = "db.t4g.large"
 }
 
 variable "rds_master_username" {
@@ -310,49 +323,71 @@ variable "rds_reader_needed" {
 variable "rds_parameter_group_family" {
   description = "Parameter group Family name. Will be applied to both parameter group and db cluster parameter group"
   type        = string
+  default     = "aurora-mysql5.7"
 }
 
 variable "rds_enable_performance_insights" {
-  type = bool
+  description = "Enable RDS Performance Insights"
+  type        = bool
+  default     = false
 }
 variable "rds_performance_insights_retention_period" {
-  type    = number
-  default = 7
+  description = "Retention period for performance Insights"
+  type        = number
+  default     = 7
 }
 
 variable "rds_enable_event_notifications" {
-  type    = bool
-  default = true
+  description = "Enable RDS Event Notifications. Notifications through SNS"
+  type        = bool
+  default     = true
 }
 
+variable "rds_reader_instance_type" {
+  description = "Instance Type for RDS Reader"
+  type        = string
+  default     = "db.t4g.large"
+}
 
 variable "rds_ingress_whitelist" {
-  type = list(string)
+  description = "List Containing SGs or CIDRs to be whitelisted by RDS SG"
+  type        = list(string)
+  default     = []
 }
 
 variable "rds_enable_deletion_protection" {
-  default = true
-  type    = bool
+  description = "Enable Cluster deletion protection"
+  type        = bool
+  default     = true
 }
 
 variable "rds_enable_auto_minor_version_upgrade" {
-  type    = bool
-  default = false
+  description = "Enable Auto Minor Version Upgrade"
+  type        = bool
+  default     = false
 }
 
 variable "rds_db_cluster_parameter_group_parameters" {
-  default = []
+  description = "Cluster Parameter Group Parameters"
+  type        = list(map(string))
+  default     = []
 }
 
 variable "rds_preferred_backup_window" {
-  default = "07:00-09:00"
+  description = "Preffered RDS Backup Window. Time in UTC"
+  type        = string
+  default     = "07:00-09:00"
 }
 
 variable "rds_publicly_accessible" {
-  default = false
+  description = "Determines whether instances are publicly accessible. Default false"
+  type        = bool
+  default     = false
 }
 
 variable "rds_db_parameter_group_parameters" {
+  description = "A list of DB parameters to apply. Note that parameters may differ from a family to an other"
+  type        = list(map(string))
   default = [
     {
       name         = "long_query_time"
@@ -363,16 +398,21 @@ variable "rds_db_parameter_group_parameters" {
 }
 
 variable "rds_enabled_cloudwatch_logs_exports" {
-  default = ["slowquery", "audit", "error"]
+  description = "Set of log types to export to cloudwatch. If omitted, no logs will be exported. The following log types are supported: audit, error, general, slowquery, postgresql"
+  type        = list(string)
+  default     = ["slowquery", "audit", "error"]
 }
 
 variable "rds_ca_cert_identifier" {
-  type = string
+  description = "	The identifier of the CA certificate for the DB instance"
+  type        = string
+  default     = "rds-ca-rsa2048-g1"
 }
 
 variable "rds_backup_retention_period" {
-  type    = number
-  default = 7
+  description = "The days to retain backups for"
+  type        = number
+  default     = 7
 }
 
 variable "activemq_engine_version" {
@@ -417,4 +457,4 @@ variable "activemq_username" {
   default   = "admin"
 
 }
-variable "rds_reader_instance_type" {}
+

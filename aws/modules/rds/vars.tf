@@ -98,11 +98,7 @@ variable "enabled_cloudwatch_logs_exports" {
 }
 
 variable "db_parameter_group_parameters" {
-  type = list(object({
-    name         = string
-    value        = string
-    apply_method = string
-  }))
+  type = list(map(string))
   default = []
 }
 
@@ -110,12 +106,18 @@ variable "reader_instance_type" {
   type = string
 }
 
-variable "ingress_whitelist" {}
+variable "ingress_whitelist" {
+  description = "List of SGs or CIDRs to Whitelist to RDS SG"
+  type        = list(string)
+}
+
 variable "cost_tags" {}
+
 variable "eks_sg" {
   type    = string
   default = null
 }
+
 variable "whitelist_eks" {
   type    = bool
   default = false

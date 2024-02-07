@@ -1,14 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-resource "null_resource" "siem_validation" {
-  lifecycle {
-    precondition {
-      condition     = var.enable_siem ? (var.siem_storage_s3_bucket != "" && var.siem_storage_s3_bucket != null) : true
-      error_message = "Provide siem_storage_s3_bucket or disable enable_siem"
-    }
-  }
-}
-
 module "security_hub" {
   source = "./modules/security-hub"
   count  = var.subscribe_security_hub ? 1 : 0
@@ -33,8 +24,6 @@ module "vpc" {
   vpc_tags               = merge(var.vpc_tags, { Name = var.environment })
   public_subnet_tags     = merge(var.public_subnet_tags, local.eks_public_subnet_tags)
   private_subnet_tags    = merge(var.private_subnet_tags, local.eks_private_subnet_tags)
-
-  depends_on = [null_resource.siem_validation]
 }
 
 module "domain_certificate" {
@@ -105,6 +94,7 @@ module "opensearch" {
   instance_type   = var.opensearch_instance_type
   instance_count  = var.opensearch_instance_count
   ebs_volume_size = var.opensearch_ebs_volume_size
+  master_username = var.opensearch_master_username
   cost_tags       = var.cost_tags
 }
 

@@ -7,5 +7,5 @@ output "password" {
 }
 
 output "username" {
-  value = "master"
+  value = var.master_username
 }
