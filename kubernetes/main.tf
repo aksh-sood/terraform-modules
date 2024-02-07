@@ -7,11 +7,11 @@ module "addons" {
 
 module "cloudflare" {
   source = "./modules/cloudflare"
-  count = var.create_dns_records ? 1 : 0
+  count  = var.create_dns_records ? 1 : 0
 
   loadbalancer_url = module.istio.loadbalancer_url
-  environment                   = var.environment
-  domain_name                   = var.domain_name
+  environment      = var.environment
+  domain_name      = var.domain_name
 
   providers = {
     cloudflare.this = cloudflare.this
@@ -62,7 +62,7 @@ module "monitoring" {
   grafana_role_arn              = var.grafana_role_arn
 
   providers = {
-    kubectl.this    = kubectl.this
+    kubectl.this = kubectl.this
   }
 
 }

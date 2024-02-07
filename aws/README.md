@@ -14,8 +14,6 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - EKS Managed Node Groups
 - IAM roles and policies for EKS Cluster and Nodes
 - EFS Drive for persistent volume and security Group For EFS
-- RDS Cluster
-- ActiveMQ
 
 # Modules
 
@@ -47,7 +45,7 @@ The certificate module creates a domain certificate in the AWS Certificate Manag
 
 ##### [KMS](./aws/modules/kms/)
 
-The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as ```generic-cmk``` .
+The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as ```generic-cmk-{environment}``` .
 
 ##### [EKS](./aws/modules/eks/)
 
@@ -75,14 +73,9 @@ The IAM module is used to create the user managed policies and map them to clust
 5. [EFS](./aws/modules/eks/modules/efs)
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
 
-##### [OPENSEARCH](./aws/modules/opensearch/)
+##### [Opensearch](./aws/modules/opensearch/)
 This module is triggered automatically if the `create_eks` variable is set to true. The OpenSearch domain module creates an OpenSearch domain with the specified configuration.
 
-##### [RDS](./aws/modules/rds/)
-RDS Module creates a Aurora Mysql RDS Cluster within the VPC private subnets.
-
-#### [ActiveMQ](./aws/modules/activemq/)
-ActiveMQ module provisions a new ActiveMQ broker , which is deployed into a public subnet.
 
 
 # Folder Structure
@@ -180,34 +173,6 @@ terraform apply
 | opensearch_instance_count  | The number of instances in the domain  | number |`1`|
 | opensearch_ebs_volume_size | The size of the EBS volumes            | number |`20`|
 | opensearch_master_username | The master username for the domain     | string |`master`|
-|create_rds|Determines whether to create an RDS instance|bool|`true`|
-|rds_mysql_version|MySQL version for RDS Aurora|string|`-`|
-|rds_instance_type|RDS Instance Type|string|`-`|
-|rds_master_password|Master Password for RDS|string|`-`|
-|rds_master_username|Master Username for RDS|string|`master`|
-|rds_reader_needed|Enable reader for RDS|bool|`false`|
-|rds_parameter_group_family|Parameter group Family name|string|`-`|
-|rds_enable_performance_insights|Enable performance insights for RDS|bool|`-`|
-|rds_performance_insights_retention_period|Performance Insights retention period|number|`7`|
-|rds_enable_event_notifications|Enable event notifications for RDS|bool|`true`|
-|rds_reader_instance_type|Reader instance type for RDS|string|`-`|
-|rds_ingress_whitelist|Ingress whitelist for RDS|list|`-`|
-|rds_enable_deletion_protection|Enable deletion protection for RDS|bool|`true`|
-|rds_enable_auto_minor_version_upgrade|Enable auto minor version upgrade for RDS|bool|`false`|
-|rds_db_cluster_parameter_group_parameters|DB cluster parameter group parameters|list|`[]`|
-|rds_preferred_backup_window|Preferred backup window for RDS|string|`"07:00-09:00"`|
-|rds_publicly_accessible|Make RDS publicly accessible|bool|`false`|
-|rds_db_parameter_group_parameters|DB parameter group parameters|list(map)|`[{"name": "long_query_time", "value": "10", "apply_method": "immediate"}]`|
-|rds_enabled_cloudwatch_logs_exports|Enabled CloudWatch Logs Exports for RDS|list(string)|`["slowquery", "audit", "error"]`|
-|rds_ca_cert_identifier|CA certificate identifier for RDS|string|`-`|
-|rds_backup_retention_period|Backup retention period for RDS in days|number|`7`|
-|activemq_engine_version|Version of ActiveMQ engine|String |`"5.15.16"`|
-|activemq_storage_type|Preferred storage type for ActiveMQ|String|`"efs"`|
-|activemq_host_instance_type|ActiveMQ host's instance type |String|`"mq.t2.micro"`|
-|apply_immediately|Specifies whether any broker modifications are applied immediately, or during the next maintenance window|bool|`true`|
-|auto_minor_version_upgrade|Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.|bool|`false`|
-|activemq_publicly_accessible|Specify whether the ActiveMQ instance should be publicly accessible |bool|`true`|
-|activemq_username|Username to authenticate into the ActiveMQ server|String|`"admin"`|
 
 **Note: If `enable_siem` is `true` , `siem_s3_bucket` is required parameter for logging VPC traffic** 
 
@@ -348,14 +313,6 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 |efs_id                   |string        | EFS Volume ID for persistent storage                 |
 |acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
 |grafana_role_arn         |string        | ARN of the Grafana role                              |
-| opensearch_endpoint     | string       | The endpoint of the OpenSearch domain                |
-| opensearch_password     | string       | The password for the OpenSearch domain               |
-| opensearch_username     | string       | The username for the OpenSearch domain               |
-|rds_writer_endpoint      |string        |Writer endpoint of the RDS cluster                    |
-|rds_reader_endpoint      |string        |Reader endpoint of the RDS cluster                    |
-|rds_cloudwatch_log_groups|string        |CloudWatch log groups associated with the RDS cluster |
-|rds_master_username      |string        |MYSQL Username for the master user                    |
-|rds_master_password      |string        |MYSQL Password for the master user                    |
-|activemq_url             |string        |URL of the ActiveMQ broker                            |
-|activemq_username        |string        |Username for ActiveMQ                                 |
-|activemq_password        |string        |Password for ActiveMQ                                 |
+|opensearch_endpoint      |string        | The endpoint of the OpenSearch domain                |
+|opensearch_password      |string        | The password for the OpenSearch domain               |
+|opensearch_username      |string        | The username for the OpenSearch domain               |

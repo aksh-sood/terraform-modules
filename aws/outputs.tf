@@ -13,9 +13,19 @@ output "private_subnets" {
   value       = module.vpc.private_subnets
 }
 
+output "kms_key_arn" {
+  description = "ARN of KMS key created"
+  value       = module.kms.key_arn
+}
+
 output "efs_id" {
   description = "EFS volume ID for EKS Cluster"
   value       = var.create_eks ? module.eks[0].efs_id : null
+}
+
+output "eks_security_group" {
+  description = "secuirty group attached to both cluster and nodes"
+  value       = var.create_eks ? module.eks[0].primary_security_group_id : null
 }
 
 output "acm_certificate_arn" {
