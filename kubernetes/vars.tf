@@ -121,6 +121,10 @@ variable "enable_siem" {
   default = true
 }
 
+variable "create_dns_records" {
+  default = true
+}
+
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}

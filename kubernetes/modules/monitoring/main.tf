@@ -7,11 +7,6 @@ terraform {
       version               = ">= 1.7.0"
       configuration_aliases = [kubectl.this]
     }
-    cloudflare = {
-      source                = "cloudflare/cloudflare"
-      version               = "~> 4.0"
-      configuration_aliases = [cloudflare.this]
-    }
   }
 }
 
@@ -28,24 +23,6 @@ resource "random_password" "password" {
   min_upper        = 1
 }
 
-data "cloudflare_zone" "this" {
-
-  provider = cloudflare.this
-
-  name = var.domain_name
-}
-
-resource "cloudflare_record" "cnames" {
-  count = length(var.cnames)
-
-  provider = cloudflare.this
-
-  name    = "${var.environment}-${var.cnames[count.index]}"
-  zone_id = data.cloudflare_zone.this.id
-  type    = "CNAME"
-  proxied = true
-  value   = var.loadbalancer_url
-}
 
 resource "helm_release" "kube_prometheus_stack" {
   repository       = "https://prometheus-community.github.io/helm-charts"
@@ -73,7 +50,6 @@ resource "helm_release" "kube_prometheus_stack" {
       })
     })
   ]
-  depends_on = [cloudflare_record.cnames]
 }
 
 resource "kubectl_manifest" "monitoring_gateway" {
