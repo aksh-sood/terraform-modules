@@ -14,6 +14,15 @@ resource "null_resource" "azs_list_validation" {
   }
 }
 
+resource "null_resource" "siem_validation" {
+  lifecycle {
+    precondition {
+      condition     = var.enable_siem ? (var.siem_storage_s3_bucket != "" && var.siem_storage_s3_bucket != null) : true
+      error_message = "Provide siem_storage_s3_bucket or disable enable_siem"
+    }
+  }
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
@@ -79,7 +88,7 @@ module "vpc" {
 
   tags = merge(var.cost_tags, var.vpc_tags)
 
-  depends_on = [null_resource.azs_list_validation]
+  depends_on = [null_resource.azs_list_validation,null_resource.siem_validation]
 }
 
 # setting the ingress, egress rules of default security group created by vpc module to null 

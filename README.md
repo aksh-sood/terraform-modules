@@ -19,6 +19,7 @@ Below is a list of resources created :-
     - EKS Managed Node Groups
     - IAM roles and policies for EKS Cluster and Nodes
     - EFS Drive for persistent volume and security Group For EFS
+    - Opensearch Domain
     - RDS Cluster
     - ActiveMQ
   
@@ -29,6 +30,7 @@ Below is a list of resources created :-
     - Kube Prometheus Stack installation 
     - Prometheus Alerts
     - Grafana Dashboards and Users
+    - Filebeat
 
 Documentation to the relevant resources can be found in [AWS](./aws/README.md) and [Kubernetes](./kubernetes/README.md)
 

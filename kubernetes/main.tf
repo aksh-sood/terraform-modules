@@ -72,6 +72,9 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
 
+  loadbalancer_url     = module.istio.loadbalancer_url
+  depends_on = [module.istio]
+
   environment         = var.environment
   opensearch_endpoint = var.opensearch_endpoint
   opensearch_password = var.opensearch_password
@@ -80,7 +83,7 @@ module "logging" {
 
   providers = {
     kubectl.this = kubectl.this
+    cloudflare.this = cloudflare.this
   }
 
-  depends_on = [module.istio]
 }
