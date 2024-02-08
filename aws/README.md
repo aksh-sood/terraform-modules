@@ -75,6 +75,9 @@ The IAM module is used to create the user managed policies and map them to clust
 5. [EFS](./aws/modules/eks/modules/efs)
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
 
+##### [OPENSEARCH](./aws/modules/opensearch/)
+This module is triggered automatically if the `create_eks` variable is set to true. The OpenSearch domain module creates an OpenSearch domain with the specified configuration.
+
 ##### [RDS](./aws/modules/rds/)
 RDS Module creates a Aurora Mysql RDS Cluster within the VPC private subnets.
 
@@ -172,6 +175,11 @@ terraform apply
 |acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
 |security_hub_standards | Security hub standards to to enabled |list(string)| `["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]`|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
+| opensearch_engine_version  | The version of the OpenSearch engine   | string |`OpenSearch_2.11`|
+| opensearch_instance_type   | The type of instance for OpenSearch    | string |`t3.medium.search`|
+| opensearch_instance_count  | The number of instances in the domain  | number |`1`|
+| opensearch_ebs_volume_size | The size of the EBS volumes            | number |`20`|
+| opensearch_master_username | The master username for the domain     | string |`master`|
 |create_rds|Determines whether to create an RDS instance|bool|`true`|
 |rds_mysql_version|MySQL version for RDS Aurora|string|`-`|
 |rds_instance_type|RDS Instance Type|string|`-`|
@@ -182,7 +190,7 @@ terraform apply
 |rds_enable_performance_insights|Enable performance insights for RDS|bool|`-`|
 |rds_performance_insights_retention_period|Performance Insights retention period|number|`7`|
 |rds_enable_event_notifications|Enable event notifications for RDS|bool|`true`|
-|rds_reader_instance_type|Reader instance type for RDS|`-`|`-`|
+|rds_reader_instance_type|Reader instance type for RDS|string|`-`|
 |rds_ingress_whitelist|Ingress whitelist for RDS|list|`-`|
 |rds_enable_deletion_protection|Enable deletion protection for RDS|bool|`true`|
 |rds_enable_auto_minor_version_upgrade|Enable auto minor version upgrade for RDS|bool|`false`|
@@ -340,6 +348,9 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 |efs_id                   |string        | EFS Volume ID for persistent storage                 |
 |acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
 |grafana_role_arn         |string        | ARN of the Grafana role                              |
+| opensearch_endpoint     | string       | The endpoint of the OpenSearch domain                |
+| opensearch_password     | string       | The password for the OpenSearch domain               |
+| opensearch_username     | string       | The username for the OpenSearch domain               |
 |rds_writer_endpoint      |string        |Writer endpoint of the RDS cluster                    |
 |rds_reader_endpoint      |string        |Reader endpoint of the RDS cluster                    |
 |rds_cloudwatch_log_groups|string        |CloudWatch log groups associated with the RDS cluster |

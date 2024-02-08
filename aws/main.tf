@@ -94,6 +94,7 @@ module "opensearch" {
   instance_type   = var.opensearch_instance_type
   instance_count  = var.opensearch_instance_count
   ebs_volume_size = var.opensearch_ebs_volume_size
+  master_username = var.opensearch_master_username
   cost_tags       = var.cost_tags
 }
 

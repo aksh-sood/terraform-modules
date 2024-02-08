@@ -83,11 +83,6 @@ module "rds_cluster" {
     1 = {
       promotion_tier = 0
     }
-    2 = {
-      count          = var.rds_reader_needed == true ? 1 : 0
-      promotion_tier = 1
-      instance_class = try(var.reader_instance_type, var.rds_instance_type)
-    }
   }
 
 
@@ -155,4 +150,27 @@ resource "aws_security_group_rule" "eks_sg" {
   protocol                 = "tcp"
   source_security_group_id = var.eks_sg
   security_group_id        = module.rds_cluster.security_group_id
+}
+
+resource "aws_rds_cluster_instance" "reader_instance" {
+  count = var.rds_reader_needed ? 1 : 0
+
+  promotion_tier                        = 1
+  identifier                            = "${var.name}-2"
+  cluster_identifier                    = module.rds_cluster.cluster_id
+  instance_class                        = try(var.reader_instance_type, var.rds_instance_type)
+  engine                                = "aurora-mysql"
+  engine_version                        = module.rds_cluster.cluster_engine_version_actual
+  publicly_accessible                   = var.publicly_accessible
+  copy_tags_to_snapshot                 = true
+  db_parameter_group_name               = module.rds_cluster.db_parameter_group_id
+  db_subnet_group_name                  = module.rds_cluster.db_subnet_group_name
+  performance_insights_enabled          = var.enable_performance_insights
+  performance_insights_retention_period = var.performance_insights_retention_period
+  auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
+  
+  tags = merge(var.cost_tags, {
+    Name      = "${var.name}-RDS"
+    Terraform = "true"
+  })
 }
