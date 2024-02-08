@@ -5,6 +5,21 @@ module "addons" {
   lbc_addon_version = var.lbc_addon_version
 }
 
+
+module "cloudflare" {
+  source = "./modules/cloudflare"
+  count = var.create_dns_records ? 1 : 0
+
+  loadbalancer_url = module.istio.loadbalancer_url
+  environment                   = var.environment
+  domain_name                   = var.domain_name
+
+  providers = {
+    cloudflare.this = cloudflare.this
+  }
+
+}
+
 resource "kubernetes_storage_class_v1" "efs" {
   metadata {
     name = "efs"
@@ -49,7 +64,6 @@ module "monitoring" {
   source = "./modules/monitoring"
 
   isito_dependency = module.istio
-  loadbalancer_url = module.istio.loadbalancer_url
 
   environment                   = var.environment
   domain_name                   = var.domain_name
@@ -64,7 +78,6 @@ module "monitoring" {
 
   providers = {
     kubectl.this    = kubectl.this
-    cloudflare.this = cloudflare.this
   }
 
 }
