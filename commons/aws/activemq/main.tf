@@ -2,7 +2,7 @@
 resource "random_password" "activemq_password" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_+[]{}<>:?"
+  override_special = "!#$%&*()-_+[]{}<>?"
   min_special      = 1
   lower            = true
   min_lower        = 1
@@ -24,14 +24,14 @@ resource "aws_security_group" "activemq_sg" {
     from_port       = 61617
     to_port         = 61617
     protocol        = "tcp"
-    security_groups = [var.security_group]
+    security_groups = var.whitelist_security_groups
   }
   ingress {
     description     = ""
     from_port       = 8162
     to_port         = 8162
     protocol        = "tcp"
-    security_groups = [var.security_group]
+    security_groups = var.whitelist_security_groups
   }
 
   egress {

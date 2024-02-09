@@ -5,14 +5,13 @@ module "addons" {
   lbc_addon_version = var.lbc_addon_version
 }
 
-
 module "cloudflare" {
   source = "./modules/cloudflare"
-  count = var.create_dns_records ? 1 : 0
+  count  = var.create_dns_records ? 1 : 0
 
   loadbalancer_url = module.istio.loadbalancer_url
-  environment                   = var.environment
-  domain_name                   = var.domain_name
+  environment      = var.environment
+  domain_name      = var.domain_name
 
   providers = {
     cloudflare.this = cloudflare.this
@@ -46,20 +45,6 @@ module "istio" {
   depends_on = [module.addons]
 }
 
-module "baton_application_namespaces" {
-  source = "./modules/baton-application-namespace"
-
-  domain_name                  = var.domain_name
-  environment                  = var.environment
-  baton_application_namespaces = var.baton_application_namespaces
-
-  providers = {
-    kubectl.this = kubectl.this
-  }
-
-  depends_on = [module.istio]
-}
-
 module "monitoring" {
   source = "./modules/monitoring"
 
@@ -77,16 +62,13 @@ module "monitoring" {
   grafana_role_arn              = var.grafana_role_arn
 
   providers = {
-    kubectl.this    = kubectl.this
+    kubectl.this = kubectl.this
   }
 
 }
 
 module "logging" {
   source = "./modules/logging"
-
-  loadbalancer_url     = module.istio.loadbalancer_url
-  depends_on = [module.istio]
 
   environment         = var.environment
   opensearch_endpoint = var.opensearch_endpoint
@@ -96,7 +78,7 @@ module "logging" {
 
   providers = {
     kubectl.this = kubectl.this
-    cloudflare.this = cloudflare.this
   }
 
+  depends_on = [module.istio]
 }

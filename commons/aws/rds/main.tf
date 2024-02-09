@@ -25,7 +25,7 @@ locals {
 resource "random_password" "password" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!#$%&*()-_=+[]{}<>?"
   min_special      = 1
   lower            = true
   min_lower        = 1
@@ -168,7 +168,7 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   performance_insights_enabled          = var.enable_performance_insights
   performance_insights_retention_period = var.performance_insights_retention_period
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
-  
+
   tags = merge(var.cost_tags, {
     Name      = "${var.name}-RDS"
     Terraform = "true"

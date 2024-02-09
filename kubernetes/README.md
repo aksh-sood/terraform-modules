@@ -117,27 +117,27 @@ terraform apply
 
 ### Inputs
 
-| Name                                   | Description                                                         | Type                                                        | Default                                                                      |
-| :------------------------------------- | :------------------------------------------------------------------ | :---------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| kube_prometheus_stack_version          | Prometheus version to be installed                                  | string                                                      | `"49.2.0"`                                                                   |
-| istio_version                          | isito version to be installed                                       | string                                                      | `"1.20.0"`                                                                   |
-| slack_channel_name*           | slack channnel name to recieve prometheus alerts                    | string                                                      |                                                                              |
-| slack_web_hook*                       | slack applicaiton webhook for prometheus alerts                     | string                                                      |                                                                              |
-| pagerduty_key*                | PagerDuty key for prometheus alerts                                 | string                                                      |                                                                              |
-| efs_id*                       | EFS ID from aws script for persistent storage                       | string                                                      |                                                                              |
-| efs_addon_version                      | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
-| lbc_addon_version                      | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
-| environment*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
-| domain_name*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
-| acm_certificate_arn*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
-| siem_storage_s3_bucket                 | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |
-| custom_alerts                          | List of custom alerts for prometheus                                | [map(custom_alerts)](#markdown-header-custom-alerts-config) | `[]`                                                                         |
-| grafana_role_arn*             | ARN for the grafana role                                            | string                                                      |                                                                              |
-| prometheus_volume_size                 | PVC size for prometheus                                             | string                                                      | `"200Gi"`                                                                    |
-| alert_manager_volume_size              | PVC size for alertmanager                                           | string                                                      | `"5Gi"`                                                                      |
-| cloudflare_api_token*         | cloudflare API access token                                         | string                                                      |                                                                              |
-| enable_siem                            | Optional enabling of logging in ALB                                 | bool                                                        | `true`                                                                       |
-| baton_application_namespaces* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| Name                           | Description                                                         | Type                                                        | Default                                                                      |
+| :----------------------------- | :------------------------------------------------------------------ | :---------------------------------------------------------- | :--------------------------------------------------------------------------- |
+| kube_prometheus_stack_version  | Prometheus version to be installed                                  | string                                                      | `"49.2.0"`                                                                   |
+| istio_version                  | isito version to be installed                                       | string                                                      | `"1.20.0"`                                                                   |
+| slack_channel_name\*           | slack channnel name to recieve prometheus alerts                    | string                                                      |                                                                              |
+| slack_web_hook\*               | slack applicaiton webhook for prometheus alerts                     | string                                                      |                                                                              |
+| pagerduty_key\*                | PagerDuty key for prometheus alerts                                 | string                                                      |                                                                              |
+| efs_id\*                       | EFS ID from aws script for persistent storage                       | string                                                      |                                                                              |
+| efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
+| lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
+| environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
+| domain_name\*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
+| acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
+| siem_storage_s3_bucket         | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |
+| custom_alerts                  | List of custom alerts for prometheus                                | [map(custom_alerts)](#markdown-header-custom-alerts-config) | `[]`                                                                         |
+| grafana_role_arn\*             | ARN for the grafana role                                            | string                                                      |                                                                              |
+| prometheus_volume_size         | PVC size for prometheus                                             | string                                                      | `"200Gi"`                                                                    |
+| alert_manager_volume_size      | PVC size for alertmanager                                           | string                                                      | `"5Gi"`                                                                      |
+| cloudflare_api_token\*         | cloudflare API access token                                         | string                                                      |                                                                              |
+| enable_siem                    | Optional enabling of logging in ALB                                 | bool                                                        | `true`                                                                       |
+| baton_application_namespaces\* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 **NOTE: `enable_siem` parameter is used to enable/disable the logging of istio ingress . If set to `true` ,`siem_storage_s3_bucket` is required attribute with S3 bucekt in the same region as the EKS cluster**
 
@@ -146,13 +146,13 @@ terraform apply
 The following object is used to create additional custom alerts for the Alert Manager in prometheus.
 It follows the same structure as setting up an alert in yaml configuration in PrometheusRule object.
 
-| Name                  | Description                                 | Type             | Default                                                                             |
-| :-------------------- | :------------------------------------------ | :--------------- | :---------------------------------------------------------------------------------- |
-| alert*       | Name of the alert                           | string           |                                                                                     |
-| expr*        | PromQL query for the alert                  | string           |                                                                                     |
-| for*         | Time for which the alert must be triggering | string           |                                                                                     |
-| labels*      | labels for the alert                        | map(labels)      | [Custom Objects In Custom Alerts](#markdown-header-custom-objects-in-custom-alerts) |
-| annotations* | Annotations for the alert                   | map(annotations) | [Custom Objects In Custom Alerts](#markdown-header-custom-objects-in-custom-alerts) |
+| Name          | Description                                 | Type             | Default                                                                             |
+| :------------ | :------------------------------------------ | :--------------- | :---------------------------------------------------------------------------------- |
+| alert\*       | Name of the alert                           | string           |                                                                                     |
+| expr\*        | PromQL query for the alert                  | string           |                                                                                     |
+| for\*         | Time for which the alert must be triggering | string           |                                                                                     |
+| labels\*      | labels for the alert                        | map(labels)      | [Custom Objects In Custom Alerts](#markdown-header-custom-objects-in-custom-alerts) |
+| annotations\* | Annotations for the alert                   | map(annotations) | [Custom Objects In Custom Alerts](#markdown-header-custom-objects-in-custom-alerts) |
 
 ### Custom Objects In Custom Alerts
 
@@ -160,16 +160,16 @@ There are two custom object in `custom_alerts` object `labels` and `annotations`
 
 **Labels**
 
-| Name               | Description                | Type   | Default |
-| :----------------- | :------------------------- | :----- | :------ |
-| severity*| level of severity of alert | string |         |
+| Name       | Description                | Type   | Default |
+| :--------- | :------------------------- | :----- | :------ |
+| severity\* | level of severity of alert | string |         |
 
 **Annotations**
 
-| Name                  | Description              | Type   | Default |
-| :-------------------- | :----------------------- | :----- | :------ |
-| summary*    | Summary for the alert    | string |         |
-| description* | Description of the alert | string |         |
+| Name          | Description              | Type   | Default |
+| :------------ | :----------------------- | :----- | :------ |
+| summary\*     | Summary for the alert    | string |         |
+| description\* | Description of the alert | string |         |
 
 **Example for Custom Alerts**
 
@@ -192,27 +192,27 @@ The following object deals with the namespaces and other kubernetes resources fo
 
 **All values are required**
 
-| Name                      | Description                                                                | Type           | Default                                            |
-| :------------------------ | :------------------------------------------------------------------------- | :------------- | :------------------------------------------------- |
-| namespace*      | Namespace value                                                            | string         |                                                    |
-| istio_injection* | Whether to enable istio injection or not                                   | bool           |                                                    |
-| common_env                | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
-| services*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
+| Name              | Description                                                                | Type           | Default                                            |
+| :---------------- | :------------------------------------------------------------------------- | :------------- | :------------------------------------------------- |
+| namespace\*       | Namespace value                                                            | string         |                                                    |
+| istio_injection\* | Whether to enable istio injection or not                                   | bool           |                                                    |
+| common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
+| services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
 
 ### Baton Services
 
 This object taked the paramters needed by a single service to run adn are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
 
-| Name                      | Description                                                                                                                            | Type        | Default  |
-| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------- |
-| name*            | Name of the service                                                                                                                    | string      |          |
-| customer*        | Name of the customer                                                                                                                   | string      |          |
-| target_port*     | Port exposed by the service                                                                                           | number      |          |
-| health_endpoint* | Health check endpoint of the service                                                                                                   | string      |          |
-| subdomain_suffix          | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
-| url_prefix*      | Prefix for the service URL                                                                                                             | string      |          |
-| image_tag                 | Version of the image to be used                                                                                                        | string      | `latest` |
-| env*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
+| Name              | Description                                                                                                                            | Type        | Default  |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------- |
+| name\*            | Name of the service                                                                                                                    | string      |          |
+| customer\*        | Name of the customer                                                                                                                   | string      |          |
+| target_port\*     | Port exposed by the service                                                                                                            | number      |          |
+| health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
+| subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
+| url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
+| image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
+| env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 
 **Note: By default `{ "APP_ENVIRONMENT" = customer, "SPRING_PROFILES_ACTIVE" = namespace }` are always appended to `env` attribute.**
 
@@ -223,11 +223,11 @@ This object taked the paramters needed by a single service to run adn are passed
       {
       namespace       = "ns1"
       istio_injection = true
+      customer        = "cust1"
       common_env      = { "key7" = "v7", "key8" = "v8" }
       services = [
         {
           name            = "app1"
-          customer        = "cust1"
           health_endpoint = "/health"
           target_port     = 8080
           subdomain_suffix= "api"
@@ -237,7 +237,6 @@ This object taked the paramters needed by a single service to run adn are passed
         },
         {
           name            = "app3"
-          customer        = "cust1"
           health_endpoint = "/health"
           target_port     = 8080
           url_prefix      = "/app3"
@@ -249,10 +248,10 @@ This object taked the paramters needed by a single service to run adn are passed
     {
       namespace       = "ns2"
       istio_injection = false
+      customer        = "cust2"
       services = [
         {
           name            = "app2"
-          customer        = "cust2"
           health_endpoint = "/health"
           target_port     = 8080
           endpoint        = "api"

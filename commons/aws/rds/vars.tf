@@ -98,7 +98,7 @@ variable "enabled_cloudwatch_logs_exports" {
 }
 
 variable "db_parameter_group_parameters" {
-  type = list(map(string))
+  type    = list(map(string))
   default = []
 }
 

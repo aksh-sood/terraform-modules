@@ -13,9 +13,19 @@ output "private_subnets" {
   value       = module.vpc.private_subnets
 }
 
+output "kms_key_arn" {
+  description = "ARN of KMS key created"
+  value       = module.kms.key_arn
+}
+
 output "efs_id" {
   description = "EFS volume ID for EKS Cluster"
   value       = var.create_eks ? module.eks[0].efs_id : null
+}
+
+output "eks_security_group" {
+  description = "secuirty group attached to both cluster and nodes"
+  value       = var.create_eks ? module.eks[0].primary_security_group_id : null
 }
 
 output "acm_certificate_arn" {
@@ -40,42 +50,4 @@ output "opensearch_password" {
 
 output "opensearch_username" {
   value = var.create_eks ? module.opensearch[0].username : null
-}
-
-output "rds_writer_endpoint" {
-  value       = var.create_rds ? module.rds_cluster[0].writer_endpoint : null
-  description = "Writer endpoint of the RDS cluster."
-}
-
-output "rds_reader_endpoint" {
-  value       = var.create_rds ? module.rds_cluster[0].reader_endpoint : null
-  description = "Reader endpoint of the RDS cluster."
-}
-
-output "rds_master_password" {
-  value     = var.create_rds ? module.rds_cluster[0].master_password : null
-  sensitive = true
-}
-
-output "rds_master_username" {
-  value = var.create_rds ? module.rds_cluster[0].master_username : null
-}
-
-output "activemq_url" {
-
-  value = module.activemq.activemq_url
-
-}
-
-output "activemq_password" {
-
-  value     = module.activemq.activemq_password
-  sensitive = true
-
-}
-
-output "activemq_username" {
-
-  value     = var.activemq_username
-  sensitive = true
 }

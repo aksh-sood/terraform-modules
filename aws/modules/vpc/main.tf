@@ -88,7 +88,7 @@ module "vpc" {
 
   tags = merge(var.cost_tags, var.vpc_tags)
 
-  depends_on = [null_resource.azs_list_validation,null_resource.siem_validation]
+  depends_on = [null_resource.azs_list_validation, null_resource.siem_validation]
 }
 
 # setting the ingress, egress rules of default security group created by vpc module to null 

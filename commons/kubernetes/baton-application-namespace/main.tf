@@ -14,10 +14,11 @@ locals {
   hosts = [
     for ns in var.baton_application_namespaces : {
       namespace = ns.namespace
-      hosts = jsonencode(set([
-        for service in ns.services :
-        service.subdomain_suffix == "" ? "${var.environment}.${var.domain_name}" :
-      "${var.environment}-${service.subdomain_suffix}.${var.domain_name}"]))
+      hosts = jsonencode([
+        for service in ns.services : service.subdomain_suffix == "" ?
+        "${var.environment}.${var.domain_name}"
+        :
+      "${var.environment}-${service.subdomain_suffix}.${var.domain_name}"])
     }
   ]
   services = flatten([
@@ -26,6 +27,7 @@ locals {
       for service in ns.services :
       {
         namespace        = ns.namespace
+        customer         = ns.customer
         name             = service.name
         customer         = service.customer
         health_endpoint  = service.health_endpoint
@@ -67,16 +69,18 @@ resource "kubectl_manifest" "gateways" {
 
 resource "helm_release" "baton-application" {
   for_each  = { for svc in local.services : svc.name => svc }
+
   name      = each.value.name
   namespace = each.value.namespace
   chart     = "${path.module}/baton-service"
+  wait      = false
 
   values = [
     <<-EOT
 customer: ${each.value.customer}
 health_endpoint: ${each.value.health_endpoint}
 targetPort: ${each.value.target_port}
-endpoint: ${each.value.subdomain_suffix}
+subdomain_suffix: ${each.value.subdomain_suffix}
 url_prefix: ${each.value.url_prefix}
 domain: ${var.domain_name}
 image_tag: ${each.value.image_tag}

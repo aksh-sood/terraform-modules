@@ -20,27 +20,50 @@ Below is a list of resources created :-
     - IAM roles and policies for EKS Cluster and Nodes
     - EFS Drive for persistent volume and security Group For EFS
     - Opensearch Domain
-    - RDS Cluster
-    - ActiveMQ
   
   - Kubernetes
-    - EFS and EBS Addons 
+    - LBC Addons 
     - Istio installation in EKS cluster
     - Istio ingress of type ALB
     - Kube Prometheus Stack installation 
     - Prometheus Alerts
     - Grafana Dashboards and Users
     - Filebeat
+  
+  - FX Admin
+    - Kinesis Streams
+    - Kinesis Firehose
+    - Kinesis analytics application
+    - Lambda Functions
+    - ActiveMQ
+    - RDS Database
+    - S3 Buckets for baton and swift messages
 
-Documentation to the relevant resources can be found in [AWS](./aws/README.md) and [Kubernetes](./kubernetes/README.md)
+  - Commons
+    - AWS
+      - Kinesis Streams
+      - S3 Bucket
+      - IAM role for Lambda functions
+      - Lambda Functions
+      - RDS Cluster
+      - ActiveMQ
+      - SQS
+    - Kubernetes
+      - Baton Application Namepspaces
 
-# WHY TWO FOLDERS
+Documentation to the relevant resources can be found in [AWS](./aws/README.md) , [Kubernetes](./kubernetes/README.md) ,[Commons](./commons/README.md) and [FX ADMIN](./fx-admin/README.md)
+
+# WHY MULTIPLE FOLDERS
 
 Following single folder structure ,the Kubernetes provider configuration is not compatible as is giving many issues in execution of the script as it is not supporting runtime configuration changes resulting in failure of connection to the EKS cluster or failure in creation of Kubernetes resources .
 
 Also the corresponding structure and resources would be to big , even if the change happens in a single resource ,terraform refreshes the entire state file to detect the changes which  would cause significant delay in the apply and plan operations .
 
 Terraform community also suggests to keep these folders separate for better management and because of their limitations.
+
+The [commons](./commons/) folder is used a a utility acroos multiple folders with common resources being created across multiple folders adn acts as a universla module for other folders.
+
+The [FX Admin](./fx-admin/) folder deals with the creation of resources strictly for the admin account which distributes the messages to other customer accounts .
 
 # Prerequisites
 
