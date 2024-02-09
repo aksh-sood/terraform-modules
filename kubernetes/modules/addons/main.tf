@@ -1,25 +1,3 @@
-# EFS driver installation
-resource "helm_release" "efs_driver" {
-  name       = "aws-efs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
-  chart      = "aws-efs-csi-driver"
-  namespace  = "kube-system"
-  version    = var.efs_addon_version
-
-  values = [
-    <<-EOT
-replicaCount: 1 
-storageClasses:
-  - name: efs
-    reclaimPolicy: Retain
-    parameters:
-      provisioningMode: efs-ap
-      fileSystemId: ${var.efs_id}
-      directoryPerms: "700"
-EOT      
-  ]
-}
-
 # Load balancer controller add on
 resource "helm_release" "lbc_addon" {
   name       = "aws-load-balancer-controller"

@@ -1,9 +1,3 @@
-variable "efs_addon_version" {
-  type        = string
-  description = "EFS helm chart version number"
-  default     = "2.2.0"
-}
-
 variable "lbc_addon_version" {
   description = "Load Balancer Controller helm chart version number"
   type        = string
@@ -13,11 +7,10 @@ variable "lbc_addon_version" {
 variable "environment" {
   description = "Environment for which the resources are being provisioned"
   type        = string
-  default     = "test"
 }
 
 variable "acm_certificate_arn" {
-  description = "ARN ID of the ACM certificate to be used by istio load balancer"
+  description = "arn id of the ACM certificate to be used by load balancer"
   type        = string
 }
 
@@ -30,6 +23,11 @@ variable "istio_version" {
   description = "istio helm chart version"
   type        = string
   default     = "1.20.0"
+}
+
+variable "siem_storage_s3_bucket" {
+  description = "bucket id for alerts and logging"
+  type        = string
 }
 
 variable "kube_prometheus_stack_version" {
@@ -46,25 +44,21 @@ variable "efs_id" {
 variable "slack_web_hook" {
   description = "Slack Webhook for alerts notification from prometheus alert manager"
   type        = string
-  default     = "https://hooks.slack.com/services/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"
 }
 
 variable "slack_channel_name" {
   description = "Slack channel for alerts notification from prometheus alert manager"
   type        = string
-  default     = "terraform-test-alerts"
 }
 
 variable "pagerduty_key" {
   description = "PagerDuty key for alerts notification from prometheus alert manager"
   type        = string
-  default     = "8d81b91f50e54dc09a2400fbeb019c84"
 }
 
 variable "grafana_role_arn" {
   description = "IAM Role ARN for cloudwatch data source in grafana"
   type        = string
-  default     = ""
 }
 
 variable "custom_alerts" {
@@ -97,6 +91,19 @@ variable "prometheus_volume_size" {
   type        = string
   description = "Volume Claims size for alert manager"
   default     = "200Gi"
+}
+
+variable "cloudflare_api_token" {
+  type        = string
+  description = "api token to access cloudflare"
+}
+
+variable "enable_siem" {
+  default = true
+}
+
+variable "create_dns_records" {
+  default = true
 }
 
 variable "opensearch_password" {}

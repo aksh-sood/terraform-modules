@@ -8,13 +8,15 @@ terraform {
 }
 
 provider "grafana" {
-  // TODO : Add DNS Record and provide public endpoint in future
-  url  = "http://localhost:3000"
+
+  url  = "https://${var.environment}-grafana.${var.domain_name}"
   auth = "admin:${var.grafana_password}"
 }
 
 resource "grafana_folder" "custom" {
   title = "Custom Dashboards"
+
+  depends_on = [var.vs_dependency]
 }
 
 resource "grafana_dashboard" "metrics" {
@@ -23,13 +25,13 @@ resource "grafana_dashboard" "metrics" {
   config_json = file("${path.module}/dashboards/${each.key}")
   folder      = grafana_folder.custom.id
 
-  depends_on = [var.dependency]
+  depends_on = [var.vs_dependency]
 }
 
 resource "random_password" "password" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
+  override_special = "!#$%&*()-_=+[]{}<>?"
   min_special      = 1
   lower            = true
   min_lower        = 1
@@ -45,7 +47,7 @@ resource "grafana_user" "developer" {
   password = random_password.password.result
   is_admin = false
 
-  depends_on = [var.dependency]
+  depends_on = [var.vs_dependency]
 }
 
 resource "grafana_data_source" "cloudwatch" {
@@ -59,4 +61,6 @@ resource "grafana_data_source" "cloudwatch" {
   "defaultRegion": "us-east-1"
 }
 JSON
+
+  depends_on = [var.vs_dependency]
 }

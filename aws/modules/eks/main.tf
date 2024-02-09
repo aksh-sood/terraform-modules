@@ -100,8 +100,9 @@ module "eks_node" {
 module "addons" {
   source = "./modules/addons"
 
-  cluster_name = var.cluster_name
-  eks_addons   = var.eks_addons
+  cluster_name          = var.cluster_name
+  eks_addons            = var.eks_addons
+  additional_eks_addons = var.additional_eks_addons
 
   depends_on = [module.cluster, module.eks_node, module.iam]
 }

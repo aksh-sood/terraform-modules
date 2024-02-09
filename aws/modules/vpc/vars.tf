@@ -37,6 +37,14 @@ variable "public_route_table_tags" {
   }
 }
 
+variable "vpc_flow_log_tags" {
+  description = "tags for vpc flow logging"
+  type        = map(string)
+  default = {
+    Description = "VPC Flow Log"
+  }
+}
+
 #acl rules
 variable "private_acl_egress_rules" {
   description = "base egress rules for private subnet NACL"
@@ -226,10 +234,16 @@ variable "vpc_tags" {
   type        = map(string)
 }
 
+variable "siem_storage_s3_bucket" {
+  description = "ARN of the s3 bucket where logs are to be stored"
+  type        = string
+}
+
 variable "public_subnet_cidrs" {
   description = "list of public subnet cidr's to be created"
   type        = list(string)
 }
+
 variable "private_subnet_cidrs" {
   description = "list of private subnet cidr's to be created"
   type        = list(string)
@@ -238,3 +252,4 @@ variable "private_subnet_cidrs" {
 variable "cost_tags" {}
 variable "region" {}
 variable "enable_nat_gateway" {}
+variable "enable_siem" {}

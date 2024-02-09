@@ -17,3 +17,5 @@ variable "instance_type" {}
 variable "engine_version" {}
 
 variable "cost_tags" {}
+
+variable "master_username" {}
