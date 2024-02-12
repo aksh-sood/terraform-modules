@@ -324,4 +324,3 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
 |rds_master_username  | string |RDS master username credential|
 |rds_master_password  | string |RDS master password credential|
 |activemq_credentials | list(map) | Credentials for different ActiveMQ deployments within a namespace|
-|app_password         | string | Basic Auth password for metrics endpoint of the applications| 

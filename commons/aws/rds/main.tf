@@ -107,7 +107,7 @@ module "rds_cluster" {
 # Event Notification for RDS
 resource "aws_sns_topic" "rds" {
   name              = "rds-cluster-events"
-  kms_master_key_id = var.resources_key_arn
+  kms_master_key_id = var.sns_kms_key_arn
 }
 
 locals {

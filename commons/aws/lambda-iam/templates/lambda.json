@@ -34,8 +34,7 @@
         "${sqs_queue_arn}",
         "arn:aws:logs:${region}:${account_id}:log-group:*",
         "arn:aws:logs:${region}:${account_id}:log-group:*:log-stream:*",
-        "${matched_trades_stream_arn}",
-        "${normalized_trades_stream_arn}"
+        ${streams_arn}
       ]
     },
     {

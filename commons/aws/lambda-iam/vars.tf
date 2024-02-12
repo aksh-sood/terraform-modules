@@ -8,9 +8,12 @@ variable "lambda_role_policies" {
   ]
 }
 
+variable "streams_arn" {
+  description = "List of stream ARNs for lambda to access"
+  type = list(string)
+}
+
 variable "name" {}
 variable "region" {}
 variable "s3_bucket_arn" {}
 variable "sqs_queue_arn" {}
-variable "matched_trades_stream_arn" {}
-variable "normalized_trades_stream_arn" {}

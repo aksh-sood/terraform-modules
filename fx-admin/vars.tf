@@ -189,6 +189,7 @@ variable "lambda_packages_s3_bucket" {
 variable "private_subnet_ids" {
   type = list(string)
 }
+
 variable "public_subnet_ids" {
   type = list(string)
 }
@@ -318,6 +319,7 @@ variable "baton_application_namespaces" {
   ]
 }
 
+
 variable "rabbitmq_engine_version" {
   description = "Version of the RabbitMQ broker engine"
   type        = string
@@ -384,6 +386,7 @@ variable "cloudflare_api_token" {
   description = "API token to access cloudflare"
   type        = string
 }
+
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
   type        = map(any)

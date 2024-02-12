@@ -22,3 +22,8 @@ output "jaeger_password" {
   value     = random_password.password[2].result
   sensitive = true
 }
+
+output "app_password" {
+  value     = random_password.password[3].result
+  sensitive = true
+}

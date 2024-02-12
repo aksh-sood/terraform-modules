@@ -19,7 +19,7 @@ The following folder is a sub part of the entire Terraform IAC project and deals
 
 ##### [Istio](./kubernetes/modules/istio)
 
-The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. Additionally, it creates a private Application Load Balncer to expose Grafana and OpenSearch endpoint through VPN. It also implements basic authentication over WASM plugin for domains like jaeger, alertmanager, prometheus.
+The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. Additionally, it creates a private Application Load Balncer to expose Grafana and OpenSearch endpoint through VPN. It also implements basic authentication over WASM plugin for applications like jaeger, alertmanager, prometheus and all the metrics endpoints `/metrics` of other applications.
 
 **Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB.
 **WARNING:** If the S3 logging bucket is not in the same region then `loadbalancer_url` is not generated leading to failiure of script.
@@ -309,3 +309,4 @@ This object taked the paramters needed by a single service to run adn are passed
 | alertmanager_password | string | basic auth password for alertmanager|
 | prometheus_username| string | basic auth username for prometheus | 
 | prometheus_password | string | basic auth password for prometheus|
+| app_password         | string | Basic Auth password for metrics endpoint of the applications| 

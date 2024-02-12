@@ -26,9 +26,10 @@ resource "cloudflare_record" "cnames" {
 
   provider = cloudflare.this
 
-  name    = "${var.name}${each.key}"
   zone_id = data.cloudflare_zone.this.id
-  type    = "CNAME"
+
   proxied = true
+  type    = "CNAME"
+  name    = "${var.name}${each.key}"
   value   = var.loadbalancer_url
 }

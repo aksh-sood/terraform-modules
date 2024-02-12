@@ -54,9 +54,3 @@ output "activemq_credentials" {
   value       = [for ns in module.baton_application_namespace : ns.activemq_credentials if ns.activemq_credentials != null]
   sensitive   = true
 }
-
-output "app_password" {
-  description = "Basic Auth password for metrics endpoint of the application"
-  value = module.basic_auth_application.app_password
-  sensitive   = true
-}

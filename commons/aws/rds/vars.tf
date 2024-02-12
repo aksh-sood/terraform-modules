@@ -123,6 +123,6 @@ variable "whitelist_eks" {
   default = false
 }
 
-variable "resources_key_arn" {
-  description = "KMS CMK Arn for SSE Encryption"
+variable "sns_kms_key_arn" {
+  description = "KMS ARN for SSE Encryption on SNS"
 }

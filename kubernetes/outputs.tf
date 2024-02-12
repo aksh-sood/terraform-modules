@@ -75,12 +75,8 @@ output "sftp_host" {
   value       = var.enable_sftp ? module.sftp[0].host : null
 }
 
-variable "cost_tags" {
-  description = "Customer Cost and Environment tags for all the resources "
-  type        = map(string)
-  default = {
-    env-type    = "test"
-    customer    = "internal"
-    cost-center = "overhead"
-  }
+output "app_password" {
+  description = "Basic Auth password for metrics endpoint of the application"
+  value     = module.istio.app_password
+  sensitive = true
 }

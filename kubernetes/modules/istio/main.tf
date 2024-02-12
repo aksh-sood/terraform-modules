@@ -268,7 +268,7 @@ YAML
 }
 
 resource "random_password" "password" {
-  count = 3
+  count = 4
 
   length           = 16
   special          = true
@@ -317,6 +317,14 @@ spec:
       hosts:
       - ${var.environment}-jaeger.${var.domain_name}
       prefix: /
+      request_methods:
+      - GET
+      - POST
+    - credentials:
+      - ${base64encode("admin:${random_password.password[3].result}")}
+      hosts:
+      - '*.${var.domain_name}'
+      suffix: /metrics
       request_methods:
       - GET
       - POST

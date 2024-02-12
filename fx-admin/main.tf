@@ -184,12 +184,12 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  name                         = var.environment
-  region                       = var.region
   s3_bucket_arn                = module.s3.bucket_arn
   sqs_queue_arn                = module.sqs.arn
-  matched_trades_stream_arn    = module.normalized_trml_kinesis_stream.stream_arn
-  normalized_trades_stream_arn = module.normalized_trml_kinesis_stream.stream_arn
+  streams_arn                  = [module.normalized_trml_kinesis_stream.stream_arn,module.normalized_trml_kinesis_stream.stream_arn]
+
+  name                         = var.environment
+  region                       = var.region
 }
 
 module "sqs" {
@@ -290,6 +290,8 @@ module "matched_trades_lambda" {
 module "rds_cluster" {
   source = "../commons/aws/rds"
 
+  sns_kms_key_arn                       = module.kms_sse.arn
+
   whitelist_eks                         = true
   kms_key_id                            = var.kms_key_arn
   subnets                               = var.private_subnet_ids
@@ -316,7 +318,6 @@ module "rds_cluster" {
   db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
   eks_sg                                = var.eks_security_group
   cost_tags                             = var.cost_tags
-  resources_key_arn                     = module.kms_sse.arn
 }
 
 module "secrets" {
@@ -406,17 +407,6 @@ module "baton_application_namespace" {
   }
 
   depends_on = [module.secrets, module.rabbitmq_config, module.directory_service_data_import]
-}
-
-module "basic_auth_application" {
-  source = "../commons/kubernetes/wasm-auth"
-
-  environment = var.environment
-  domain_name = var.domain_name
-
-  providers = {
-    kubectl.this = kubectl.this
-  }
 }
 
 module "transit_gateway" {

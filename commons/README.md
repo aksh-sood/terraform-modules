@@ -63,7 +63,7 @@ This module creates an Aurora RDS Cluster with MYSQL engine with multiple config
 ##### Outputs
 
 | Name                      | Type   | Description                                           |
-|:--------------------------|:-------|:------------------------------------------------------|
+| :------------------------ | :----- | :---------------------------------------------------- |
 | rds_writer_endpoint       | string | Writer endpoint of the RDS cluster                    |
 | rds_reader_endpoint       | string | Reader endpoint of the RDS cluster                    |
 | rds_cloudwatch_log_groups | string | CloudWatch log groups associated with the RDS cluster |
@@ -131,7 +131,7 @@ This module creates a Lambda function with security group for the lambda as well
 ##### Inputs
 
 | Name                      | Description                                             | Type         | Default |
-|:--------------------------|:--------------------------------------------------------|:-------------|:--------|
+| :------------------------ | :------------------------------------------------------ | :----------- | :------ |
 | stream_arn                | ARN of Kinesis Stream for event source mappping         | string       | `null`  |
 | sqs_arn                   | ARN of SQS for event source mappping                    | string       | `null`  |
 | name\*                    | Name for the Lambda function                            | string       |         |
@@ -159,7 +159,7 @@ This module generates the IAM role to associate to the lambda functions for givi
 ##### Inputs
 
 | Name        | Description                                             | Type   | Default |
-|:------------|:--------------------------------------------------------|:-------|:--------|
+| :---------- | :------------------------------------------------------ | :----- | :------ |
 | region      | AWS Region in which the function is created             | string |         |
 | environment | Name of the environment to append to the resources name | string |         |
 
@@ -176,7 +176,7 @@ This module creates a S3 Bucket with the respective region with S3 server_side_e
 ##### Inputs
 
 | Name          | Description                                             | Type        | Default |
-|:--------------|:--------------------------------------------------------|:------------|:--------|
+| :------------ | :------------------------------------------------------ | :---------- | :------ |
 | environment\* | Name of the environment to append to the resources name | string      |         |
 | name\*        | Name of the bucket                                      | string      |         |
 | tags\*        | Tags for the bucket                                     | map(string) |         |
@@ -185,25 +185,23 @@ This module creates a S3 Bucket with the respective region with S3 server_side_e
 
 | Name | Type | Description |
 | :--- | :--- | :---------- |
-
-|
 |bucket_arn|string|ARN of the S3 Bucket|
 
 ### [SQS](./aws/sqs)
 
-This module creates a SQS with visibility set to `305` seconds by default.Environment name is being appened to all the names provied to in this resource to keep the distinction for each resource clear.
+This module creates a SQS with visibility set to `305` seconds by default.Environment name is being appened to all the names provided to in this resource to keep the distinction for each resource clear.
 
 ##### Inputs
 
 | Name   | Description         | Type        | Default |
-|:-------|:--------------------|:------------|:--------|
+| :----- | :------------------ | :---------- | :------ |
 | name\* | Name of the bucket  | string      |         |
 | tags\* | Tags for the bucket | map(string) |         |
 
 ##### Outputs
 
 | Name | Type   | Description    |
-|:-----|:-------|:---------------|
+| :--- | :----- | :------------- |
 | arn  | string | ARN of the SQS |
 
 ### [STREAM](./aws/stream)
@@ -213,14 +211,14 @@ This module creates a AWS Kinesis Stream with default `retention_period` as `12`
 ##### Inputs
 
 | Name   | Description         | Type        | Default |
-|:-------|:--------------------|:------------|:--------|
+| :----- | :------------------ | :---------- | :------ |
 | name\* | Name of the bucket  | string      |         |
 | tags\* | Tags for the bucket | map(string) |         |
 
 ##### Outputs
 
 | Name       | Type   | Description               |
-|:-----------|:-------|:--------------------------|
+| :--------- | :----- | :------------------------ |
 | stream_arn | string | ARN of the Kinesis Stream |
 
 ### [Rabbit MQ (kubernetes)](./kubernetes/rabbitmq)

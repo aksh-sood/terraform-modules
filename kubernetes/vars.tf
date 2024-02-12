@@ -170,6 +170,22 @@ variable "cluster_autoscaler_version" {
   default     = "v1.26.2"
 }
 
+variable "lambda_packages_s3_bucket" {
+  description = "S3 bucket name with JAR packages for lambda functions"
+  type        = string
+  default     = "fx-dev-lambda-packages"
+}
+
+variable "cost_tags" {
+  description = "Customer Cost and Environment tags for all the resources "
+  type        = map(string)
+  default = {
+    env-type    = "test"
+    customer    = "internal"
+    cost-center = "overhead"
+  }
+}
+
 variable "elb_security_group" {
   description = "security group for load balancers"
   type        = string
@@ -180,16 +196,11 @@ variable "internal_alb_security_group" {
   type        = string
 }
 
-variable "opensearch_password" {}
-variable "opensearch_username" {}
-variable "opensearch_endpoint" {}
-
 variable "gchat_webhook" {
   default = null
   type    = string
 }
-variable "lambda_packages_s3_bucket" {
-  description = "S3 bucket name with JAR packages for lambda functions"
-  type        = string
-  default     = "fx-dev-lambda-packages"
-}
+
+variable "opensearch_password" {}
+variable "opensearch_username" {}
+variable "opensearch_endpoint" {}
