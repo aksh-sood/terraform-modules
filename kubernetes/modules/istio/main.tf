@@ -1,3 +1,15 @@
+terraform {
+  required_version = ">= 0.13"
+
+  required_providers {
+    kubectl = {
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
+    }
+  }
+}
+
 # Istio helm installation
 resource "helm_release" "istio_base" {
   repository       = "https://istio-release.storage.googleapis.com/charts"
@@ -155,6 +167,93 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
       error_message = "Provided siem_storage_s3_bucket or disable enable_siem"
     }
   }
+
+  depends_on = [helm_release.istio_ingress]
+}
+
+resource "kubectl_manifest" "istio_gateway" {
+
+  provider = kubectl.this
+
+  yaml_body = <<YAML
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: istio-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - ${var.environment}-jaeger.${var.domain_name}
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+YAML
+
+  depends_on = [helm_release.istio_ingress]
+}
+
+resource "random_password" "password" {
+  count = 3
+
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>?"
+  min_special      = 1
+  lower            = true
+  min_lower        = 1
+  numeric          = true
+  min_numeric      = 1
+  upper            = true
+  min_upper        = 1
+}
+
+resource "kubectl_manifest" "basic_auth" {
+
+  provider = kubectl.this
+
+  yaml_body = <<YAML
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: basic-auth
+  namespace: istio-system
+spec:
+  phase: AUTHN
+  pluginConfig:
+    basic_auth_rules:
+    - credentials:
+      - ${base64encode("admin:${random_password.password[0].result}")}
+      hosts:
+      - ${var.environment}-prometheus.${var.domain_name}
+      prefix: /
+      request_methods:
+      - GET
+      - POST
+    - credentials:
+      - ${base64encode("admin:${random_password.password[1].result}")}
+      hosts:
+      - ${var.environment}-alertmanager.${var.domain_name}
+      prefix: /
+      request_methods:
+      - GET
+      - POST
+    - credentials:
+      - ${base64encode("admin:${random_password.password[2].result}")}
+      hosts:
+      - ${var.environment}-jaeger.${var.domain_name}
+      prefix: /
+      request_methods:
+      - GET
+      - POST
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  url: oci://ghcr.io/istio-ecosystem/wasm-extensions/basic_auth:1.12.0
+YAML
 
   depends_on = [helm_release.istio_ingress]
 }

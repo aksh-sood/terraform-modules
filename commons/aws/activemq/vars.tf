@@ -1,7 +1,8 @@
 variable "environment" {}
+variable "region" {}
+variable "vpc_id" {}
 variable "subnet_ids" {}
 variable "whitelist_security_groups" {}
-variable "vpc_id" {}
 variable "tags" {}
 variable "activemq_engine_version" {}
 variable "activemq_storage_type" {}

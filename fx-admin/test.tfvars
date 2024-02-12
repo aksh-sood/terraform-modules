@@ -1,5 +1,6 @@
 region             = "us-east-1"
 environment        = "aksh2"
+vendor             = "baton"
 kms_key_arn        = "arn:aws:kms:us-east-1:130759691668:key/3d905d17-67f8-4ef3-a262-2eaf30eb4861"
 eks_security_group = "sg-013757e0a209c45a2"
 public_subnet_ids = [
@@ -25,7 +26,7 @@ baton_application_namespaces = []
 rds_mysql_version                         = "8.0"
 rds_instance_type                         = "db.t4g.large"
 rds_master_username                       = "root"
-rds_reader_needed                         = true
+create_rds_reader                         = true
 rds_parameter_group_family                = "aurora-mysql8.0"
 rds_enable_performance_insights           = true
 rds_performance_insights_retention_period = 7

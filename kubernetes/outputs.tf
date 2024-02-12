@@ -26,3 +26,34 @@ output "loadbalancer_url" {
   description = "Hostname for the istio ingress created"
   value       = module.istio.loadbalancer_url
 }
+
+output "jaeger_username" {
+  value     = "admin"
+}
+
+output "jaeger_password" {
+  value     = module.istio.jaeger_password
+  sensitive = true
+}
+
+output "alertmanager_username" {
+  value     = "admin"
+}
+
+output "alertmanager_password" {
+  value     = module.istio.alertmanager_password
+  sensitive = true
+}
+
+output "prometheus_username" {
+  value     = "admin"
+}
+
+output "prometheus_password" {
+  value     = module.istio.prometheus_password
+  sensitive = true
+}
+
+output "fqdn" {
+  value = module.cloudflare.domains
+}

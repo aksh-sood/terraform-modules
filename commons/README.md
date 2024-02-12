@@ -1,0 +1,274 @@
+# Description
+
+This folder works like a universal module for multiple directories in this script. It houses many modules for both AWS and Kubernetes resources , below is the list of resources it houses inside the AWS and Kubernetes subdirectories.
+
+- AWS
+  - Kinesis Streams
+  - S3 Bucket
+  - IAM role for Lambda functions
+  - Lambda Functions
+  - RDS Cluster
+  - ActiveMQ
+  - SQS
+- Kubernetes
+  - Baton Application Namepspaces
+
+# Modules
+
+### [RDS](./aws/rds/)
+
+This module creates an Aurora RDS Cluster with MYSQL engine with multiple configuration options ranging from SQL version to having a reader instance or not . Follow the below inputs for more .
+
+##### Inputs
+
+| Name                                      | Description                               | Type         | Default                                                                     |
+| :---------------------------------------- | :---------------------------------------- | :----------- | :-------------------------------------------------------------------------- |
+| create_rds_reader                         | Enable reader for RDS                     | bool         | `false`                                                                     |
+| rds_mysql_version                         | MySQL version for RDS Aurora              | string       | `-`                                                                         |
+| rds_instance_type                         | RDS Instance Type                         | string       | `-`                                                                         |
+| rds_master_password                       | Master Password for RDS                   | string       | `-`                                                                         |
+| rds_master_username                       | Master Username for RDS                   | string       | `master`                                                                    |
+| rds_parameter_group_family                | Parameter group Family name               | string       | `-`                                                                         |
+| rds_enable_performance_insights           | Enable performance insights for RDS       | bool         | `-`                                                                         |
+| rds_performance_insights_retention_period | Performance Insights retention period     | number       | `7`                                                                         |
+| rds_enable_event_notifications            | Enable event notifications for RDS        | bool         | `true`                                                                      |
+| rds_reader_instance_type                  | Reader instance type for RDS              | `-`          | `-`                                                                         |
+| rds_ingress_whitelist                     | Ingress whitelist for RDS                 | list         | `-`                                                                         |
+| rds_enable_deletion_protection            | Enable deletion protection for RDS        | bool         | `true`                                                                      |
+| rds_enable_auto_minor_version_upgrade     | Enable auto minor version upgrade for RDS | bool         | `false`                                                                     |
+| rds_db_cluster_parameter_group_parameters | DB cluster parameter group parameters     | list         | `[]`                                                                        |
+| rds_preferred_backup_window               | Preferred backup window for RDS           | string       | `"07:00-09:00"`                                                             |
+| rds_publicly_accessible                   | Make RDS publicly accessible              | bool         | `false`                                                                     |
+| rds_db_parameter_group_parameters         | DB parameter group parameters             | list(map)    | `[{"name": "long_query_time", "value": "10", "apply_method": "immediate"}]` |
+| rds_enabled_cloudwatch_logs_exports       | Enabled CloudWatch Logs Exports for RDS   | list(string) | `["slowquery", "audit", "error"]`                                           |
+| rds_ca_cert_identifier                    | CA certificate identifier for RDS         | string       | `-`                                                                         |
+| rds_backup_retention_period               | Backup retention period for RDS in days   | number       | `7`                                                                         |
+
+##### Outputs
+
+| Name                      | Type   | Description                                           |
+| :------------------------ | :----- | :---------------------------------------------------- |
+| rds_writer_endpoint       | string | Writer endpoint of the RDS cluster                    |
+| rds_reader_endpoint       | string | Reader endpoint of the RDS cluster                    |
+| rds_cloudwatch_log_groups | string | CloudWatch log groups associated with the RDS cluster |
+| rds_master_username       | string | MYSQL Username for the master user                    |
+| rds_master_password       | string | MYSQL Password for the master user                    |
+
+### [ACTIVE MQ](./aws/activemq/)
+
+This module provisions a single ACTIVEMQ Broker and security group for it .
+
+##### Inputs
+
+| Name                         | Description                                                                                               | Type   | Default         |
+| :--------------------------- | :-------------------------------------------------------------------------------------------------------- | :----- | :-------------- |
+| activemq_engine_version      | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
+| activemq_storage_type        | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
+| activemq_host_instance_type  | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
+| apply_immediately            | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |
+| auto_minor_version_upgrade   | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
+| activemq_publicly_accessible | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
+| activemq_username            | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
+
+##### Outputs
+
+| Name              | Type   | Description                |
+| :---------------- | :----- | :------------------------- |
+| activemq_url      | string | URL of the ActiveMQ broker |
+| activemq_username | string | Username for ActiveMQ      |
+| activemq_password | string | Password for ActiveMQ      |
+
+### [LAMBDA](./aws/lambda)
+
+This module creates a Lambda function with security group for the lambda as well as event source mapping for the lambda .Environment name is being appened to all the names provied to in this resource to keep the distinction for each resource clear. The module supports configuration for both sqs as well as kinesis sources . `stream_arn` or `sqs_arn` input values determine hwo the event source mapping is configured . Only one is supported and required for a single lambda. 
+
+##### Inputs
+
+| Name                      | Description                                             | Type         | Default |
+| :------------------------ | :------------------------------------------------------ | :----------- | :------ |
+| stream_arn                | ARN of Kinesis Stream for event source mappping         | string       | `null`  |
+| sqs_arn                   | ARN of SQS for event source mappping                    | string       | `null`  |
+| name\*                    | Name for the Lambda function                            | string       |         |
+| package_key\*             | S3 path for script or code to run                       | string       |         |
+| handler\*                 | The method in your function code that processes events  | string       |         |
+| lambda_packages_s3_bucket | Name of S3 Bucket with Lambda functions                 | string       |         |
+| tags\*                    | Tags for the Lambda Function                            | map(string)  |         |
+| environment_variables\*   | Configuraiton for the Lambda Environment variables      | map(dynamic) |         |
+| subnet_ids\*              | Subnet IDS to associate with the Lambda                 | list(string) |         |
+| lambda_role_arn\*         | ARN of the IAM role to associate to the Lambda          | string       |         |
+| vpc_id\*                  | VPC ID to associate the Lambda function to              | string       |         |
+| region\*                  | AWS Region in which the function is created             | string       |         |
+| environment\*             | Name of the environment to append to the resources name | string       |         |
+
+##### Outputs
+
+| Name | Type | Description |
+| :--- | :--- | :---------- |
+|security_group_id|string|Security Group ID for the Lambda|
+
+### [LAMBDA IAM](./aws/lambda-iam)
+
+This module generates the IAM role to associate to the lambda functions for giving them the required access
+
+##### Inputs
+
+| Name        | Description                                             | Type   | Default |
+| :---------- | :------------------------------------------------------ | :----- | :------ |
+| region      | AWS Region in which the function is created             | string |         |
+| environment | Name of the environment to append to the resources name | string |         |
+
+##### Outputs
+
+| Name | Type | Description |
+| :--- | :--- | :---------- |
+
+|
+|lambda_role_arn|string|ARN of the IAM role created for the Lambda|
+
+### [S3](./aws/s3)
+
+This module creates a S3 Bucket with the respective region with S3 server_side_encryption_configuration also.
+
+##### Inputs
+
+| Name          | Description                                             | Type        | Default |
+| :------------ | :------------------------------------------------------ | :---------- | :------ |
+| environment\* | Name of the environment to append to the resources name | string      |         |
+| name\*        | Name of the bucket                                      | string      |         |
+| tags\*        | Tags for the bucket                                     | map(string) |         |
+
+##### Outputs
+
+| Name | Type | Description |
+| :--- | :--- | :---------- |
+
+|
+|bucket_arn|string|ARN of the S3 Bucket|
+
+### [SQS](./aws/sqs)
+
+This module creates a SQS with visibility set to `305` seconds by default.Environment name is being appened to all the names provied to in this resource to keep the distinction for each resource clear.
+
+##### Inputs
+
+| Name   | Description         | Type        | Default |
+| :----- | :------------------ | :---------- | :------ |
+| name\* | Name of the bucket  | string      |         |
+| tags\* | Tags for the bucket | map(string) |         |
+
+##### Outputs
+
+| Name | Type   | Description    |
+| :--- | :----- | :------------- |
+| arn  | string | ARN of the SQS |
+
+### [STREAM](./aws/stream)
+
+This module creates a AWS Kinesis Stream with default `retention_period` as `12`.
+
+##### Inputs
+
+| Name   | Description         | Type        | Default |
+| :----- | :------------------ | :---------- | :------ |
+| name\* | Name of the bucket  | string      |         |
+| tags\* | Tags for the bucket | map(string) |         |
+
+##### Outputs
+
+| Name       | Type   | Description               |
+| :--------- | :----- | :------------------------ |
+| stream_arn | string | ARN of the Kinesis Stream |
+
+### [Baton Application Namespace](./kubernetes/module/baton-application-namespace)
+
+Responsible for creation of namespaces and virtualservies, gateways, deployments, service accounts and takes care of these requirements for running the applications. Helm chart has been created for deploying these objects except the gateways and namespaces.
+
+The services are exposed for the following URL `{environment}-{subdomain_suffix}-{service}-{domain}` or if `subdomain_suffix` is not give then `{environment}-{domain}`
+
+| Name                           | Description                                             | Type                               | Default                                                                      |
+| :----------------------------- | :------------------------------------------------------ | :--------------------------------- | :--------------------------------------------------------------------------- |
+| environment\*                  | Name of the environment to append to the resources name | string                             |                                                                              |
+| domain_name\*                  | Domain name registerd in the DNS service                | string                             |
+| common_connections             | Global connections to attach to each service            | map(string)                        |                                                                              |
+| baton_application_namespaces\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+
+### Baton Application Namespaces
+
+The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the paramters for the object.
+
+**All values are required**
+
+| Name              | Description                                                                | Type           | Default                                            |
+| :---------------- | :------------------------------------------------------------------------- | :------------- | :------------------------------------------------- |
+| namespace\*       | Namespace value                                                            | string         |                                                    |
+| istio_injection\* | Whether to enable istio injection or not                                   | bool           |                                                    |
+| common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
+| services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
+
+### Baton Services
+
+This object taked the paramters needed by a single service to run adn are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
+
+##### Inputs
+
+| Name              | Description                                                                                                                            | Type        | Default  |
+| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------- |
+| name\*            | Name of the service                                                                                                                    | string      |          |
+| customer\*        | Name of the customer                                                                                                                   | string      |          |
+| target_port\*     | Port exposed by the service                                                                                                            | number      |          |
+| health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
+| subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
+| url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
+| image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
+| env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
+
+**Note: By default `{ "APP_ENVIRONMENT" = customer, "SPRING_PROFILES_ACTIVE" = namespace }` are always appended to `env` attribute.**
+
+**Example service object**
+
+```
+[
+      {
+      namespace       = "ns1"
+      istio_injection = true
+      common_env      = { "key7" = "v7", "key8" = "v8" }
+      services = [
+        {
+          name            = "app1"
+          customer        = "cust1"
+          health_endpoint = "/health"
+          target_port     = 8080
+          subdomain_suffix= "api"
+          url_prefix      = "/app1"
+          env             = { "key1" = "v1", "key2" = "v2" }
+          image_tag       = "latest"
+        },
+        {
+          name            = "app3"
+          customer        = "cust1"
+          health_endpoint = "/health"
+          target_port     = 8080
+          url_prefix      = "/app3"
+          env             = { "key5" = "v5", "key6" = "v6" }
+          image_tag       = "latest"
+        }
+      ]
+    },
+    {
+      namespace       = "ns2"
+      istio_injection = false
+      services = [
+        {
+          name            = "app2"
+          customer        = "cust2"
+          health_endpoint = "/health"
+          target_port     = 8080
+          endpoint        = "api"
+          url_prefix      = "/app2"
+          env             = { "key3" = "v3", "key4" = "v4" }
+          image_tag       = "latest"
+        }
+      ]
+    }
+]
+```

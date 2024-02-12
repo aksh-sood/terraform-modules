@@ -9,14 +9,20 @@ This module contains the setup for FX Admin node resources required for onboardi
 - ActiveMQ
 - RDS Database
 - S3 Buckets for baton and swift messages
+- Baton Applications and namespaces configuraitons
 
 # Modules
 
-This folder only contains one module in itself . Please refer the below list to [know more](../commons/README.md) about modules bring reffered here.
+This folder only contains two modules in itself . Please refer the below list to [know more](../commons/README.md) about modules bring reffered here.
 
 - [Lambda](../commons/aws/lambda/)
 - [Lambda IAM](../commons/aws/lambda-iam/)
 - [Stream](../commons/aws/stream/)
+- [RDS](../commons/aws/rds/)
+- [S3](../commons/aws/s3/)
+- [SQS](../commons/aws/sqs/)
+- [ActiveMQ](../commons/aws/activemq/)
+- [Baton Application Namespaces](../commons/kubernetes/baton-application-namespace/)
 
 ##### [Kinesis App](./modules/kinesis-app/)
 
@@ -37,7 +43,7 @@ Below mentioned modules are sourced via [commons](../commons/) folder , below is
 - _matched_trades_lambda_ : For creating lambda function for mathced trades.
 - _activemq_ : ActiveMQ Broker for sending messages to customer accounts.
 - _rds_cluster_ : RDS Cluster with Aurora MySQL instances
-- _s3_baton_ : Creates a S3 bucket for Baton
+- _s3_ : Creates a S3 bucket for Baton
 - _s3_swift_ : Creates a S3 bucket gor SWIFT messages
 
 # Folder Structure

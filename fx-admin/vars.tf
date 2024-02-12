@@ -31,7 +31,7 @@ variable "rds_master_username" {
   default     = "master"
 }
 
-variable "rds_reader_needed" {
+variable "create_rds_reader" {
   description = "Enable reader for RDS"
   type        = bool
   default     = false
@@ -75,7 +75,7 @@ variable "rds_ingress_whitelist" {
 variable "rds_enable_deletion_protection" {
   description = "Enable Cluster deletion protection"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "rds_enable_auto_minor_version_upgrade" {

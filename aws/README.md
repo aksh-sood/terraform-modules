@@ -45,11 +45,11 @@ The certificate module creates a domain certificate in the AWS Certificate Manag
 
 ##### [KMS](./aws/modules/kms/)
 
-The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as ```generic-cmk-{environment}``` .
+The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as `generic-cmk-{environment}` .
 
 ##### [EKS](./aws/modules/eks/)
 
-The EKS module provisions the EKS cluster and installs the required addons in it. The cluster is provisioned in the VPC created by the VPC module and in all its subnets by default . The EKS module has two sub modules :
+The EKS module provisions the EKS cluster and installs the required addons in it. The cluster is provisioned in the VPC created by the VPC module and in all its subnets by default . The key to access the instances in stored in the local machine by the name of `{environment}-eks-nodes.pem` . The EKS module has following sub modules :
 
 1. [cluster](./aws/modules/eks/modules/cluster/)
 Responsible for creating the EKS cluster with specified requirements.
@@ -308,8 +308,8 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 | Name  | Type | Description |
 |:-----------|:---------|:-----------|
 |vpc_id                   |string        | VPC id for the new VPC created                       |
-|public_subnets           |list(string)  | List of IDs of public subnets                        |
-|private_subnets          |list(string)  | List of IDs of private subnets                       |
+|public_subnet_ids           |list(string)  | List of IDs of public subnets                        |
+|private_subnet_ids          |list(string)  | List of IDs of private subnets                       |
 |efs_id                   |string        | EFS Volume ID for persistent storage                 |
 |acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
 |grafana_role_arn         |string        | ARN of the Grafana role                              |

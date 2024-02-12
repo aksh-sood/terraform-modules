@@ -37,11 +37,13 @@ resource "helm_release" "kube_prometheus_stack" {
       prometheus_volume_size = var.prometheus_volume_size
       grafana_volume_size    = var.grafana_volume_size
       grafana_password       = random_password.password.result
-      alerts = templatefile("${path.module}/configs/alerts.yaml", {
-        custom_alerts = jsonencode(var.custom_alerts)
-        #  prometheus_volume_size=var.prometheus_volume_size
-        #  grafana_volume_size=var.grafana_volume_size 
-      })
+      # TODO: manage custom alerting issue for terragrunt
+      # alerts                 = file("${path.module}/configs/alerts.yaml")
+      # alerts = templatefile("${path.module}/configs/alerts.yaml", {
+      #   custom_alerts = jsonencode(var.custom_alerts)
+      #   #  prometheus_volume_size=var.prometheus_volume_size
+      #   #  grafana_volume_size=var.grafana_volume_size 
+      # })
       alertmanager = templatefile("${path.module}/configs/alertmanager.yaml", {
         slack_web_hook            = var.slack_web_hook
         slack_channel_name        = var.slack_channel_name
@@ -110,7 +112,9 @@ module "grafana_config" {
 
   grafana_password = random_password.password.result
   vs_dependency    = kubectl_manifest.kube_stack_virtualservices
-  environment      = var.environment
-  domain_name      = var.domain_name
-  grafana_role_arn = var.grafana_role_arn
+
+  environment       = var.environment
+  domain_name       = var.domain_name
+  grafana_role_arn  = var.grafana_role_arn
+  configure_grafana = var.configure_grafana
 }

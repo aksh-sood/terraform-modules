@@ -153,7 +153,7 @@ resource "aws_security_group_rule" "eks_sg" {
 }
 
 resource "aws_rds_cluster_instance" "reader_instance" {
-  count = var.rds_reader_needed ? 1 : 0
+  count = var.create_rds_reader ? 1 : 0
 
   promotion_tier                        = 1
   identifier                            = "${var.name}-2"
