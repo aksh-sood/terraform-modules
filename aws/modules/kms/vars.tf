@@ -1,4 +1,4 @@
-variable "aliases" {
+variable "alias" {
   type    = string
   default = "generic-cmk"
 }

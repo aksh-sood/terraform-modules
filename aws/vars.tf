@@ -49,11 +49,10 @@ variable "az_count" {
   type        = number
   validation {
     condition     = var.az_count > 0 || var.az_count < 6
-    error_message = "number should be a greater than 0 and less than 6"
+    error_message = "Number should be greater than 0 and less than 6"
   }
   default = 3
 }
-
 
 variable "enable_nat_gateway" {
   description = "Enable single NAT Gateway for vpc"
@@ -73,6 +72,48 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]
 }
 
+
+variable "enable_siem" {
+  description = "Whether to enable siem setup and logging"
+  default     = true
+}
+
+variable "siem_storage_s3_bucket" {
+  description = "bucket id for alerts and logging"
+  type        = string
+  default     = "aes-siem-800161367015-log"
+}
+
+variable "create_certificate" {
+  description = "Whether to create an AWS ACM certificate or not.If true variables starting with acm area required"
+  type        = bool
+  default     = true
+}
+
+variable "acm_certificate_bucket" {
+  description = "Bucket name of acm certificate data"
+  type        = string
+  default     = "baton-domain-certificates"
+}
+
+variable "acm_certificate" {
+  description = "S3 path to ACM Domain key"
+  type        = string
+  default     = "batonsystem.com/cloudflare/batonsystem.com.crt"
+}
+
+variable "acm_certificate_chain" {
+  description = "S3 path to ACM certificate key"
+  type        = string
+  default     = "batonsystem.com/cloudflare/origin_ca_rsa_root.pem"
+}
+
+variable "acm_private_key" {
+  description = "S3 path to ACM private key"
+  type        = string
+  default     = "batonsystem.com/cloudflare/batonsystem.com.key"
+}
+
 variable "create_eks" {
   default = true
 }
@@ -81,6 +122,12 @@ variable "cluster_version" {
   description = "eks cluster verison"
   type        = string
   default     = "1.28"
+}
+
+variable "additional_eks_addons" {
+  description = "additional addons for EKS cluster"
+  type        = list(string)
+  default     = []
 }
 
 variable "eks_node_groups" {
@@ -95,6 +142,7 @@ variable "eks_node_groups" {
       instance_types             = list(string)
       min_size                   = number
       max_size                   = number
+      labels                     = optional(map(string), {})
       additional_security_groups = optional(list(string), [])
       tags                       = optional(map(string), {})
     }))
@@ -125,22 +173,119 @@ variable "eks_node_groups" {
   }
 }
 
+variable "subscribe_security_hub" {
+  description = "Wheather to subscribe security hub or not"
+  type        = bool
+  default     = false
+}
+
+variable "security_hub_standards" {
+  description = "List security hub standards enabled"
+  type        = list(string)
+  default = [
+    "aws-foundational-security-best-practices/v/1.0.0",
+    "cis-aws-foundations-benchmark/v/1.4.0",
+    "pci-dss/v/3.2.1",
+    "nist-800-53/v/5.0.0"
+  ]
+}
+
+variable "disabled_security_hub_controls" {
+  description = "security hub controls that are disabled for all standards with control id and reason"
+  type        = map(map(string))
+  default = {
+    "aws-foundational-security-best-practices/v/1.0.0" = {
+      "AutoScaling.6"    = "Not applicable to us because of our deployment model"
+      "CloudFormation.1" = "CloudFormation stacks should be integrated with Simple Notification Service (SNS)"
+      "CloudTrail.5"     = "Using SIEM instead"
+      "EC2.9"            = "Only the bare necessary machines are exposed"
+      "EC2.10"           = "Using SIEM instead"
+      "EC2.17"           = "EKS nodes and VPN instances need multiple ENIs"
+      "EC2.18"           = "Need 443 and 80 for exposing the application"
+      "ECR.3"            = "Need to retain the images"
+      "IAM.2"            = "Only one Deployment user"
+      "IAM.6"            = "Do not use sub account root account. Main root account has MFA enabled"
+      "RDS.6"            = "Alternative compensating controls in place"
+      "RDS.13"           = "We need to keep updates manual, automatic updates may break something"
+      "S3.11"            = "Already covered in the cloudtrail logs"
+      "SNS.2"            = "Alternative compensating controls in place"
+      "SSM.1"            = "We do not plan on using System Manager"
+      "SSM.3"            = "We do not plan on using System Manager"
+      "SecretsManager.1" = "In Baton, we use SecretsManager to store application secrets which includes credentials of external portals, items deployed in K8s clusters etc along with the credentials of the AWS resource. Hence, it's not possible to automatically to rotate the secrets stored in SecretsManager within the scope of AWS"
+      "SecretsManager.4" = "In Baton, we use SecretsManager to store application secrets which includes credentials of external portals, items deployed in K8s clusters etc along with the credentials of the AWS resource. Hence, it's not possible to automatically to rotate the secrets stored in SecretsManager within the scope of AWS"
+    }
+    "cis-aws-foundations-benchmark/v/1.4.0" = {
+      "3.3" = "We are already doing that."
+      "1.5" = "Baton does not use root on linked accounts"
+      "1.6" = "Baton does not use root on linked accounts"
+      "3.4" = "Using SIEM instead"
+      "3.6" = "Alternative compensating controls in place"
+      "3.7" = "Alternative compensating controls in place"
+      "5.3" = "Need 443 and 80 for exposing the application"
+    }
+    "pci-dss/v/3.2.1" = {
+      "PCI.IAM.2"        = "Only one Deployment user"
+      "PCI.IAM.4"        = "Baton does use root on linked accounts"
+      "PCI.IAM.5"        = "Baton does not use root on linked accounts"
+      "PCI.IAM.6"        = "The deployment user doesn't have console login enabled"
+      "PCI.SSM.1"        = "We don't plan on using System Manager"
+      "PCI.SSM.3"        = "We don't plan on using System Manager"
+      "PCI.CloudTrail.1" = "Alternative compensating controls in place"
+      "PCI.CloudTrail.4" = "Using SIEM instead"
+    }
+    "nist-800-53/v/5.0.0" = {
+      "IAM.9"            = "Using SIEM Instead"
+      "AutoScaling.6"    = "Not applicable to us because of our deployment model"
+      "CloudFormation.1" = "CloudFormation stacks should be integrated with Simple Notification Service (SNS)"
+      "CloudTrail.5"     = "Using SIEM Instead"
+      "EC2.9"            = "Only the bare necessary machines are exposed"
+      "EC2.10"           = "Using SIEM instead"
+      "EC2.17"           = "EKS nodes and VPN instances need multiple ENIs"
+      "EC2.18"           = "Need 443 and 80 for exposing the application"
+      "ECR.3"            = "Need to retain the images"
+      "IAM.2"            = "Only one Deployment user"
+      "IAM.5"            = "The deployment user doesn't have console login enabled"
+      "IAM.6"            = "Do not use sub account root account. Main root account has MFA enabled"
+      "IAM.9"            = "Baton does not use root on linked accounts"
+      "IAM.19"           = "The deployment user doesn't have console login enabled"
+      "RDS.6"            = "Alternative compensating controls in place"
+      "RDS.13"           = "We need to keep updates manual, automatic updates may break something"
+      "S3.11"            = "Already covered in the cloudtrail logs"
+      "SNS.2"            = "Alternative compensating controls in place"
+      "SSM.1"            = "We do not plan on using System Manager"
+      "SSM.3"            = "We do not plan on using System Manager"
+      "SecretsManager.1" = "In Baton, we use SecretsManager to store application secrets which includes credentials of external portals, items deployed in K8s clusters etc along with the credentials of the AWS resource. Hence, it's not possible to automatically to rotate the secrets stored in SecretsManager within the scope of AWS"
+      "SecretsManager.4" = "In Baton, we use SecretsManager to store application secrets which includes credentials of external portals, items deployed in K8s clusters etc along with the credentials of the AWS resource. Hence, it's not possible to automatically to rotate the secrets stored in SecretsManager within the scope of AWS"
+    }
+  }
+}
 
 variable "opensearch_ebs_volume_size" {
-  type    = number
-  default = 20
+  description = "Size of EBS volumes attached to data nodes (in GiB)"
+  type        = number
+  default     = 20
 }
 
 variable "opensearch_instance_type" {
-  default = "m5.large.search"
+  description = "Instance type of data nodes in the cluster"
+  type        = string
+  default     = "t3.medium.search"
+}
+
+variable "opensearch_master_username" {
+  description = "Master Username of Opensearch"
+  type        = string
+  default     = "master"
 }
 
 variable "opensearch_instance_count" {
-  type    = number
-  default = 1
+  description = "Number of instances in the cluster"
+  default     = 1
+  type        = number
 }
 
 variable "opensearch_engine_version" {
-  type    = string
-  default = "OpenSearch_2.11"
+  description = "Specify the engine version for the Amazon OpenSearch Service domain"
+  default     = "OpenSearch_2.11"
+  type        = string
 }

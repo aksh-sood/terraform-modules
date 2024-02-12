@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 # Cluster associated Policies and role Creation
 resource "aws_iam_policy" "elb_policy" {
-  name        = "k8s_elb_policy_${var.cluster_name}_${var.region}"
+  name_prefix = "k8s_elb_policy_${var.cluster_name}_${var.region}"
   description = "elb policy for k8s cluster"
   policy      = file("${path.module}/policies/eksctl-cluster-PolicyELBPermissions.json")
 
@@ -11,8 +11,8 @@ resource "aws_iam_policy" "elb_policy" {
 
 #policy for Cloud Watch metrics
 resource "aws_iam_policy" "cloudwatch_policy" {
-  name        = "k8s_cloudwatch_policy_${var.cluster_name}_${var.region}"
-  description = "cloudwatch logs policy for k8s cluster"
+  name_prefix = "k8s_cloudwatch_policy_${var.cluster_name}_${var.region}"
+  description = "cloudwacth logs policy for k8s cluster"
   policy      = file("${path.module}/policies/eksctl-cluster-PolicyCloudWatchMetric.json")
 
   tags = var.tags
@@ -33,7 +33,7 @@ locals {
 }
 
 resource "aws_iam_role" "cluster_role" {
-  name               = "eks_cluster_role_${var.cluster_name}_${var.region}"
+  name_prefix        = "eks_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",
@@ -64,7 +64,7 @@ resource "aws_iam_role_policy_attachment" "cluster_role" {
 
 #Policy for nodes to manage secrets
 resource "aws_iam_policy" "secrets_policy" {
-  name        = "SecretsManager_Read_Only_Access_${var.cluster_name}_${var.region}"
+  name_prefix = "SecretsManager_Read_Only_Access_${var.cluster_name}_${var.region}"
   description = "provides read only access to secrets"
   policy      = file("${path.module}/policies/secretsManager.json")
 
@@ -73,7 +73,7 @@ resource "aws_iam_policy" "secrets_policy" {
 
 #Policy for efs driver integeration
 resource "aws_iam_policy" "efs_policy" {
-  name        = "efs_csi_driver_policy_${var.cluster_name}_${var.region}"
+  name_prefix = "efs_csi_driver_policy_${var.cluster_name}_${var.region}"
   description = "efs policy for k8s cluster"
   policy      = file("${path.module}/policies/efs-driver.json")
 
@@ -82,7 +82,7 @@ resource "aws_iam_policy" "efs_policy" {
 
 resource "aws_iam_policy" "additional_inline_node_policy" {
   count       = var.additional_node_inline_policy != null ? 1 : 0
-  name        = "custom_inline__node_policy_${var.cluster_name}_${var.region}"
+  name_prefix = "custom_inline__node_policy_${var.cluster_name}_${var.region}"
   description = "Additional policy for eks nodes"
   policy      = var.additional_node_inline_policy
 
@@ -110,7 +110,7 @@ locals {
 }
 
 resource "aws_iam_role" "node_role" {
-  name               = "eks_node_role_${var.cluster_name}_${var.region}"
+  name_prefix        = "eks_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",
@@ -138,7 +138,7 @@ resource "aws_iam_role_policy_attachment" "node_role" {
 }
 
 resource "aws_iam_role" "grafana" {
-  name               = "grafana_${var.cluster_name}_${var.region}"
+  name_prefix        = "grafana_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
   {
     "Version": "2012-10-17",

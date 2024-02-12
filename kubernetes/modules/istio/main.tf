@@ -110,7 +110,7 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
       "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
       "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\":80},{\"HTTPS\":443}]"
       # The flow logging for the ELB cannot work if the native region of the bucket does not match that is the ELB
-      "alb.ingress.kubernetes.io/load-balancer-attributes" = "deletion_protection.enabled=false,routing.http.drop_invalid_header_fields.enabled=true"
+      "alb.ingress.kubernetes.io/load-balancer-attributes" = var.enable_siem ? join("", [var.alb_base_attributes, ",access_logs.s3.enabled=true,access_logs.s3.bucket=${var.siem_storage_s3_bucket}"]) : var.alb_base_attributes
     }
   }
 
@@ -146,6 +146,13 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
 
         }
       }
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.enable_siem ? (var.siem_storage_s3_bucket != "" && var.siem_storage_s3_bucket != null) : true
+      error_message = "Provided siem_storage_s3_bucket or disable enable_siem"
     }
   }
 

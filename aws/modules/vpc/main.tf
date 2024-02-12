@@ -5,15 +5,22 @@ data "aws_availability_zones" "this" {
   }
 }
 
-# Printing list of azs available
-resource "null_resource" "azs_list" {
-  provisioner "local-exec" {
-    command = <<-EOT
-    echo -e "\033[1;33m The ${var.region} has total of ${length(data.aws_availability_zones.this.names)} AZS available listed below.\033[0m \n \033[1;33m Please make sure the region has 3 or more AZS \033[0m"
-    echo -e "\033[1;33m ${join(" ", data.aws_availability_zones.this.names)} \033[0m"
-    EOT
+resource "null_resource" "azs_list_validation" {
+  lifecycle {
+    precondition {
+      condition     = length(data.aws_availability_zones.this.names) >= var.az_count
+      error_message = "Provided regions doesn't have the minimum of ${var.az_count} availability zone"
+    }
   }
+}
 
+resource "null_resource" "siem_validation" {
+  lifecycle {
+    precondition {
+      condition     = var.enable_siem ? (var.siem_storage_s3_bucket != "" && var.siem_storage_s3_bucket != null) : true
+      error_message = "Provide siem_storage_s3_bucket or disable enable_siem"
+    }
+  }
 }
 
 module "vpc" {
@@ -57,6 +64,12 @@ module "vpc" {
   public_route_table_tags  = merge(var.cost_tags, var.public_route_table_tags)
   private_route_table_tags = merge(var.cost_tags, var.private_route_table_tags)
 
+  #vpc flow logging
+  enable_flow_log           = var.enable_siem ? true : false
+  flow_log_destination_type = var.enable_siem ? "s3" : null
+  flow_log_destination_arn  = var.enable_siem ? "arn:aws:s3:::${var.siem_storage_s3_bucket}" : null
+  vpc_flow_log_tags         = var.enable_siem ? merge(var.cost_tags, var.vpc_flow_log_tags) : null
+
   #default acl configuration
   default_network_acl_ingress = var.default_acl_ingress_rules
   default_network_acl_egress  = var.default_acl_egress_rules
@@ -75,7 +88,7 @@ module "vpc" {
 
   tags = merge(var.cost_tags, var.vpc_tags)
 
-  depends_on = [null_resource.azs_list]
+  depends_on = [null_resource.azs_list_validation, null_resource.siem_validation]
 }
 
 # setting the ingress, egress rules of default security group created by vpc module to null 

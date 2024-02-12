@@ -3,23 +3,10 @@ terraform {
 
   required_providers {
     kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = ">= 1.7.0"
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
     }
-  }
-}
-
-provider "kubectl" {
-  config_path = "~/.kube/${var.environment}"
-}
-
-data "template_file" "istio_logging_config" {
-  template = file("${path.module}/istio_logging_config.yaml")
-
-  vars = {
-    opensearch_endpoint = var.opensearch_endpoint
-    environment         = var.environment
-    domain_name         = var.domain_name
   }
 }
 
@@ -51,7 +38,7 @@ resource "kubernetes_service" "proxy" {
     }
   }
 
-  depends_on = [kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "helm_release" "filebeat" {
@@ -63,10 +50,13 @@ resource "helm_release" "filebeat" {
   create_namespace = true
 
   values     = [data.template_file.init.rendered]
-  depends_on = [kubernetes_service.proxy, kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_service.proxy, kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "gateway" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
@@ -85,10 +75,13 @@ spec:
       protocol: HTTP
 YAML
 
-  depends_on = [kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "destination_rule" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -102,10 +95,13 @@ spec:
       mode: SIMPLE
 YAML
 
-  depends_on = [kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "service_entry" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
@@ -123,10 +119,13 @@ spec:
   resolution: DNS
 YAML
 
-  depends_on = [kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "virtual_service" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -155,5 +154,5 @@ spec:
             number: 443
 YAML
 
-  depends_on = [kubernetes_namespace.logging, var.isito_dependency]
+  depends_on = [kubernetes_namespace.logging]
 }
