@@ -1,3 +1,21 @@
+module "rabbitmq" {
+  source = "../commons/aws/rabbitmq"
+
+  name                       = var.environment
+  vpc_id                     = var.vpc_id
+  subnet_ids                 = var.private_subnet_ids
+  whitelist_security_groups  = [var.eks_security_group]
+  engine_version             = var.rabbitmq_engine_version
+  enable_cluster_mode        = var.rabbitmq_enable_cluster_mode
+  instance_type              = var.rabbitmq_instance_type
+  username                   = var.rabbitmq_username
+  auto_minor_version_upgrade = var.rabbitmq_auto_minor_version_upgrade
+  publicly_accessible        = var.rabbitmq_publicly_accessible
+  apply_immediately          = var.rabbitmq_apply_immediately
+
+  tags = var.cost_tags
+}
+
 module "s3_swift" {
   source = "../commons/aws/s3"
 
@@ -17,7 +35,7 @@ module "s3" {
 module "kinesis_firehose" {
   source = "./modules/kinesis-firehose"
 
-  bucket_arn = module.s3_baton.bucket_arn
+  bucket_arn = module.s3.bucket_arn
 
   environment = var.environment
   region      = var.region

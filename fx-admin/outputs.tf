@@ -13,6 +13,19 @@ output "activemq_username" {
 }
 
 
+output "rabbitmq_password" {
+  value = module.rabbitmq.password
+  sensitive = true
+}
+
+output "rabbitmq_username" {
+  value = module.rabbitmq.username
+}
+
+output "rabbitmq_endpoint" {
+  value = module.rabbitmq.endpoint
+}
+
 output "rds_writer_endpoint" {
   value       = module.rds_cluster.writer_endpoint
   description = "Writer endpoint of the RDS cluster."

@@ -191,3 +191,45 @@ variable "environment" {}
 variable "kms_key_arn" {}
 variable "vendor" {}
 variable "baton_application_namespaces" {}
+
+variable "rabbitmq_engine_version" {
+  description = "Version of the RabbitMQ broker engine"
+  type = string
+  default = "3.11.20"
+}
+
+variable "rabbitmq_enable_cluster_mode" {
+  description = "Enable RabbitMQ Cluster Mode. Default is `false`"
+  type = bool
+  default = false
+}
+
+variable "rabbitmq_instance_type" {
+  description = "Broker's instance type"
+  type = string
+  default = "mq.m5.large"
+}
+
+variable "rabbitmq_auto_minor_version_upgrade" {
+  description = "Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available. Default is `false`"
+  type = bool
+  default = false
+}
+
+variable "rabbitmq_publicly_accessible" {
+  description = "Whether to enable connections from applications outside of the VPC that hosts the broker's subnets. Default is `false`"
+  type = bool
+  default = false
+}
+
+variable "rabbitmq_username" {
+  description = "Username of the user. Default is `master`"
+  type = string
+  default = "master"
+}
+
+variable "rabbitmq_apply_immediately" {
+  description = "Specifies whether any broker modifications are applied immediately, or during the next maintenance window. Default is `false`"
+  type = bool
+  default = false
+}

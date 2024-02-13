@@ -48,3 +48,11 @@ rds_db_parameter_group_parameters = [
 rds_enabled_cloudwatch_logs_exports = ["slowquery", "audit", "error"]
 rds_ca_cert_identifier              = "rds-ca-rsa2048-g1"
 rds_backup_retention_period         = 7
+
+rabbitmq_engine_version = "3.11.20"
+rabbitmq_instance_type = "mq.m5.large"
+rabbitmq_apply_immediately = true
+rabbitmq_auto_minor_version_upgrade = false
+rabbitmq_publicly_accessible = false
+rabbitmq_username = "master"
+rabbitmq_enable_cluster_mode = false
