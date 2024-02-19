@@ -3,12 +3,12 @@ output "vpc_id" {
   value       = module.vpc.id
 }
 
-output "public_subnets" {
+output "public_subnet_ids" {
   description = "public subnets of the cluster"
   value       = module.vpc.public_subnets
 }
 
-output "private_subnets" {
+output "private_subnet_ids" {
   description = "private subnets of the cluster"
   value       = module.vpc.private_subnets
 }
@@ -30,7 +30,7 @@ output "eks_security_group" {
 
 output "acm_certificate_arn" {
   description = "ARN of the domain certificate"
-  value       = module.domain_certificate[0].certificate_arn
+  value       = var.create_certificate ? module.domain_certificate[0].certificate_arn : null
 }
 
 output "grafana_role_arn" {

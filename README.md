@@ -83,6 +83,7 @@ Provider versions used while creation of script
 | Helm       | 2.10.1  | 
 | Kubernetes | 2.10.0  |
 | Grafana    | 2.3.3   |
+| Kubectl    | 1.7.0   |
 
 Module versions
 

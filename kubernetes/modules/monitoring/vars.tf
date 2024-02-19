@@ -15,3 +15,4 @@ variable "grafana_role_arn" {}
 variable "environment" {}
 variable "domain_name" {}
 variable "isito_dependency" {}
+variable "configure_grafana" {}

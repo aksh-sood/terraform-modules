@@ -15,7 +15,7 @@ resource "random_password" "activemq_password" {
 
 # Creating a new Security group for Activemq 
 resource "aws_security_group" "activemq_sg" {
-  name        = "Activemq"
+  name        = "Activemq-${var.environment}-${var.region}"
   description = "Activemq Security group for ${var.environment}"
   vpc_id      = var.vpc_id
 
