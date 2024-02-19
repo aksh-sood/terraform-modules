@@ -83,22 +83,25 @@ resource "aws_opensearch_domain" "domain" {
   }
 }
 
-data "aws_iam_policy_document" "main" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    actions   = ["es:*"]
-    resources = ["${aws_opensearch_domain.domain.arn}/*"]
-
-  }
+resource "time_sleep" "delay_5_second" {
+  create_duration = "5s"
 }
 
 resource "aws_opensearch_domain_policy" "main" {
+  depends_on = [time_sleep.delay_5_second]
+
   domain_name     = aws_opensearch_domain.domain.domain_name
-  access_policies = data.aws_iam_policy_document.main.json
+  access_policies = <<-EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "es:*",
+      "Resource": "${aws_opensearch_domain.domain.arn}/*"
+    }
+  ]
+}
+EOF
 }
