@@ -61,23 +61,23 @@ This module provisions a single ACTIVEMQ Broker and security group for it .
 
 ##### Inputs
 
-| Name                         | Description                                                                                               | Type   | Default         |
-|:-----------------------------|:----------------------------------------------------------------------------------------------------------|:-------|:----------------|
-| activemq_engine_version      | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
-| activemq_storage_type        | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
-| activemq_host_instance_type  | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
-| apply_immediately            | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |
-| auto_minor_version_upgrade   | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
-| activemq_publicly_accessible | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
-| activemq_username            | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
+| Name                       | Description                                                                                               | Type   | Default         |
+|:---------------------------|:----------------------------------------------------------------------------------------------------------|:-------|:----------------|
+| engine_version             | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
+| storage_type               | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
+| instance_type              | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
+| apply_immediately          | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |
+| auto_minor_version_upgrade | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
+| publicly_accessible        | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
+| username                   | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
 
 ##### Outputs
 
-| Name              | Type   | Description                |
-|:------------------|:-------|:---------------------------|
-| activemq_url      | string | URL of the ActiveMQ broker |
-| activemq_username | string | Username for ActiveMQ      |
-| activemq_password | string | Password for ActiveMQ      |
+| Name     | Type   | Description                |
+|:---------|:-------|:---------------------------|
+| url      | string | URL of the ActiveMQ broker |
+| username | string | Username for ActiveMQ      |
+| password | string | Password for ActiveMQ      |
 
 ### [RABBITMQ](./aws/activemq/)
 

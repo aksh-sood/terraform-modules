@@ -105,18 +105,18 @@ module "s3_writer_lambda" {
 module "activemq" {
   source = "../commons/aws/activemq"
 
-  environment                  = var.environment
-  region                       = var.region
-  vpc_id                       = var.vpc_id
-  subnet_ids                   = var.public_subnet_ids
-  activemq_engine_version      = var.activemq_engine_version
-  activemq_host_instance_type  = var.activemq_host_instance_type
-  activemq_publicly_accessible = var.activemq_publicly_accessible
-  apply_immediately            = var.apply_immediately
-  activemq_storage_type        = var.activemq_storage_type
-  activemq_username            = var.activemq_username
-  auto_minor_version_upgrade   = var.auto_minor_version_upgrade
-  whitelist_security_groups    = [var.eks_security_group, module.matched_trades_lambda.security_group_id, module.normalized_trml_lambda.security_group_id]
+  environment                = var.environment
+  region                     = var.region
+  vpc_id                     = var.vpc_id
+  subnet_ids                 = var.public_subnet_ids
+  engine_version             = var.activemq_engine_version
+  instance_type              = var.activemq_instance_type
+  publicly_accessible        = var.activemq_publicly_accessible
+  apply_immediately          = var.activemq_apply_immediately
+  storage_type               = var.activemq_storage_type
+  username                   = var.activemq_username
+  auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
+  whitelist_security_groups  = [var.eks_security_group, module.matched_trades_lambda.security_group_id, module.normalized_trml_lambda.security_group_id]
 
   tags = var.cost_tags
 }
@@ -136,7 +136,7 @@ module "normalized_trml_lambda" {
   environment_variables = {
     data_type           = "normalized_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-    activemq_broker_url = "failover:(${module.activemq.activemq_url},${module.activemq.activemq_url})?jms.userName=${module.activemq.activemq_username}&jms.password=${module.activemq.activemq_password}"
+    activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
   }
 
   tags = var.cost_tags
@@ -157,7 +157,7 @@ module "matched_trades_lambda" {
   environment_variables = {
     data_type           = "matched_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-    activemq_broker_url = "failover:(${module.activemq.activemq_url},${module.activemq.activemq_url})?jms.userName=${module.activemq.activemq_username}&jms.password=${module.activemq.activemq_password}"
+    activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
   }
   tags = var.cost_tags
 
@@ -205,10 +205,10 @@ module "baton_application_namespaces" {
     database_reader_url = module.rds_cluster.reader_endpoint,
     database_username   = module.rds_cluster.master_username,
     database_password   = module.rds_cluster.master_password,
-    activemq_url_1      = module.activemq.activemq_url,
-    activemq_url_2      = module.activemq.activemq_url,
-    activemq_username   = module.activemq.activemq_username,
-    activemq_password   = module.activemq.activemq_password
+    activemq_url_1      = module.activemq.url,
+    activemq_url_2      = module.activemq.url,
+    activemq_username   = module.activemq.username,
+    activemq_password   = module.activemq.password
   }
 
 

@@ -1,9 +1,9 @@
 output "activemq_url" {
-  value = module.activemq.activemq_url
+  value = module.activemq.url
 }
 
 output "activemq_password" {
-  value     = module.activemq.activemq_password
+  value     = module.activemq.password
   sensitive = true
 }
 
