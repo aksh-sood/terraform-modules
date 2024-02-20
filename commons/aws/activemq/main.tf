@@ -15,7 +15,7 @@ resource "random_password" "activemq_password" {
 
 # Creating a new Security group for Activemq 
 resource "aws_security_group" "activemq_sg" {
-  name        = "Activemq"
+  name        = "Activemq-${var.environment}-${var.region}"
   description = "Activemq Security group for ${var.environment}"
   vpc_id      = var.vpc_id
 
@@ -50,7 +50,7 @@ resource "aws_mq_configuration" "mq_configuration" {
   description    = "ActiveMQ provisioning"
   name           = var.environment
   engine_type    = "ActiveMQ"
-  engine_version = var.activemq_engine_version
+  engine_version = var.engine_version
   data           = file("${path.module}/configuration/activemq_config.xml")
 }
 
@@ -61,18 +61,18 @@ resource "aws_mq_broker" "activemq" {
 
   }
   engine_type                = "ActiveMQ"
-  engine_version             = var.activemq_engine_version
-  storage_type               = var.activemq_storage_type
-  host_instance_type         = var.activemq_host_instance_type
+  engine_version             = var.engine_version
+  storage_type               = var.storage_type
+  host_instance_type         = var.instance_type
   apply_immediately          = var.apply_immediately
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
-  publicly_accessible        = var.activemq_publicly_accessible
+  publicly_accessible        = var.publicly_accessible
   subnet_ids                 = [var.subnet_ids[0]]
   security_groups            = [aws_security_group.activemq_sg.id]
   tags                       = var.tags
   user {
     console_access = true
-    username       = var.activemq_username
+    username       = var.username
     password       = random_password.activemq_password.result
   }
 

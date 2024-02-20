@@ -60,12 +60,11 @@ module "eks" {
   source = "./modules/eks"
   count  = var.create_eks ? 1 : 0
 
-  vpc_id              = module.vpc.id
-  azs                 = module.vpc.azs
-  private_subnet_ids  = module.vpc.private_subnets
-  public_subnet_ids   = module.vpc.public_subnets
-  kms_key_arn         = module.kms.key_arn
-  acm_certificate_arn = module.domain_certificate[0].certificate_arn
+  vpc_id             = module.vpc.id
+  azs                = module.vpc.azs
+  private_subnet_ids = module.vpc.private_subnets
+  public_subnet_ids  = module.vpc.public_subnets
+  kms_key_arn        = module.kms.key_arn
 
   region                 = var.region
   cluster_name           = var.environment

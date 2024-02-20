@@ -54,7 +54,7 @@ module "rds_cluster" {
   preferred_backup_window               = var.preferred_backup_window
   backup_retention_period               = var.backup_retention_period
   performance_insights_enabled          = var.enable_performance_insights
-  performance_insights_retention_period = var.performance_insights_retention_period
+  performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
   publicly_accessible                   = var.publicly_accessible
   storage_encrypted                     = true
   ca_cert_identifier                    = var.ca_cert_identifier
@@ -112,19 +112,19 @@ resource "aws_sns_topic" "rds" {
 locals {
   event_subscriptions = [
     {
-      name             = "rds-cluster-events-sub"
+      name             = "${var.name}-rds-cluster-events-sub"
       source_type      = "db-cluster"
       source_ids       = [module.rds_cluster.cluster_id]
       event_categories = ["failure", "maintenance"]
     },
     {
-      name             = "rds-events-sub"
+      name             = "${var.name}-rds-events-sub"
       source_type      = "db-instance"
       source_ids       = module.rds_cluster.cluster_members
       event_categories = ["failure", "maintenance", "configuration change"]
     },
     {
-      name             = "rds-db-parameter-group-sub"
+      name             = "${var.name}-rds-db-parameter-group-sub"
       source_type      = "db-parameter-group"
       source_ids       = [module.rds_cluster.db_parameter_group_id]
       event_categories = ["configuration change"]
@@ -153,7 +153,7 @@ resource "aws_security_group_rule" "eks_sg" {
 }
 
 resource "aws_rds_cluster_instance" "reader_instance" {
-  count = var.rds_reader_needed ? 1 : 0
+  count = var.create_rds_reader ? 1 : 0
 
   promotion_tier                        = 1
   identifier                            = "${var.name}-2"
@@ -166,7 +166,7 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   db_parameter_group_name               = module.rds_cluster.db_parameter_group_id
   db_subnet_group_name                  = module.rds_cluster.db_subnet_group_name
   performance_insights_enabled          = var.enable_performance_insights
-  performance_insights_retention_period = var.performance_insights_retention_period
+  performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
 
   tags = merge(var.cost_tags, {

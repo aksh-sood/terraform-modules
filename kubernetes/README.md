@@ -9,13 +9,13 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - Prometheus Alerts
 - Grafana Dashboards and Users
 - Cloudflare CNAME records
-- Baton application service objects in respective namespaces and requirements
+- Jaeger
 
 # Modules
 
 ##### [Istio](./kubernetes/module/istio)
 
-The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world.
+The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. It also implements basic authentication over WASM plugin for domains like jaeger, alertmanager, prometheus.
 
 **Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB.
 **WARNING:** If the S3 logging bucket is not in the same region then `loadbalancer_url` is not generated leading to failiure of script.
@@ -26,11 +26,13 @@ Responsible for installation of helm based eks addons in cluster which are liste
 
 The versions for the following can be supplied from the input variables.
 
-##### [Baton Application Namespace](./kubernetes/module/baton-application-namespace)
+##### [Cloudflare](./kubernetes/module/cloudflare)
 
-Responsible for creation of namespaces and virtualservies, gateways, deployments, service accounts and takes care of these requirements for running the applications. Helm chart has been created for deploying these objects except the gateways and namespaces.
+Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,prometheus, alertmanager.
 
-The services are exposed for the following URL `{environment}-{subdomain_suffix}-{service}-{domain}` or if `subdomain_suffix` is not give then `{environment}-{domain}`
+##### [Jaeger](./kubernetes/module/jaeger)
+
+This module is responsible for installation and configuration of jaeger tracing components on top of istio . The jaeger components are not installed via helm and neither are they configured in this module. The maintainers of istio also maintain a configuration for [jaeger installation](https://istio.io/latest/docs/ops/integrations/jaeger/#installation) which we apply in this module using kubectl provider .
 
 ##### [Monitoring](./kubernetes/module/monitoring)
 
@@ -58,10 +60,9 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 ├── main.tf
 ├── modules
 │   ├── addons
+│   ├── cloudflare
 │   ├── istio
-│   ├── baton-application-namespace
-|   |   ├──  helm-chart
-│   |   └── gateway.yaml
+│   ├── jaeger
 │   └── monitoring(legacy module)
 |       ├── modules
 |       |   └── grafana-config(legacy module)
