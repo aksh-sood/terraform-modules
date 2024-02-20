@@ -9,6 +9,7 @@ This folder works like a universal module for multiple directories in this scrip
   - Lambda Functions
   - RDS Cluster
   - ActiveMQ
+  - RabbitMQ
   - SQS
 - Kubernetes
   - Baton Application Namepspaces
@@ -22,7 +23,7 @@ This module creates an Aurora RDS Cluster with MYSQL engine with multiple config
 ##### Inputs
 
 | Name                                      | Description                               | Type         | Default                                                                     |
-| :---------------------------------------- | :---------------------------------------- | :----------- | :-------------------------------------------------------------------------- |
+|:------------------------------------------|:------------------------------------------|:-------------|:----------------------------------------------------------------------------|
 | create_rds_reader                         | Enable reader for RDS                     | bool         | `false`                                                                     |
 | rds_mysql_version                         | MySQL version for RDS Aurora              | string       | `-`                                                                         |
 | rds_instance_type                         | RDS Instance Type                         | string       | `-`                                                                         |
@@ -47,7 +48,7 @@ This module creates an Aurora RDS Cluster with MYSQL engine with multiple config
 ##### Outputs
 
 | Name                      | Type   | Description                                           |
-| :------------------------ | :----- | :---------------------------------------------------- |
+|:--------------------------|:-------|:------------------------------------------------------|
 | rds_writer_endpoint       | string | Writer endpoint of the RDS cluster                    |
 | rds_reader_endpoint       | string | Reader endpoint of the RDS cluster                    |
 | rds_cloudwatch_log_groups | string | CloudWatch log groups associated with the RDS cluster |
@@ -60,23 +61,53 @@ This module provisions a single ACTIVEMQ Broker and security group for it .
 
 ##### Inputs
 
-| Name                         | Description                                                                                               | Type   | Default         |
-| :--------------------------- | :-------------------------------------------------------------------------------------------------------- | :----- | :-------------- |
-| activemq_engine_version      | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
-| activemq_storage_type        | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
-| activemq_host_instance_type  | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
-| apply_immediately            | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |
-| auto_minor_version_upgrade   | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
-| activemq_publicly_accessible | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
-| activemq_username            | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
+| Name                       | Description                                                                                               | Type   | Default         |
+|:---------------------------|:----------------------------------------------------------------------------------------------------------|:-------|:----------------|
+| engine_version             | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
+| storage_type               | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
+| instance_type              | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
+| apply_immediately          | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |
+| auto_minor_version_upgrade | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
+| publicly_accessible        | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
+| username                   | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
 
 ##### Outputs
 
-| Name              | Type   | Description                |
-| :---------------- | :----- | :------------------------- |
-| activemq_url      | string | URL of the ActiveMQ broker |
-| activemq_username | string | Username for ActiveMQ      |
-| activemq_password | string | Password for ActiveMQ      |
+| Name     | Type   | Description                |
+|:---------|:-------|:---------------------------|
+| url      | string | URL of the ActiveMQ broker |
+| username | string | Username for ActiveMQ      |
+| password | string | Password for ActiveMQ      |
+
+### [RABBITMQ](./aws/activemq/)
+
+This module provisions a single RABBITMQ Broker and security group for it .
+
+##### Inputs
+
+| Name                        | Description                                                       | Type         | Default       |
+|-----------------------------|-------------------------------------------------------------------|--------------|---------------|
+| vpc_id\*                    | VPC ID where resources will be deployed                           | String       | `-`           |
+| subnet_ids\*                | List of Subnet IDs within the specified VPC                       | List(String) | `-`           |
+| engine_version              | Version of RabbitMQ to deploy                                     | String       | `3.11.20`     |
+| host_instance_type          | EC2 instance type used as host for RabbitMQ cluster nodes         | String       | `mq.m5.large` |
+| apply_immediately           | Whether to apply changes immediately or during maintenance window | Boolean      | `false`       |
+| auto_minor_version_upgrade  | Automatically upgrade minor versions of RabbitMQ                  | Boolean      | `false`       |
+| publicly_accessible         | Allow public access to RabbitMQ cluster                           | Boolean      | `false`       |
+| tags\*                      | Tags assigned to AWS resources                                    | Map(String)  | `-`           |
+| username                    | Username for RabbitMQ admin account                               | String       | `master`      |
+| name\*                      | Custom name for RabbitMQ cluster                                  | String       | `-`           |
+| whitelist_security_groups\* | Security groups allowed to connect to RabbitMQ cluster            | List(String) | `-`           |
+| enable_cluster_mode         | Enable RabbitMQ clustering feature                                | Boolean      | `false`       |
+
+##### Outputs
+
+| Name        | Type      | Description                                        |
+|-------------|-----------|----------------------------------------------------|
+| password    | Sensitive | Generated password for RabbitMQ admin account      |
+| username    | String    | Specified username for RabbitMQ admin account      |
+| console_url | String    | URL to access RabbitMQ management console          |
+| endpoint    | String    | Endpoint address for connecting to RabbitMQ broker |
 
 ### [LAMBDA](./aws/lambda)
 
@@ -85,7 +116,7 @@ This module creates a Lambda function with security group for the lambda as well
 ##### Inputs
 
 | Name                      | Description                                             | Type         | Default |
-| :------------------------ | :------------------------------------------------------ | :----------- | :------ |
+|:--------------------------|:--------------------------------------------------------|:-------------|:--------|
 | stream_arn                | ARN of Kinesis Stream for event source mappping         | string       | `null`  |
 | sqs_arn                   | ARN of SQS for event source mappping                    | string       | `null`  |
 | name\*                    | Name for the Lambda function                            | string       |         |
@@ -102,9 +133,9 @@ This module creates a Lambda function with security group for the lambda as well
 
 ##### Outputs
 
-| Name | Type | Description |
-| :--- | :--- | :---------- |
-|security_group_id|string|Security Group ID for the Lambda|
+| Name              | Type   | Description                      |
+|:------------------|:-------|:---------------------------------|
+| security_group_id | string | Security Group ID for the Lambda |
 
 ### [LAMBDA IAM](./aws/lambda-iam)
 
@@ -113,7 +144,7 @@ This module generates the IAM role to associate to the lambda functions for givi
 ##### Inputs
 
 | Name        | Description                                             | Type   | Default |
-| :---------- | :------------------------------------------------------ | :----- | :------ |
+|:------------|:--------------------------------------------------------|:-------|:--------|
 | region      | AWS Region in which the function is created             | string |         |
 | environment | Name of the environment to append to the resources name | string |         |
 
@@ -132,7 +163,7 @@ This module creates a S3 Bucket with the respective region with S3 server_side_e
 ##### Inputs
 
 | Name          | Description                                             | Type        | Default |
-| :------------ | :------------------------------------------------------ | :---------- | :------ |
+|:--------------|:--------------------------------------------------------|:------------|:--------|
 | environment\* | Name of the environment to append to the resources name | string      |         |
 | name\*        | Name of the bucket                                      | string      |         |
 | tags\*        | Tags for the bucket                                     | map(string) |         |
@@ -152,14 +183,14 @@ This module creates a SQS with visibility set to `305` seconds by default.Enviro
 ##### Inputs
 
 | Name   | Description         | Type        | Default |
-| :----- | :------------------ | :---------- | :------ |
+|:-------|:--------------------|:------------|:--------|
 | name\* | Name of the bucket  | string      |         |
 | tags\* | Tags for the bucket | map(string) |         |
 
 ##### Outputs
 
 | Name | Type   | Description    |
-| :--- | :----- | :------------- |
+|:-----|:-------|:---------------|
 | arn  | string | ARN of the SQS |
 
 ### [STREAM](./aws/stream)
@@ -169,14 +200,14 @@ This module creates a AWS Kinesis Stream with default `retention_period` as `12`
 ##### Inputs
 
 | Name   | Description         | Type        | Default |
-| :----- | :------------------ | :---------- | :------ |
+|:-------|:--------------------|:------------|:--------|
 | name\* | Name of the bucket  | string      |         |
 | tags\* | Tags for the bucket | map(string) |         |
 
 ##### Outputs
 
 | Name       | Type   | Description               |
-| :--------- | :----- | :------------------------ |
+|:-----------|:-------|:--------------------------|
 | stream_arn | string | ARN of the Kinesis Stream |
 
 ### [Baton Application Namespace](./kubernetes/module/baton-application-namespace)
@@ -185,9 +216,9 @@ Responsible for creation of namespaces and virtualservies, gateways, deployments
 
 The services are exposed for the following URL `{environment}-{subdomain_suffix}-{service}-{domain}` or if `subdomain_suffix` is not give then `{environment}-{domain}`
 
-| Name                           | Description                                             | Type                               | Default                                                                      |
-| :----------------------------- | :------------------------------------------------------ | :--------------------------------- | :--------------------------------------------------------------------------- |
-| environment\*                  | Name of the environment to append to the resources name | string                             |                                                                              |
+| Name          | Description                                             | Type   | Default |
+|:--------------|:--------------------------------------------------------|:-------|:--------|
+| environment\* | Name of the environment to append to the resources name | string |         |
 | domain_name\*                  | Domain name registerd in the DNS service                | string                             |
 | common_connections             | Global connections to attach to each service            | map(string)                        |                                                                              |
 | baton_application_namespaces\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
@@ -199,7 +230,7 @@ The following object deals with the namespaces and other kubernetes resources fo
 **All values are required**
 
 | Name              | Description                                                                | Type           | Default                                            |
-| :---------------- | :------------------------------------------------------------------------- | :------------- | :------------------------------------------------- |
+|:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
 | namespace\*       | Namespace value                                                            | string         |                                                    |
 | istio_injection\* | Whether to enable istio injection or not                                   | bool           |                                                    |
 | common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
@@ -212,7 +243,7 @@ This object taked the paramters needed by a single service to run adn are passed
 ##### Inputs
 
 | Name              | Description                                                                                                                            | Type        | Default  |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------- |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 | name\*            | Name of the service                                                                                                                    | string      |          |
 | customer\*        | Name of the customer                                                                                                                   | string      |          |
 | target_port\*     | Port exposed by the service                                                                                                            | number      |          |
