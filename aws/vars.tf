@@ -77,6 +77,7 @@ variable "enable_siem" {
   default     = true
 }
 
+# make sure that S3 bucket policies are configured properly to allow logs from diffrent sources like vpc and ELB
 variable "siem_storage_s3_bucket" {
   description = "bucket id for alerts and logging"
   type        = string
