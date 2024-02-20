@@ -55,5 +55,5 @@ output "prometheus_password" {
 }
 
 output "fqdn" {
-  value = module.cloudflare.domains
+  value = var.create_dns_records?  module.cloudflare[0].domains : null
 }
