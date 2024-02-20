@@ -190,7 +190,25 @@ variable "eks_security_group" {}
 variable "environment" {}
 variable "kms_key_arn" {}
 variable "vendor" {}
-variable "baton_application_namespaces" {}
+variable "baton_application_namespaces" {
+
+  description = "List of namespaces and services and there required attributes"
+  type = list(object({
+    namespace       = string
+    customer        = string
+    istio_injection = bool
+    common_env      = optional(map(string), {})
+    services = list(object({
+      name             = string
+      health_endpoint  = string
+      target_port      = number
+      subdomain_suffix = optional(string, "")
+      url_prefix       = string
+      env              = map(string)
+      image_tag        = optional(string, "latest")
+    }))
+  }))
+}
 
 variable "rabbitmq_engine_version" {
   description = "Version of the RabbitMQ broker engine"

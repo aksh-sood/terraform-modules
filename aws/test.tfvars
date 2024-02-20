@@ -20,6 +20,7 @@ az_count = 3
 
 enable_nat_gateway = true
 
+
 public_subnet_cidrs = ["10.0.0.0/19", "10.0.32.0/19", "10.0.64.0/19"]
 
 private_subnet_cidrs = ["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]
