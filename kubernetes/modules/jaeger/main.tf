@@ -20,7 +20,7 @@ data "http" "jaeger_crd" {
 
 
 data "kubectl_file_documents" "jaeger" {
-  content = data.http.jaeger_crd.request_body
+  content = data.http.jaeger_crd.body
 }
 
 # Due to terraform limitations , we have kept the loop on `kubectl_manifest` has been set manually as terraform does not support runtime change in resource count.
