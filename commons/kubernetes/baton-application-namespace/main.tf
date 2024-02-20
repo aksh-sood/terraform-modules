@@ -11,16 +11,21 @@ terraform {
 }
 
 locals {
-  hosts = [
-    for ns in var.baton_application_namespaces : {
+# A new map is generated containing the namespace and host names which are 
+# extracted in the below code for creating gateways
+  gateways = [for gate in [
+    for ns in var.baton_application_namespaces : length(ns.services) > 0 ? {
       namespace = ns.namespace
       hosts = jsonencode([
         for service in ns.services : service.subdomain_suffix == "" ?
         "${var.environment}.${var.domain_name}"
         :
       "${var.environment}-${service.subdomain_suffix}.${var.domain_name}"])
-    }
-  ]
+    } : null
+  ] : gate if gate != null]
+
+# A list of all the services is created with there 
+# namespace , customer , common environment variables appended to each sservice for helm chart.
   services = flatten([
     for ns in var.baton_application_namespaces :
     [
@@ -34,9 +39,12 @@ locals {
         subdomain_suffix = service.subdomain_suffix == "" ? "" : "-${service.subdomain_suffix}"
         url_prefix       = service.url_prefix
         image_tag        = service.image_tag
-        env = merge(service.env, ns.common_env,
+        env = merge(service.env, ns.common_env, var.common_connections,
 
-          { "APP_ENVIRONMENT" = ns.customer, "SPRING_PROFILES_ACTIVE" = ns.namespace }
+          {
+            "APP_ENVIRONMENT"        = ns.customer,
+            "SPRING_PROFILES_ACTIVE" = ns.namespace
+          }
         )
       }
     ]
@@ -48,7 +56,7 @@ resource "kubernetes_namespace_v1" "application" {
   metadata {
     name = each.value.namespace
     labels = {
-      istio_injection = each.value.istio_injection ? "enabled" : "disabled"
+      istio-injection = each.value.istio_injection ? "enabled" : "disabled"
     }
   }
 }
@@ -57,8 +65,8 @@ resource "kubectl_manifest" "gateways" {
 
   provider = kubectl.this
 
-  for_each = { for ns in local.hosts : ns.namespace => ns }
-  yaml_body = templatefile("${path.module}/gateway.yaml", {
+  for_each = { for ns in local.gateways : ns.namespace => ns }
+  yaml_body = templatefile("${path.module}/templates/gateway.yaml", {
     namespace = each.value.namespace,
     hosts     = each.value.hosts
   })
@@ -67,7 +75,7 @@ resource "kubectl_manifest" "gateways" {
 }
 
 resource "helm_release" "baton-application" {
-  for_each  = { for svc in local.services : svc.name => svc }
+  for_each = { for svc in local.services : svc.name => svc }
 
   name      = each.value.name
   namespace = each.value.namespace

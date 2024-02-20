@@ -12,3 +12,5 @@ variable "alb_base_attributes" {
 variable "istio_version" {}
 variable "siem_storage_s3_bucket" {}
 variable "enable_siem" {}
+variable "domain_name" {}
+variable "environment" {}

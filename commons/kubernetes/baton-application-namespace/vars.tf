@@ -2,7 +2,7 @@ variable "baton_application_namespaces" {
   description = "List of namespaces, services and there required attributes"
   type = list(object({
     namespace       = string
-    customer         = string
+    customer        = string
     istio_injection = bool
     common_env      = optional(map(string), {})
     services = list(object({
@@ -16,5 +16,10 @@ variable "baton_application_namespaces" {
     }))
   }))
 }
+
+variable "common_connections" {
+  default = {}
+}
+
 variable "domain_name" {}
 variable "environment" {}

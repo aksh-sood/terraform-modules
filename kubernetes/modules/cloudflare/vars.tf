@@ -1,6 +1,6 @@
 variable "cnames" {
   type    = list(string)
-  default = ["prometheus", "grafana", "alertmanager", "kibana"]
+  default = ["prometheus", "grafana", "alertmanager", "kibana", "jaeger"]
 }
 variable "loadbalancer_url" {}
 variable "environment" {}

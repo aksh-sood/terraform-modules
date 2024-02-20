@@ -38,9 +38,15 @@ module "istio" {
   source = "./modules/istio"
 
   enable_siem            = var.enable_siem
+  environment            = var.environment
+  domain_name            = var.domain_name
   acm_certificate_arn    = var.acm_certificate_arn
   istio_version          = var.istio_version
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
 
   depends_on = [module.addons]
 }
@@ -50,6 +56,7 @@ module "monitoring" {
 
   isito_dependency = module.istio
 
+  configure_grafana             = var.create_dns_records
   environment                   = var.environment
   domain_name                   = var.domain_name
   slack_channel_name            = var.slack_channel_name
@@ -75,6 +82,20 @@ module "logging" {
   opensearch_password = var.opensearch_password
   opensearch_username = var.opensearch_username
   domain_name         = var.domain_name
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.istio]
+}
+
+module "jaeger" {
+  source = "./modules/jaeger"
+
+  environment   = var.environment
+  istio_version = var.istio_version
+  domain_name   = var.domain_name
 
   providers = {
     kubectl.this = kubectl.this

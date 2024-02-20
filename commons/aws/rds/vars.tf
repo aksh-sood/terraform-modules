@@ -26,7 +26,7 @@ variable "master_username" {
   description = "Username for the RDS master user."
 }
 
-variable "rds_reader_needed" {
+variable "create_rds_reader" {
   description = "Whether RDS read replicas are needed (true/false)."
 }
 
