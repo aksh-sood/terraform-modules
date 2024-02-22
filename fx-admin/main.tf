@@ -208,7 +208,10 @@ module "baton_application_namespaces" {
     activemq_url_1      = module.activemq.url,
     activemq_url_2      = module.activemq.url,
     activemq_username   = module.activemq.username,
-    activemq_password   = module.activemq.password
+    activemq_password   = module.activemq.password,
+    rabbitmq_url        = module.rabbitmq.endpoint,
+    rabbitmq_username   = module.rabbitmq.username,
+    rabbitmq_password   = module.rabbitmq.password,
   }
 
 
