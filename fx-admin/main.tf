@@ -89,7 +89,7 @@ module "s3_writer_lambda" {
   sqs_arn         = module.sqs.arn
   lambda_role_arn = module.lambda_iam.lambda_role_arn
 
-  name                      = "s3-writer-${var.environment}"
+  name                      = "${var.environment}-s3-writer"
   package_key               = "s3-writer-lambda-0.0.1-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
@@ -105,7 +105,7 @@ module "s3_writer_lambda" {
 module "activemq" {
   source = "../commons/aws/activemq"
 
-  environment                = var.environment
+  name                       = var.environment
   region                     = var.region
   vpc_id                     = var.vpc_id
   subnet_ids                 = var.public_subnet_ids
@@ -127,7 +127,7 @@ module "normalized_trml_lambda" {
   stream_arn      = module.normalized_trml_kinesis_stream.stream_arn
   lambda_role_arn = module.lambda_iam.lambda_role_arn
 
-  name                      = "normalized-trades-${var.environment}"
+  name                      = "${var.environment}-normalized-trades"
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
@@ -148,7 +148,7 @@ module "matched_trades_lambda" {
   stream_arn      = module.matched_trades_kinesis_stream.stream_arn
   lambda_role_arn = module.lambda_iam.lambda_role_arn
 
-  name                      = "matched-trades-${var.environment}"
+  name                      = "${var.environment}-matched-trades"
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id

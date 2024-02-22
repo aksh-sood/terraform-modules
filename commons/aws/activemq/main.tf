@@ -15,8 +15,8 @@ resource "random_password" "activemq_password" {
 
 # Creating a new Security group for Activemq 
 resource "aws_security_group" "activemq_sg" {
-  name        = "Activemq-${var.environment}-${var.region}"
-  description = "Activemq Security group for ${var.environment}"
+  name        = "Activemq-${var.name}-${var.region}"
+  description = "Activemq Security group for ${var.name}"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -48,14 +48,14 @@ resource "aws_security_group" "activemq_sg" {
 
 resource "aws_mq_configuration" "mq_configuration" {
   description    = "ActiveMQ provisioning"
-  name           = var.environment
+  name           = var.name
   engine_type    = "ActiveMQ"
   engine_version = var.engine_version
   data           = file("${path.module}/configuration/activemq_config.xml")
 }
 
 resource "aws_mq_broker" "activemq" {
-  broker_name = var.environment
+  broker_name = var.name
   configuration {
     id = aws_mq_configuration.mq_configuration.id
 
