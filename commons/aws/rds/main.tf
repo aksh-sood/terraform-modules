@@ -47,6 +47,7 @@ module "rds_cluster" {
   engine_version                        = var.mysql_version
   instance_class                        = var.rds_instance_type
   master_username                       = var.master_username
+  manage_master_user_password           = false
   master_password                       = random_password.password.result
   deletion_protection                   = var.enable_deletion_protection
   kms_key_id                            = var.kms_key_id
