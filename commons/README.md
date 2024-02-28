@@ -12,7 +12,8 @@ This folder works like a universal module for multiple directories in this scrip
   - RabbitMQ
   - SQS
 - Kubernetes
-  - Baton Application Namepspaces
+  - Baton Namepspace
+  - Baton Application 
 
 # Modules
 
@@ -221,9 +222,9 @@ The services are exposed for the following URL `{environment}-{subdomain_suffix}
 | environment\* | Name of the environment to append to the resources name | string |         |
 | domain_name\*                  | Domain name registerd in the DNS service                | string                             |
 | common_connections             | Global connections to attach to each service            | map(string)                        |                                                                              |
-| baton_application_namespaces\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| baton_application_namespace\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
-### Baton Application Namespaces
+### Baton Namespace
 
 The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the paramters for the object.
 

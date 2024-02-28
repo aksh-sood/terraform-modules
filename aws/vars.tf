@@ -59,7 +59,6 @@ variable "enable_nat_gateway" {
   type        = bool
   default     = true
 }
-
 variable "public_subnet_cidrs" {
   description = "cidr list of public subnets"
   type        = list(string)

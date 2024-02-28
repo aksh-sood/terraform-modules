@@ -194,26 +194,32 @@ module "rds_cluster" {
   cost_tags                             = var.cost_tags
 }
 
-module "baton_application_namespaces" {
-  source = "../commons/kubernetes/baton-application-namespace"
 
-  domain_name                  = var.domain_name
-  environment                  = var.environment
-  baton_application_namespaces = var.baton_application_namespaces
-  common_connections = {
-    database_writer_url = module.rds_cluster.writer_endpoint,
-    database_reader_url = module.rds_cluster.reader_endpoint,
-    database_username   = module.rds_cluster.master_username,
-    database_password   = module.rds_cluster.master_password,
-    activemq_url_1      = module.activemq.url,
-    activemq_url_2      = module.activemq.url,
-    activemq_username   = module.activemq.username,
-    activemq_password   = module.activemq.password,
-    rabbitmq_url        = module.rabbitmq.endpoint,
-    rabbitmq_username   = module.rabbitmq.username,
-    rabbitmq_password   = module.rabbitmq.password,
-  }
+module "baton_application_namespace" {
+  source = "../commons/kubernetes/baton-namespace"
 
+  for_each = { for ns in var.baton_application_namespaces : ns.namespace => ns }
+
+  domain_name     = var.domain_name
+  environment     = var.environment
+  namespace       = each.value.namespace
+  istio_injection = each.value.istio_injection
+  customer        = each.value.customer
+  services        = each.value.services
+  common_env = merge(each.value.common_env,
+    {
+      database_writer_url = module.rds_cluster.writer_endpoint,
+      database_reader_url = module.rds_cluster.reader_endpoint,
+      database_username   = module.rds_cluster.master_username,
+      database_password   = module.rds_cluster.master_password,
+      activemq_url_1      = module.activemq.url,
+      activemq_url_2      = module.activemq.url,
+      activemq_username   = module.activemq.username,
+      activemq_password   = module.activemq.password,
+      rabbitmq_url        = module.rabbitmq.endpoint,
+      rabbitmq_username   = module.rabbitmq.username,
+      rabbitmq_password   = module.rabbitmq.password,
+  })
 
   providers = {
     kubectl.this = kubectl.this

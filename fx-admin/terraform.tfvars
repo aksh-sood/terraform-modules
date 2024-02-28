@@ -1,17 +1,17 @@
 region             = "us-east-1"
-environment        = "aksh2"
+environment        = "aksh"
 vendor             = "baton"
-kms_key_arn        = "arn:aws:kms:us-east-1:130759691668:key/3d905d17-67f8-4ef3-a262-2eaf30eb4861"
-eks_security_group = "sg-013757e0a209c45a2"
+kms_key_arn        = "arn:aws:kms:us-east-1:130759691668:key/1392bbbc-5099-4b24-9956-0899987c1f40"
+eks_security_group = "sg-085d41fb88734675c"
 public_subnet_ids = [
-  "subnet-08cc1bfae6b44ba63",
-  "subnet-03cf7b2f4d44e6588",
-  "subnet-06bc6f9265c653d92",
+  "subnet-00f4a043e1b549f95",
+  "subnet-0802bd542c08d8cba",
+  "subnet-06a094ad607a453c4",
 ]
 private_subnet_ids = [
-  "subnet-0ce14c6bbf00e1274",
-  "subnet-0006af4e4d372804e",
-  "subnet-023cde3bb16ef74b0",
+  "subnet-020605ab594af04ce",
+  "subnet-0cb5216b77306070f",
+  "subnet-07aac25a954f25117",
 ]
 vpc_id                              = "vpc-03deeeec9786ae012"
 activemq_engine_version             = "5.15.16"
