@@ -54,22 +54,18 @@ output "prometheus_password" {
   sensitive = true
 }
 
-output "fqdn" {
-  value = var.create_dns_records ? module.cloudflare[0].domains : null
-}
-
 output "sftp_password" {
   description = "password for sftp user"
-  value =var.enable_sftp?module.sftp[0].sftp_password:null
-  sensitive = true
+  value       = var.enable_sftp ? module.sftp[0].sftp_password : null
+  sensitive   = true
 }
 
 output "sftp_username" {
   description = "username for the SFTP server"
-  value = var.enable_sftp?module.sftp[0].sftp_username:null
+  value       = var.enable_sftp ? module.sftp[0].sftp_username : null
 }
 
 output "sftp_host" {
   description = "SFTP hostname"
-  value = var.enable_sftp?module.sftp[0].host:null
+  value       = var.enable_sftp ? module.sftp[0].host : null
 }

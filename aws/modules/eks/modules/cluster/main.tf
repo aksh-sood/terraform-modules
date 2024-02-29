@@ -22,12 +22,12 @@ module "eks" {
   node_security_group_use_name_prefix       = false
   iam_role_use_name_prefix                  = false
   cluster_encryption_policy_use_name_prefix = false
-  cluster_security_group_additional_rules   = {
+  cluster_security_group_additional_rules = {
     node_whitelist = {
-      protocol = "-1"
-      from_port = 0
-      to_port = 0
-      type = "ingress"
+      protocol                   = "-1"
+      from_port                  = 0
+      to_port                    = 0
+      type                       = "ingress"
       source_node_security_group = true
     }
   }

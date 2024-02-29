@@ -19,11 +19,11 @@ resource "kubernetes_namespace_v1" "this" {
 
 resource "kubernetes_persistent_volume_claim_v1" "this" {
   metadata {
-    name = "sftp-data"
+    name      = "sftp-data"
     namespace = kubernetes_namespace_v1.this.metadata.0.name
   }
   spec {
-    access_modes = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteMany"]
     storage_class_name = var.storage_class_name
     resources {
       requests = {
@@ -35,7 +35,7 @@ resource "kubernetes_persistent_volume_claim_v1" "this" {
 
 resource "kubernetes_service_v1" "this" {
   metadata {
-    name = "sftp"
+    name      = "sftp"
     namespace = kubernetes_namespace_v1.this.metadata.0.name
   }
   spec {
@@ -44,7 +44,7 @@ resource "kubernetes_service_v1" "this" {
       app = "sftp"
     }
     port {
-      name = "ssh"
+      name        = "ssh"
       port        = 22
       target_port = 22
     }
@@ -53,17 +53,17 @@ resource "kubernetes_service_v1" "this" {
 }
 
 resource "kubernetes_deployment_v1" "this" {
-  
+
   wait_for_rollout = false
 
   metadata {
-    name = "sftp"
+    name      = "sftp"
     namespace = kubernetes_namespace_v1.this.metadata.0.name
   }
 
   spec {
-    replicas = 1
-    min_ready_seconds = 10 
+    replicas          = 1
+    min_ready_seconds = 10
     selector {
       match_labels = {
         app = "sftp"
@@ -79,14 +79,14 @@ resource "kubernetes_deployment_v1" "this" {
 
       spec {
         container {
-          image = "atmoz/sftp:latest"
-          name  = "sftp"
+          image             = "atmoz/sftp:latest"
+          name              = "sftp"
           image_pull_policy = "Always"
-          args = [ "${var.sftp_username}:${random_password.password.result}:1001:100:Incoming,Outgoing" ]
+          args              = ["${var.sftp_username}:${random_password.password.result}:1001:100:Incoming,Outgoing"]
 
           volume_mount {
-            mount_path = "home/myuser"
-            name = "sftp-data"
+            mount_path = "home/${var.sftp_username}"
+            name       = "sftp-data"
           }
 
           security_context {
@@ -96,16 +96,16 @@ resource "kubernetes_deployment_v1" "this" {
           }
 
           port {
-            protocol = "TCP"
+            protocol       = "TCP"
             container_port = 22
           }
         }
 
-      security_context  {
-        fs_group = 472
-      }
+        security_context {
+          fs_group = 472
+        }
 
-    volume {
+        volume {
           name = "sftp-data"
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim_v1.this.metadata.0.name

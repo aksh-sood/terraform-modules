@@ -1,5 +1,5 @@
 variable "cnames" {
-  type    = set(string)
+  type = set(string)
 }
 
 variable "loadbalancer_url" {}

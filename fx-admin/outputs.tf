@@ -44,7 +44,3 @@ output "rds_master_password" {
 output "rds_master_username" {
   value = module.rds_cluster.master_username
 }
-
-output "fqdn" {
-  value = var.create_dns_records ? module.cloudflare[0].domains : null
-}

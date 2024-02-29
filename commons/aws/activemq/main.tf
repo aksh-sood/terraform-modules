@@ -1,13 +1,13 @@
 #Generating a random password gor ActiveMQ
 resource "random_password" "activemq_password" {
-  length           = 16
-  special          = false
-  lower            = true
-  min_lower        = 1
-  numeric          = true
-  min_numeric      = 1
-  upper            = true
-  min_upper        = 1
+  length      = 16
+  special     = false
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
 }
 
 
@@ -41,7 +41,7 @@ resource "aws_security_group" "activemq_sg" {
   }
 
   # Adding name tag for Security group so that we can easily identify it
-  tags = merge(var.tags,{Name = "${var.name}-activemq"})
+  tags = merge(var.tags, { Name = "${var.name}-activemq" })
 }
 
 resource "aws_mq_configuration" "mq_configuration" {

@@ -138,7 +138,7 @@ terraform apply
 | efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
 | lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
 | environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
-| secret_name\* | Secret name containing SSH key to be feed to config-server| string | |
+| bitbucket_key_secrets_manager_name\* | Secret name containing SSH key to be feed to config-server| string | |
 |config_server_image_tag\*| Version of config-server to deploy | number |  |
 | config_repo_url\* | SSH link to config repo repository for configuring ENV variables of applications | string | `"git@bitbucket.org:ubixi/config-repo.git"` |
 |sftp_namespace|Namespace for SFTP server to deploy | string | `"sftp"`|
@@ -290,7 +290,6 @@ This object taked the paramters needed by a single service to run adn are passed
 | sftp_host | string | SFTP hostname | 
 | sftp_username | string | SFTP username |
 | sftp_password | string | SFTP password |
-| fqdn | list(string) | List of all the domains created| 
 | jaeger_username | string |  basic auth username for jaeger |
 | jaeger_password | string |basic auth password for jaeger | 
 | alertmanager_username| string |basic auth username for alertmanager |

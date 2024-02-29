@@ -55,7 +55,7 @@ module "vpc" {
   enable_nat_gateway     = var.enable_nat_gateway
   single_nat_gateway     = var.enable_nat_gateway
   one_nat_gateway_per_az = false
-  nat_gateway_tags       = merge(var.cost_tags,{ Name = var.name })
+  nat_gateway_tags       = merge(var.cost_tags, { Name = var.name })
 
   # Internet Gateway config
   igw_tags = var.cost_tags
@@ -86,7 +86,7 @@ module "vpc" {
   public_inbound_acl_rules  = concat(var.common_acl_ingress_rules, var.public_acl_ingress_rules)
   public_outbound_acl_rules = concat(var.common_acl_egress_rules, var.public_acl_egress_rules)
 
-  tags = merge(var.cost_tags, var.vpc_tags,{ Name = var.name })
+  tags = merge(var.cost_tags, var.vpc_tags, { Name = var.name })
 
   depends_on = [null_resource.azs_list_validation, null_resource.siem_validation]
 }
@@ -97,5 +97,5 @@ module "vpc" {
 resource "aws_default_security_group" "default" {
   vpc_id = module.vpc.vpc_id
 
-  tags = merge(var.cost_tags, var.vpc_tags,{ Name = var.name })
+  tags = merge(var.cost_tags, var.vpc_tags, { Name = var.name })
 }

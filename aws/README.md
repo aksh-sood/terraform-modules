@@ -53,7 +53,7 @@ The vpn-endpoint module creates assosiated vpn linking to the first private subn
 
 ##### [EKS](./aws/modules/eks/)
 
-The EKS module provisions the EKS cluster and installs the required addons in it. The cluster is provisioned in the VPC created by the VPC module and in all its subnets by default . The key to access the instances in stored in the local machine by the name of `{environment}-eks-nodes.pem` . The EKS module has following sub modules :
+The EKS module provisions the EKS cluster and installs the required addons in it. The cluster is provisioned in the VPC created by the VPC module and in all its subnets by default . The key to access the instances in stored in the local machine by the name of `{environment}-eks-nodes.pem` at `$HOME` directory. The EKS module has following sub modules :
 
 1. [cluster](./aws/modules/eks/modules/cluster/)
 Responsible for creating the EKS cluster with specified requirements.

@@ -149,8 +149,10 @@ terraform apply
 | cnames | Set of CNAME suffixed for subdomain |set(string)  |`[]` | 
 | cloudflare_api_token\* | API token for configuring cloudflare provider |  string | |
 | kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
-|sftp_user_password| SFTP user password | string |`""`|
-| baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |
+| sftp_host\* | Hostname for baton SFTP server | string | |
+| sftp_user\* | Username for baton SFTP server| string | 
+| sftp_password\* |  Password for baton SFTP server | string |  baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 ### Baton Application Namespaces
 
@@ -283,4 +285,3 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
 |rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
 |rds_master_username| string |RDS master username credential|
 |rds_master_password| string |RDS master password credential|
-|fqdn               | set(string) |Set of DNS records created by cloudflare|

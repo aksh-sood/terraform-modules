@@ -1,12 +1,12 @@
 resource "random_password" "rabbitmq_password" {
-  length           = 16
-  special          = false
-  lower            = true
-  min_lower        = 1
-  numeric          = true
-  min_numeric      = 1
-  upper            = true
-  min_upper        = 1
+  length      = 16
+  special     = false
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
 }
 
 
@@ -39,7 +39,7 @@ resource "aws_security_group" "rabbitmq" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = merge(var.tags,{Name ="${var.name}-rabbitmq" })
+  tags = merge(var.tags, { Name = "${var.name}-rabbitmq" })
 }
 
 resource "aws_mq_broker" "rabbitmq" {

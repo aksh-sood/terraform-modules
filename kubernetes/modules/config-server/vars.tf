@@ -5,10 +5,10 @@ variable "secret_name" {
 
 variable "config_repo_url" {
   description = "SSH link to config repo repository for configuring Env variables of applications"
-  type = string
+  type        = string
 }
 
-variable "config_server_image_tag" {
+variable "image_tag" {
   description = "Version of the config-server to deploy"
-  type = number
+  type        = number
 }

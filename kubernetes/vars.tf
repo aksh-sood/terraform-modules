@@ -92,7 +92,7 @@ variable "custom_alerts" {
   default = []
 }
 
-variable "secret_name" {
+variable "bitbucket_key_secrets_manager_name" {
   description = "Name of the secret storing ssh key to configure into k8s secrets of config server"
   type        = string
   default     = ""
@@ -100,13 +100,13 @@ variable "secret_name" {
 
 variable "config_repo_url" {
   description = "SSH link to config repo repository for configuring ENV variables of applications"
-  type = string
-  default = "git@bitbucket.org:ubixi/config-repo.git"
+  type        = string
+  default     = "git@bitbucket.org:ubixi/config-repo.git"
 }
 
 variable "config_server_image_tag" {
   description = "Version of the config-server to deploy"
-  type = number
+  type        = number
 }
 
 variable "enable_config_server" {
@@ -142,19 +142,19 @@ variable "create_dns_records" {
 
 variable "enable_sftp" {
   description = "Deploy SFTP server in Kubernetes cluster"
-  default = true
+  default     = true
 }
 
 variable "sftp_namespace" {
   description = "Namespace to deploy SFTP server in"
-  type = string
-  default = "sftp"
+  type        = string
+  default     = "sftp"
 }
 
 variable "sftp_username" {
   description = "username for SFTP server"
-  type = string
-  default = "myuser"
+  type        = string
+  default     = "myuser"
 }
 
 variable "opensearch_password" {}
