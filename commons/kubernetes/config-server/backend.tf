@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "automation-state-terraform"
-    key    = "aws/terraform-state"
+    key    = "config-server/terraform-state"
     region = "us-east-1"
   }
 }

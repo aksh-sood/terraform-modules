@@ -32,6 +32,8 @@ module "baton_application" {
   target_port      = each.value.target_port
   subdomain_suffix = each.value.subdomain_suffix
   image_tag        = each.value.image_tag
+  volumes=var.volumeMounts.volumes
+  mounts=var.volumeMounts.mounts
   env = merge(each.value.env, var.common_env,
     {
       "APP_ENVIRONMENT"        = var.customer,
@@ -46,7 +48,7 @@ resource "kubectl_manifest" "gateway" {
 
   provider = kubectl.this
 
-  count = length(var.services) > 0 ? 1 : 0
+  count = length(var.services) > 0 && var.enable_gateway ? 1 : 0
 
   yaml_body = templatefile("${path.module}/templates/gateway.yaml", {
     namespace = var.namespace,

@@ -13,6 +13,8 @@ subdomain_suffix: ${var.subdomain_suffix}
 url_prefix: ${var.url_prefix}
 domain: ${var.domain_name}
 image_tag: ${var.image_tag}
+mounts: ${jsonencode(var.mounts)}
+volumes: ${jsonencode(var.volumes)}
 env: ${jsonencode(var.env)}
 EOT
   ]

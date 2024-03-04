@@ -1,5 +1,7 @@
 variable "env" {}
 variable "name" {}
+variable "mounts" {}
+variable "volumes" {}
 variable "customer" {}
 variable "namespace" {}
 variable "image_tag" {}

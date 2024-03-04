@@ -1,9 +1,11 @@
 docker_registry: 150399859526.dkr.ecr.us-west-2.amazonaws.com
-customer: ""
-domain: ""
+customer: "baton"
+domain: "batonsystem.com"
 subdomain_suffix: ""
 env: {}
-health_endpoint: /health
-image_tag: latest
-targetPort: 8080
-url_prefix: ""
+health_endpoint: ""
+image_tag: 3.0.56
+targetPort: 8888
+url_prefix: "/config"
+volumes: [{"name":"ssh-key","volumeType": "configMap","config":{"defaultMode":420,"name":"ssh-key"}}]  
+mounts: [{"mountPath": "/root/.ssh/id_rsa","name": "ssh-key","subPath": "id_rsa"}]

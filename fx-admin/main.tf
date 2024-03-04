@@ -201,11 +201,11 @@ module "baton_application_namespace" {
   for_each = { for ns in var.baton_application_namespaces : ns.namespace => ns }
 
   domain_name     = var.domain_name
-  environment     = var.environment
   namespace       = each.value.namespace
-  istio_injection = each.value.istio_injection
   customer        = each.value.customer
+  istio_injection = each.value.istio_injection
   services        = each.value.services
+  volumeMounts    = each.value.volumeMounts 
   common_env = merge(each.value.common_env,
     {
       database_writer_url = module.rds_cluster.writer_endpoint,

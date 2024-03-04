@@ -11,8 +11,32 @@ variable "services" {
   }))
 }
 
+variable "enable_gateway" {
+  description = "Whether to create a gateway in the namespace or not"
+  type = bool
+  default = true
+}
+
+variable "volumeMounts" {
+  type = object({
+      volumes = list(object({
+        name = string
+        volumeType =string
+        config=map(string)
+    }))
+    mounts = list(object({
+      mountPath = string
+      name      = string
+      subPath   = string
+    }))
+    })
+  default =     {
+      volumes = []
+      mounts = []
+    }
+}
+
 variable "domain_name" {}
-variable "environment" {}
 variable "namespace" {}
 variable "customer" {}
 variable "common_env" {}

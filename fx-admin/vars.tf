@@ -200,13 +200,30 @@ variable "baton_application_namespaces" {
     common_env      = optional(map(string), {})
     services = list(object({
       name             = string
-      health_endpoint  = string
+      health_endpoint  = optional(string, "/health")
       target_port      = number
       subdomain_suffix = optional(string, "")
       url_prefix       = string
-      env              = map(string)
+      env              = optional(map(string), {})
       image_tag        = optional(string, "latest")
     }))
+    volumeMounts   = optional(object({
+      volumes = list(object({
+        name = string
+        volumeType =string
+        config=map(string)
+    }))
+    mounts = list(object({
+      mountPath = string
+      name      = string
+      subPath   = string
+    }))
+    }),
+    {
+      volumes=[]
+      mounts=[]
+    }
+    )
   }))
 }
 
