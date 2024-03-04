@@ -103,3 +103,14 @@ module "jaeger" {
 
   depends_on = [module.istio]
 }
+
+module "config_server" {
+  source = "./modules/config-server"
+  count = var.enable_config_server?1:0
+
+  secret_name = var.secret_name 
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+}
