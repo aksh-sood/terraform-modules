@@ -47,6 +47,10 @@ The certificate module creates a domain certificate in the AWS Certificate Manag
 
 The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as `generic-cmk-{environment}` .
 
+##### [VPN-ENDPOINT](./aws/modules/vpn-endpoint/)
+
+The vpn-endpoint module creates assosiated vpn linking to the first private subnet from the [VPC](./aws/modules/vpc) module. It is based upon federated access for which the saml file should be located at **./aws/modules/vpn-endpoint/** with name **saml-metadata.xml** which is replaces by a dummy in source code for security reasons . The acces group id is associated to both the internal vpc network as well as internet access. It also creates a cloudwatch log group which is used to log the traffic of vpn endpoint . Inside the module a locally signed certificate is also created which is used as server certificate once uploaded to Amazon Certificate Manager.  
+
 ##### [EKS](./aws/modules/eks/)
 
 The EKS module provisions the EKS cluster and installs the required addons in it. The cluster is provisioned in the VPC created by the VPC module and in all its subnets by default . The key to access the instances in stored in the local machine by the name of `{environment}-eks-nodes.pem` . The EKS module has following sub modules :
@@ -90,6 +94,7 @@ Below is the structure of AWS Folder.
 |   ├── activemq
 │   ├── security-hub
 │   ├── domain-certificate
+│   ├── vpn-endpoint
 │   ├── eks
 │   │   ├── modules
 │   │   │   ├── addons
@@ -156,6 +161,7 @@ terraform apply
 |private_subnet_cidrs     |List of CIDR blocks to create private subnets|list(string)  |`["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]`| 
 |subscribe_security_hub|Optional subscription to secuirty hub | bool | `false` |
 |create_certificate |Optional creation of ACM certificate | bool | `true` |
+| acm_certificate_arn* | ACM certificate ARN . Required if `create_certificate` is set to false| string |  |
 |enable_siem |Optional enabling of logging components for VPC | bool | `true` |
 |siem_storage_s3_bucket      |S3 bucket name for siem alerts and logging |string |`"aes-siem-800161367015-log"`|
 |additional_cluster_policies |additional cluster policies for EKS cluster |map(string)|`{}`|
@@ -168,6 +174,12 @@ terraform apply
 |acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
 |security_hub_standards | Security hub standards to to enabled |list(string)| `["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]`|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
+| enable_client_vpn | Create client vpn endpoint | bool | `false` |
+| client_vpn_metadata_bucket_region | Region where the S3 bucket storing metadata for SAML configuration is located | string | `us-west-2` |
+| client_vpn_metadata_bucket_name* | Name of the bucket where the S3 bucket storing metadata for SAML configuration is located | string | |
+| client_vpn_metadata_object_key* | Key of the object where the S3 bucket storing metadata for SAML configuration is located | string |  |
+| enable_client_vpn_split_tunneling* | Enable Split tunneling  | bool | `false` |
+| client_vpn_access_group_id* | Access group ID from SSO  | string |  |
 | opensearch_engine_version  | The version of the OpenSearch engine   | string |`OpenSearch_2.11`|
 | opensearch_instance_type   | The type of instance for OpenSearch    | string |`t3.medium.search`|
 | opensearch_instance_count  | The number of instances in the domain  | number |`1`|
@@ -308,8 +320,8 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 | Name  | Type | Description |
 |:-----------|:---------|:-----------|
 |vpc_id                   |string        | VPC id for the new VPC created                       |
-|public_subnet_ids           |list(string)  | List of IDs of public subnets                        |
-|private_subnet_ids          |list(string)  | List of IDs of private subnets                       |
+|public_subnet_ids        |list(string)  | List of IDs of public subnets                        |
+|private_subnet_ids       |list(string)  | List of IDs of private subnets                       |
 |efs_id                   |string        | EFS Volume ID for persistent storage                 |
 |acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
 |grafana_role_arn         |string        | ARN of the Grafana role                              |

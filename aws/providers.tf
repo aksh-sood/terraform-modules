@@ -15,3 +15,8 @@ provider "aws" {
   region = "us-east-1"
   alias  = "east"
 }
+
+provider "aws" {
+  region = var.client_vpn_metadata_bucket_region
+  alias  = "vpn"
+}
