@@ -1,5 +1,4 @@
 .terraform
-.terraform.lock.hcl
 .terraform.tfstate.lock.info
 terraform.tfstate
 terraform.tfstate.d
@@ -10,3 +9,4 @@ alerts
 *.pem
 *.tfplan
 .backup
+.terraform.lock.hcl

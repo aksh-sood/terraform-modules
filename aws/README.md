@@ -6,7 +6,6 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - NAT Gateway
 - Route Tables
 - Internet Gateway
-- Client VPN Endpoint
 - Security Hub Controls and remediations
 - KMS Key
 - ACM domain certificate
@@ -60,7 +59,7 @@ Responsible for creating the EKS cluster with specified requirements.
 The cluster config file is also pulled after creation of the eks cluster to `~/.kube/{environment}`
 
 2. [nodes](./aws/modules/eks/modules/nodes/)
-Creates the EKS managed node groups provided by the user
+Creates the EKS managed node groups provided by the user 
 
 3. [addons](./aws/modules/eks/modules/addons)
 Responsible for installation of addons in cluster which are listed below.
@@ -72,7 +71,7 @@ Responsible for installation of addons in cluster which are listed below.
     - lbc-controller
 
 4. [IAM](./aws/modules/eks/modules/iam)
-The IAM module is used to create the user managed policies and map them to cluster role and node role after creating it. The IAM folder also has one more sub directory called [policies](./aws/modules/eks/modules/iam/policies/) which has all the policies in json format for their creation. The smae module also creates a role and attach policy to it for grafana assumed role within the eks cluster.
+The IAM module is used to create the user managed policies and map them to cluster role and node role after creating it. The IAM folder also has one more sub directory called [policies](./aws/modules/eks/modules/iam/policies/) which has all the policies in json format for their creation. The same module also creates a role and attach policy to it for grafana assumed role within the eks cluster.
 
 5. [EFS](./aws/modules/eks/modules/efs)
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
