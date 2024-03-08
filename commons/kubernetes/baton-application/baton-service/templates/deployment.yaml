@@ -22,6 +22,7 @@ spec:
         - name: {{ .Release.Name }}
           image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
           imagePullPolicy: Always
+          {{- if and ( .Values.health_endpoint ) ( .Values.url_prefix ) }}
           readinessProbe:
             failureThreshold: 1
             httpGet:
@@ -31,8 +32,13 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 10
+          {{- end }}
+          volumeMounts:
+{{ toYaml .Values.mounts | indent 12 }}      
           env:
             {{- range $k, $v := .Values.env }}
             - name: {{ $k }}
               value: {{ $v | quote }}
             {{- end }}
+      volumes: 
+{{ toYaml .Values.volumes | indent 8}}        
