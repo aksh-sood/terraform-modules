@@ -33,7 +33,7 @@ locals {
 }
 
 resource "aws_iam_role" "cluster_role" {
-  name_prefix        = "eks_${var.cluster_name}_${var.region}"
+  name               = "eks_cluster_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",
@@ -102,7 +102,7 @@ locals {
 }
 
 resource "aws_iam_role" "node_role" {
-  name_prefix        = "eks_${var.cluster_name}_${var.region}"
+  name               = "eks_node_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",

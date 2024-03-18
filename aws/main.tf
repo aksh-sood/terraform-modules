@@ -1,5 +1,15 @@
 data "aws_caller_identity" "current" {}
 
+# This resource to validates existence of service roles for autoscaling and opensearch
+resource "null_resource" "service_roles_validation" {
+  provisioner "local-exec" {
+    command = <<-EOT
+    aws iam create-service-linked-role --aws-service-name autoscaling.amazonaws.com >>/dev/null 2>&1
+    aws iam create-service-linked-role --aws-service-name opensearchservice.amazonaws.com >>/dev/null 2>&1
+    EOT
+  }
+}
+
 resource "null_resource" "vpn_validation" {
   lifecycle {
     precondition {
@@ -11,6 +21,8 @@ resource "null_resource" "vpn_validation" {
       error_message = "Provide client_vpn_metadata_bucket_region, client_vpn_metadata_bucket_name, client_vpn_metadata_object_key or disable enable_client_vpn"
     }
   }
+
+  depends_on = [null_resource.service_roles_validation]
 }
 
 resource "null_resource" "certificate_validation" {
