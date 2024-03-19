@@ -17,7 +17,7 @@ variable "cluster_policies" {
 variable "node_policies" {
   description = "AWS Managed Policies for nodes"
   type        = list(string)
-  default = []
+  default     = []
 }
 
 variable "grafana_policies" {

@@ -5,6 +5,7 @@
     {
       "Effect": "Allow",
       "Action": [
+        "acm:*",
         "apigateway:SetWebACL",
         "apprunner:AssociateWebAcl",
         "apprunner:DescribeWebAclForService",

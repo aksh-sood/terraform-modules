@@ -1,5 +1,6 @@
 variable "env" {}
 variable "name" {}
+variable "port" {}
 variable "mounts" {}
 variable "volumes" {}
 variable "customer" {}

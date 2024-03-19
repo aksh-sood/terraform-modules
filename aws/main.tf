@@ -4,8 +4,8 @@ data "aws_caller_identity" "current" {}
 resource "null_resource" "service_roles_validation" {
   provisioner "local-exec" {
     command = <<-EOT
-    aws iam create-service-linked-role --aws-service-name autoscaling.amazonaws.com >>/dev/null 2>&1
-    aws iam create-service-linked-role --aws-service-name opensearchservice.amazonaws.com >>/dev/null 2>&1
+    aws iam create-service-linked-role --aws-service-name autoscaling.amazonaws.com >>/dev/null 2>&1 || true
+    aws iam create-service-linked-role --aws-service-name opensearchservice.amazonaws.com >>/dev/null 2>&1 || true
     EOT
   }
 }

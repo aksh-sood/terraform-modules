@@ -1,6 +1,6 @@
 locals {
-    
-  domain_name   = ""
+
+  domain_name = ""
   config_server = {
     namespace       = "config-server"
     customer        = "config-server"

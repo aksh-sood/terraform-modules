@@ -90,12 +90,13 @@ variable "custom_alerts" {
 variable "secret_name" {
   description = "Name of the secret storing ssh key to configure into config map of config server"
   type        = string
+  default     = ""
 }
 
 variable "enable_config_server" {
   description = "Whether to enable config server"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "alert_manager_volume_size" {
