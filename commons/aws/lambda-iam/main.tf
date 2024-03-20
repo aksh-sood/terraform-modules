@@ -1,6 +1,6 @@
 
 resource "aws_iam_role" "lambda_role" {
-  name = "FX_lambda_role-${var.environment}-${var.region}"
+  name = "FX_lambda_role-${var.name}-${var.region}"
 
   assume_role_policy = <<EOF
 {

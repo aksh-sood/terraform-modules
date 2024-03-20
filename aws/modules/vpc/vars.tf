@@ -253,3 +253,4 @@ variable "cost_tags" {}
 variable "region" {}
 variable "enable_nat_gateway" {}
 variable "enable_siem" {}
+variable "name" {}
