@@ -30,6 +30,10 @@ The versions for the following can be supplied from the input variables.
 
 Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,prometheus, alertmanager.
 
+##### [Config Server](./kubernetes/module/cloudflare)
+
+This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that ocontains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
+
 ##### [Jaeger](./kubernetes/module/jaeger)
 
 This module is responsible for installation and configuration of jaeger tracing components on top of istio . The jaeger components are not installed via helm and neither are they configured in this module. The maintainers of istio also maintain a configuration for [jaeger installation](https://istio.io/latest/docs/ops/integrations/jaeger/#installation) which we apply in this module using kubectl provider .
@@ -61,6 +65,7 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 ├── modules
 │   ├── addons
 │   ├── cloudflare
+│   ├── config-server
 │   ├── istio
 │   ├── jaeger
 │   └── monitoring(legacy module)
@@ -129,6 +134,7 @@ terraform apply
 | efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
 | lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
 | environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
+| secret_name\* | Secret name containing SSH key for SCM access to be feed to config-server| string | |
 | domain_name\*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
 | acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
 | siem_storage_s3_bucket         | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |

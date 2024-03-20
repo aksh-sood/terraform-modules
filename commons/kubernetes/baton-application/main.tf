@@ -9,6 +9,7 @@ resource "helm_release" "baton-application" {
 docker_registry: ${var.docker_registry}
 customer: ${var.customer}
 health_endpoint: ${var.health_endpoint}
+port: ${var.port}
 targetPort: ${var.target_port}
 subdomain_suffix: ${var.subdomain_suffix}
 url_prefix: ${var.url_prefix}

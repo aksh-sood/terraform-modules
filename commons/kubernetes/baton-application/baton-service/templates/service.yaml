@@ -11,6 +11,6 @@ spec:
   selector:
     application: {{ .Release.Name }}
   ports:
-  - port: 8080
+  - port: {{ .Values.port }}
     name: http
     targetPort: {{ .Values.targetPort }}

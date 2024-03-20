@@ -4,9 +4,10 @@ variable "services" {
     name             = string
     health_endpoint  = string
     target_port      = number
-    subdomain_suffix = optional(string, "")
     url_prefix       = string
     env              = map(string)
+    port             = optional(number,8080)
+    subdomain_suffix = optional(string, "")
     image_tag        = optional(string, "latest")
     volumeMounts = optional(object({
       volumes = list(any)
@@ -29,9 +30,26 @@ variable "enable_gateway" {
   default     = true
 }
 
-variable "domain_name" {}
-variable "namespace" {}
-variable "customer" {}
+variable "namespace" {
+  type = string
+}
+
+variable "domain_name" {
+  type = string
+}
+
+variable "docker_registry" {
+  type    = string
+  default = "150399859526.dkr.ecr.us-west-2.amazonaws.com"
+}
+
+variable "istio_injection" {
+  type    = bool
+  default = true
+}
+
+variable "customer" {
+  type = string
+}
+
 variable "common_env" {}
-variable "docker_registry" {}
-variable "istio_injection" {}

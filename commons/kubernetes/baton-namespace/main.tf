@@ -30,6 +30,7 @@ module "baton_application" {
   name             = each.value.name
   health_endpoint  = each.value.health_endpoint
   url_prefix       = each.value.url_prefix
+  port             = each.value.port
   target_port      = each.value.target_port
   subdomain_suffix = each.value.subdomain_suffix
   image_tag        = each.value.image_tag

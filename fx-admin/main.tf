@@ -206,20 +206,7 @@ module "baton_application_namespace" {
   docker_registry = each.value.docker_registry
   istio_injection = each.value.istio_injection
   services        = each.value.services
-  common_env = merge(each.value.common_env,
-    {
-      database_writer_url = module.rds_cluster.writer_endpoint,
-      database_reader_url = module.rds_cluster.reader_endpoint,
-      database_username   = module.rds_cluster.master_username,
-      database_password   = module.rds_cluster.master_password,
-      activemq_url_1      = module.activemq.url,
-      activemq_url_2      = module.activemq.url,
-      activemq_username   = module.activemq.username,
-      activemq_password   = module.activemq.password,
-      rabbitmq_url        = module.rabbitmq.endpoint,
-      rabbitmq_username   = module.rabbitmq.username,
-      rabbitmq_password   = module.rabbitmq.password,
-  })
+  common_env      = each.value.common_env
 
   providers = {
     kubectl.this = kubectl.this

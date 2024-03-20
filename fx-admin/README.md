@@ -147,43 +147,65 @@ terraform apply
 
 ### Baton Application Namespaces
 
-The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the paramters for the object.
+The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the parameters for the object.
 
-**All values are required**
 
 | Name              | Description                                                                | Type           | Default                                            |
 |:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
 | namespace\*       | Namespace value                                                            | string         |                                                    |
-| customer\*        | Name of the customer                                                       | string         |                                                    |
-| target_port\*     | Port exposed by the service                                                | number         |                                                    |
-| istio_injection\* | Whether to enable istio injection or not                                   | bool           |                                                    |
+| istio_injection | Whether to enable istio injection or not                                   | bool           | `true`         |
 | common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
+| customer\*        | Name of the customer                                                                                                                   | string      |          |
+| docker_registry\* | Registry to pull the docker images from | string ||
 | services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
 
 ### Baton Services
 
-This object taked the paramters needed by a single service to run adn are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
+This object taked the paramters needed by a single service to run and are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
+
+##### Inputs
 
 | Name              | Description                                                                                                                            | Type        | Default  |
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 | name\*            | Name of the service                                                                                                                    | string      |          |
+| target_port\*     | Port exposed by the service                                                                                                            | number      |          |
 | health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
 | url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
 | image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
+|volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
 
 **Note: By default `{ "APP_ENVIRONMENT" = customer, "SPRING_PROFILES_ACTIVE" = namespace }` are always appended to `env` attribute.**
 
-**Example service object**
+### Volume Mounts
+
+Object parameters for adding mounts to  [Baton Services](#markdown-headers-baton-services). The objects `volume` and `mounts` configurations are typical to the kubernetes YAML configurations.
+| Name              | Description                                                                                                                            | Type        | Default  |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
+| volumes | Volume configuration for deployment files. Can accept any kind of valid volume configuration for different types of volumes but should be with k8's YAML standards | list(any) | `[]` |
+|mounts | Mount configuration to the containers for volumes provided| list(mounts) |[Mounts](#markdown-headers-mounts)|
+
+### Mounts
+
+Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume-mounts) . This object configuration is typical to the kubernetes YAML configurations.
+| Name              | Description                                                                                                                            | Type        | Default  |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
+|mountPath\*| Directory on container where to mount the file |string||
+|name\*| Name of volume |string||
+|subPath\*|  |string||
+
+
+**Example input for baton application namespace**
 
 ```
 [
       {
       namespace       = "ns1"
       istio_injection = true
-      customer        = "cust1"
+      docker_registry = "123456789.dkr.ecr.us-west-2.amazonaws.com"
       common_env      = { "key7" = "v7", "key8" = "v8" }
+      customer        = "cust1"
       services = [
         {
           name            = "app1"
@@ -193,13 +215,31 @@ This object taked the paramters needed by a single service to run adn are passed
           url_prefix      = "/app1"
           env             = { "key1" = "v1", "key2" = "v2" }
           image_tag       = "latest"
+          volumeMounts    = {
+          volumes = [
+          {
+            name = "secretVol"
+            secret = {
+              secretName = "secretName"
+              readOnly   = true
+            }
+          }
+        ]
+            mounts=[
+        {
+          mountPath = "/home/ubuntu/Desktop"
+          name      = "secretVol"
+          subPath   = "my-secret"
+        }
+        ]
+          }
         },
         {
           name            = "app3"
           health_endpoint = "/health"
           target_port     = 8080
           url_prefix      = "/app3"
-          env             = { "key5" = "v5", "key6" = "v6" }
+          env             = {}
           image_tag       = "latest"
         }
       ]
@@ -222,19 +262,3 @@ This object taked the paramters needed by a single service to run adn are passed
     }
 ]
 ```
-
-### Output
-
-| Name                      | Type      | Description                                           |
-|:--------------------------|:----------|:------------------------------------------------------|
-| rds_writer_endpoint       | string    | Writer endpoint of the RDS cluster                    |
-| rds_reader_endpoint       | string    | Reader endpoint of the RDS cluster                    |
-| rds_cloudwatch_log_groups | string    | CloudWatch log groups associated with the RDS cluster |
-| rds_master_username       | string    | MYSQL Username for the master user                    |
-| rds_master_password       | string    | MYSQL Password for the master user                    |
-| activemq_url              | string    | URL of the ActiveMQ broker                            |
-| activemq_username         | string    | Username for ActiveMQ                                 |
-| activemq_password         | string    | Password for ActiveMQ                                 |
-| rabbitmq_endpoint         | String    | Endpoint address for connecting to RabbitMQ broker    |
-| rabbitmq_username         | String    | Specified username for RabbitMQ admin account         |
-| rabbitmq_password         | Sensitive | Generated password for RabbitMQ admin account         |

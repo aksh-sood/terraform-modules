@@ -8,6 +8,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - Internet Gateway
 - Security Hub Controls and remediations
 - KMS Key
+- VPN Endpoint
 - ACM domain certificate
 - EKS Cluster
 - EKS Managed Node Groups

@@ -1,7 +1,7 @@
 resource "random_password" "rabbitmq_password" {
   length           = 16
   special          = true
-  override_special = "!#$%&*()-_+[]{}<>?"
+  override_special = "!#$&*-_+"
   min_special      = 1
   lower            = true
   min_lower        = 1

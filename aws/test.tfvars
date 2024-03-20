@@ -1,4 +1,4 @@
-region = "us-east-1"
+region = "us-west-2"
 
 environment = "aksh"
 
@@ -38,11 +38,11 @@ acm_certificate_chain = "origin_ca_rsa_root.pem"
 
 acm_private_key = "key.pem"
 
-create_eks = false
+create_eks = true
 
 enable_siem = false
 
-enable_client_vpn = true
+enable_client_vpn = false
 
 client_vpn_metadata_bucket_region = "us-west-2"
 
