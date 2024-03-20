@@ -7,9 +7,11 @@ module "eks" {
 
   cluster_name    = var.cluster_name
   cluster_version = try(var.cluster_version, null)
+
   # IAM role for cluster
   create_iam_role = false
   iam_role_arn    = var.cluster_role_arn
+  enable_irsa     = false
 
   #VPC configuration
   vpc_id     = var.vpc_id

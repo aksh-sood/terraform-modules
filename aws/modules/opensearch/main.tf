@@ -88,8 +88,6 @@ resource "time_sleep" "delay_5_second" {
 }
 
 resource "aws_opensearch_domain_policy" "main" {
-  depends_on = [time_sleep.delay_5_second]
-
   domain_name     = aws_opensearch_domain.domain.domain_name
   access_policies = <<-EOF
 {
@@ -104,4 +102,6 @@ resource "aws_opensearch_domain_policy" "main" {
   ]
 }
 EOF
+
+  depends_on = [time_sleep.delay_5_second]
 }

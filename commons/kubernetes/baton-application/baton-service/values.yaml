@@ -1,0 +1,12 @@
+docker_registry: 150399859526.dkr.ecr.us-west-2.amazonaws.com
+customer: "baton"
+domain: ""
+subdomain_suffix: ""
+env: {}
+health_endpoint: "/health"
+image_tag: latest
+targetPort: 8080
+port: 8080
+url_prefix: ""
+volumes: []
+mounts: []

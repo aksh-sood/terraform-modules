@@ -12,7 +12,9 @@ This folder works like a universal module for multiple directories in this scrip
   - RabbitMQ
   - SQS
 - Kubernetes
-  - Baton Application Namepspaces
+  - Baton Namepspace
+  - Baton Application 
+  - RabbitMQ
 
 # Modules
 
@@ -152,8 +154,6 @@ This module generates the IAM role to associate to the lambda functions for givi
 
 | Name | Type | Description |
 | :--- | :--- | :---------- |
-
-|
 |lambda_role_arn|string|ARN of the IAM role created for the Lambda|
 
 ### [S3](./aws/s3)
@@ -210,7 +210,7 @@ This module creates a AWS Kinesis Stream with default `retention_period` as `12`
 |:-----------|:-------|:--------------------------|
 | stream_arn | string | ARN of the Kinesis Stream |
 
-### [Baton Application Namespace](./kubernetes/module/baton-application-namespace)
+### [Baton Application Namespace](./kubernetes/baton-application)
 
 Responsible for creation of namespaces and virtualservies, gateways, deployments, service accounts and takes care of these requirements for running the applications. Helm chart has been created for deploying these objects except the gateways and namespaces.
 
@@ -221,66 +221,104 @@ The services are exposed for the following URL `{environment}-{subdomain_suffix}
 | environment\* | Name of the environment to append to the resources name | string |         |
 | domain_name\*                  | Domain name registerd in the DNS service                | string                             |
 | common_connections             | Global connections to attach to each service            | map(string)                        |                                                                              |
-| baton_application_namespaces\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| baton_application_namespace\* | List of namespaces and services with requirments        | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
-### Baton Application Namespaces
+### Baton Namespace
 
-The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the paramters for the object.
-
-**All values are required**
+The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the parameters for the object.
 
 | Name              | Description                                                                | Type           | Default                                            |
 |:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
-| namespace\*       | Namespace value                                                            | string         |                                                    |
-| istio_injection\* | Whether to enable istio injection or not                                   | bool           |                                                    |
-| common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
+| namespace\* | Namespace value | string |  |
+| istio_injection | Whether to enable istio injection or not | bool | `true` |
+| common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}` |
+| customer\*        | Name of the customer| string      |          |
+| domain_name\* | Name of domain to link with gateways and services| string | |
+| docker_registry\* | Registry to pull the docker images from | string | |
 | services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
 
 ### Baton Services
 
-This object taked the paramters needed by a single service to run adn are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
+This object taked the paramters needed by a single service to run and are passed to the deployment and service files inside the helm chart. Following are the objects for a single service.
 
 ##### Inputs
 
 | Name              | Description                                                                                                                            | Type        | Default  |
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 | name\*            | Name of the service                                                                                                                    | string      |          |
-| customer\*        | Name of the customer                                                                                                                   | string      |          |
-| target_port\*     | Port exposed by the service                                                                                                            | number      |          |
+| port     | Port for the service     | number      |   `8080`     |
+| target_port\*     | Target port for the service   | number      |          |
 | health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
 | url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
 | image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
+|volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
 
 **Note: By default `{ "APP_ENVIRONMENT" = customer, "SPRING_PROFILES_ACTIVE" = namespace }` are always appended to `env` attribute.**
 
-**Example service object**
+### Volume Mounts
+
+Object parameters for adding mounts to  [Baton Services](#markdown-headers-baton-services). The objects `volume` and `mounts` configurations are typical to the kubernetes YAML configurations.
+| Name              | Description                                                                                                                            | Type        | Default  |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
+| volumes | Volume configuration for deployment files. Can accept any kind of valid volume configuration for different types of volumes but should be with k8's YAML standards | list(any) | `[]` |
+|mounts | Mount configuration to the containers for volumes provided| list(mounts) |[Mounts](#markdown-headers-mounts)|
+
+### Mounts
+
+Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume-mounts) . This object configuration is typical to the kubernetes YAML configurations.
+| Name              | Description                                                                                                                            | Type        | Default  |
+|:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
+|mountPath\*| Directory on container where to mount the file |string||
+|name\*| Name of volume |string||
+|subPath\*|  |string||
+
+
+**Example input for baton application namespace**
 
 ```
 [
       {
       namespace       = "ns1"
       istio_injection = true
+      docker_registry = "123456789.dkr.ecr.us-west-2.amazonaws.com"
       common_env      = { "key7" = "v7", "key8" = "v8" }
+      customer        = "cust1"
       services = [
         {
           name            = "app1"
-          customer        = "cust1"
           health_endpoint = "/health"
           target_port     = 8080
           subdomain_suffix= "api"
           url_prefix      = "/app1"
           env             = { "key1" = "v1", "key2" = "v2" }
           image_tag       = "latest"
+          volumeMounts    = {
+          volumes = [
+          {
+            name = "secretVol"
+            secret = {
+              secretName = "secretName"
+              readOnly   = true
+            }
+          }
+        ]
+            mounts=[
+        {
+          mountPath = "/home/ubuntu/Desktop"
+          name      = "secretVol"
+          subPath   = "my-secret"
+        }
+        ]
+          }
         },
         {
           name            = "app3"
-          customer        = "cust1"
           health_endpoint = "/health"
           target_port     = 8080
           url_prefix      = "/app3"
-          env             = { "key5" = "v5", "key6" = "v6" }
+          env             = {}
           image_tag       = "latest"
         }
       ]
@@ -288,10 +326,10 @@ This object taked the paramters needed by a single service to run adn are passed
     {
       namespace       = "ns2"
       istio_injection = false
+      customer        = "cust2"
       services = [
         {
           name            = "app2"
-          customer        = "cust2"
           health_endpoint = "/health"
           target_port     = 8080
           endpoint        = "api"

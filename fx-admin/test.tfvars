@@ -1,19 +1,19 @@
-region             = "us-east-1"
-environment        = "aksh2"
+region             = "us-west-2"
+environment        = "aksh"
 vendor             = "baton"
-kms_key_arn        = "arn:aws:kms:us-east-1:130759691668:key/3d905d17-67f8-4ef3-a262-2eaf30eb4861"
-eks_security_group = "sg-013757e0a209c45a2"
+kms_key_arn        = "arn:aws:kms:us-west-2:130759691668:key/fa72c934-3bb5-4b27-bdab-3713ef0b4ee1"
+eks_security_group = "sg-0cef8319b5e39eb4d"
 public_subnet_ids = [
-  "subnet-08cc1bfae6b44ba63",
-  "subnet-03cf7b2f4d44e6588",
-  "subnet-06bc6f9265c653d92",
+  "subnet-0e0ab77e57f337475",
+  "subnet-04f77ecb3d0a30544",
+  "subnet-0103a1731403b7c98",
 ]
 private_subnet_ids = [
-  "subnet-0ce14c6bbf00e1274",
-  "subnet-0006af4e4d372804e",
-  "subnet-023cde3bb16ef74b0",
+  "subnet-04cc1f5be5b9c36e8",
+  "subnet-0ff074c0009653892",
+  "subnet-0bc4b2f4f096b55da",
 ]
-vpc_id                              = "vpc-03deeeec9786ae012"
+vpc_id                              = "vpc-0cc4119089691d51e"
 activemq_engine_version             = "5.15.16"
 activemq_storage_type               = "efs"
 activemq_instance_type              = "mq.t2.micro"
@@ -56,3 +56,4 @@ rabbitmq_auto_minor_version_upgrade = false
 rabbitmq_publicly_accessible        = false
 rabbitmq_username                   = "master"
 rabbitmq_enable_cluster_mode        = false
+domain_name ="batonsystem.com"

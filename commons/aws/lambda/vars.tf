@@ -1,9 +1,9 @@
 variable "stream_arn" {
-  type = string
+  type    = string
   default = null
 }
 variable "sqs_arn" {
-  type = string
+  type    = string
   default = null
 }
 

@@ -15,18 +15,9 @@ variable "cluster_policies" {
 #  EKS node variables
 
 variable "node_policies" {
-  description = "Policies for nodes"
+  description = "AWS Managed Policies for nodes"
   type        = list(string)
-  default = [
-    "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-    , "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-    , "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-    , "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-    , "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-    , "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
-    , "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-    , "arn:aws:iam::aws:policy/AWSWAFFullAccess"
-  ]
+  default     = []
 }
 
 variable "grafana_policies" {

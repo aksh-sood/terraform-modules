@@ -1,3 +1,13 @@
+resource "null_resource" "config_server_validation" {
+  lifecycle {
+    precondition {
+      condition = var.enable_config_server ? (
+      var.secret_name != "" && var.secret_name != null) : true
+      error_message = "Provide secret_name or set enable_config_server to false"
+    }
+  }
+}
+
 module "addons" {
   source = "./modules/addons"
 
@@ -102,4 +112,17 @@ module "jaeger" {
   }
 
   depends_on = [module.istio]
+}
+
+module "config_server" {
+  source = "./modules/config-server"
+  count  = var.enable_config_server ? 1 : 0
+
+  secret_name = var.secret_name
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.istio, null_resource.config_server_validation]
 }

@@ -28,7 +28,7 @@ output "loadbalancer_url" {
 }
 
 output "jaeger_username" {
-  value     = "admin"
+  value = "admin"
 }
 
 output "jaeger_password" {
@@ -37,7 +37,7 @@ output "jaeger_password" {
 }
 
 output "alertmanager_username" {
-  value     = "admin"
+  value = "admin"
 }
 
 output "alertmanager_password" {
@@ -46,7 +46,7 @@ output "alertmanager_password" {
 }
 
 output "prometheus_username" {
-  value     = "admin"
+  value = "admin"
 }
 
 output "prometheus_password" {
@@ -55,5 +55,5 @@ output "prometheus_password" {
 }
 
 output "fqdn" {
-  value = var.create_dns_records?  module.cloudflare[0].domains : null
+  value = var.create_dns_records ? module.cloudflare[0].domains : null
 }

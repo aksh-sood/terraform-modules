@@ -1,5 +1,40 @@
 data "aws_caller_identity" "current" {}
 
+# This resource to validates existence of service roles for autoscaling and opensearch
+resource "null_resource" "service_roles_validation" {
+  provisioner "local-exec" {
+    command = <<-EOT
+    aws iam create-service-linked-role --aws-service-name autoscaling.amazonaws.com >>/dev/null 2>&1 || true
+    aws iam create-service-linked-role --aws-service-name opensearchservice.amazonaws.com >>/dev/null 2>&1 || true
+    EOT
+  }
+}
+
+resource "null_resource" "vpn_validation" {
+  lifecycle {
+    precondition {
+      condition = var.enable_client_vpn ? (
+        var.client_vpn_metadata_bucket_region != "" && var.client_vpn_metadata_bucket_region != null &&
+        var.client_vpn_metadata_bucket_name != "" && var.client_vpn_metadata_bucket_name != null &&
+        var.client_vpn_metadata_object_key != "" && var.client_vpn_metadata_object_key != null
+      ) : true
+      error_message = "Provide client_vpn_metadata_bucket_region, client_vpn_metadata_bucket_name, client_vpn_metadata_object_key or disable enable_client_vpn"
+    }
+  }
+
+  depends_on = [null_resource.service_roles_validation]
+}
+
+resource "null_resource" "certificate_validation" {
+  lifecycle {
+    precondition {
+      condition = !var.create_certificate ? (
+      var.acm_certificate_arn != "" && var.acm_certificate_arn != null) : true
+      error_message = "Provide acm_certificate_arn or set create_certificate to true"
+    }
+  }
+}
+
 module "security_hub" {
   source = "./modules/security-hub"
   count  = var.subscribe_security_hub ? 1 : 0
@@ -43,6 +78,30 @@ module "domain_certificate" {
 
 resource "aws_ebs_encryption_by_default" "default_encrypt" {
   enabled = true
+}
+
+module "client_vpn" {
+  source = "./modules/vpn-endpoint"
+  count  = var.enable_client_vpn ? 1 : 0
+
+  vpc_id    = module.vpc.id
+  subnet_id = module.vpc.private_subnets[0]
+
+  name                     = var.environment
+  target_network_cidr      = var.vpc_cidr
+  access_group_id          = var.client_vpn_access_group_id
+  saml_metadata_bucket     = var.client_vpn_metadata_bucket_name
+  enable_split_tunnel      = var.enable_client_vpn_split_tunneling
+  saml_metadata_object_key = var.client_vpn_metadata_object_key
+  acm_certificate_arn      = var.create_certificate ? module.domain_certificate[0].certificate_arn : var.acm_certificate_arn
+
+  cost_tags = var.cost_tags
+
+  providers = {
+    aws.this = aws.vpn
+  }
+
+  depends_on = [null_resource.vpn_validation, null_resource.certificate_validation]
 }
 
 module "kms" {

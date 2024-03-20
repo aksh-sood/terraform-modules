@@ -190,7 +190,38 @@ variable "eks_security_group" {}
 variable "environment" {}
 variable "kms_key_arn" {}
 variable "vendor" {}
-variable "baton_application_namespaces" {}
+variable "baton_application_namespaces" {
+
+  description = "List of namespaces and services and there required attributes"
+  type = list(object({
+    namespace       = string
+    customer        = string
+    docker_registry = optional(string, "150399859526.dkr.ecr.us-west-2.amazonaws.com")
+    istio_injection = optional(bool, true)
+    common_env      = optional(map(string), {})
+    services = list(object({
+      name             = string
+      target_port      = number
+      url_prefix       = string
+      health_endpoint  = optional(string, "/health")
+      subdomain_suffix = optional(string, "")
+      env              = optional(map(string), {})
+      image_tag        = optional(string, "latest")
+      volumeMounts = optional(object({
+        volumes = list(any)
+        mounts = list(object({
+          mountPath = string
+          name      = string
+          subPath   = string
+        }))
+        }),
+        {
+          volumes = []
+          mounts  = []
+      })
+    }))
+  }))
+}
 
 variable "rabbitmq_engine_version" {
   description = "Version of the RabbitMQ broker engine"
