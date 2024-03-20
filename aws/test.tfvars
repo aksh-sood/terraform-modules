@@ -1,4 +1,4 @@
-region = "us-east-1"
+region = "us-west-2"
 
 environment = "aksh"
 
@@ -26,6 +26,10 @@ private_subnet_cidrs = ["10.0.96.0/22", "10.0.100.0/22", "10.0.104.0/22"]
 
 siem_storage_s3_bucket = "eks-auto-vpc-flow-logs"
 
+create_certificate = true
+
+acm_certificate_arn = null
+
 acm_certificate_bucket = "test-certificate-iaac"
 
 acm_certificate = "cert.pem"
@@ -35,6 +39,20 @@ acm_certificate_chain = "origin_ca_rsa_root.pem"
 acm_private_key = "key.pem"
 
 create_eks = true
+
+enable_siem = false
+
+enable_client_vpn = false
+
+client_vpn_metadata_bucket_region = "us-west-2"
+
+client_vpn_metadata_bucket_name = "vpn-metadata"
+
+client_vpn_metadata_object_key = "JumpCloud-awsclientvpn-metadata.xml"
+
+enable_client_vpn_split_tunneling = false
+
+client_vpn_access_group_id = "Test User Group"
 
 cluster_version = "1.28"
 

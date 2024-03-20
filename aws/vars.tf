@@ -78,6 +78,7 @@ variable "enable_siem" {
   default     = true
 }
 
+# make sure that S3 bucket policies are configured properly to allow logs from diffrent sources like vpc and ELB
 variable "siem_storage_s3_bucket" {
   description = "bucket id for alerts and logging"
   type        = string
@@ -88,6 +89,12 @@ variable "create_certificate" {
   description = "Whether to create an AWS ACM certificate or not.If true variables starting with acm area required"
   type        = bool
   default     = true
+}
+
+variable "acm_certificate_arn" {
+  description = "ARN of domain certificate. Required if create_certificate is set to false"
+  type        = string
+  default     = null
 }
 
 variable "acm_certificate_bucket" {
@@ -177,6 +184,43 @@ variable "subscribe_security_hub" {
   description = "Wheather to subscribe security hub or not"
   type        = bool
   default     = false
+}
+
+
+variable "enable_client_vpn" {
+  description = "Whether to enable client vpn or not"
+  type        = bool
+  default     = false
+}
+
+variable "client_vpn_metadata_bucket_region" {
+  description = "Region in which the bucket containing SSO metdata file is located"
+  type        = string
+  default     = null
+}
+
+variable "client_vpn_metadata_bucket_name" {
+  description = "Name of the bucket containing SSO metdata file is located"
+  type        = string
+  default     = null
+}
+
+variable "client_vpn_metadata_object_key" {
+  description = "Object path for SSO metdata file in S3 Bucket"
+  type        = string
+  default     = null
+}
+
+variable "enable_client_vpn_split_tunneling" {
+  description = "Whether to enable client vpn or not"
+  type        = bool
+  default     = false
+}
+
+variable "client_vpn_access_group_id" {
+  description = "Whether to enable client vpn or not"
+  type        = string
+  default     = ""
 }
 
 variable "security_hub_standards" {

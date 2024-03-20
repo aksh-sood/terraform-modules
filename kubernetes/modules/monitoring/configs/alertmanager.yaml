@@ -12,6 +12,9 @@
       - job
       continue: false
       routes:
+      - receiver: "empty"
+        match:
+          alertname: Watchdog
       - receiver: 'slack'
         match:
           severity: warning
@@ -21,6 +24,7 @@
           severity: critical
         continue: false
     receivers:
+      - name: "empty"
       - name: default
         slack_configs:
         - send_resolved: false

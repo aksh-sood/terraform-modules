@@ -4,6 +4,12 @@ variable "lbc_addon_version" {
   default     = "1.6.0"
 }
 
+variable "region" {
+  description = "Region of aws provider to run on"
+  type        = string
+  default     = "us-east-1"
+}
+
 variable "environment" {
   description = "Environment for which the resources are being provisioned"
   type        = string
@@ -79,6 +85,18 @@ variable "custom_alerts" {
   )
 
   default = []
+}
+
+variable "secret_name" {
+  description = "Name of the secret storing ssh key to configure into config map of config server"
+  type        = string
+  default     = ""
+}
+
+variable "enable_config_server" {
+  description = "Whether to enable config server"
+  type        = bool
+  default     = true
 }
 
 variable "alert_manager_volume_size" {

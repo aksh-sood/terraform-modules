@@ -1,6 +1,6 @@
 data "aws_caller_identity" "current" {}
 
-# Cluster associated Policies and role Creation
+# Cluster associated Policies and Role Creation
 resource "aws_iam_policy" "elb_policy" {
   name_prefix = "k8s_elb_policy_${var.cluster_name}_${var.region}"
   description = "elb policy for k8s cluster"
@@ -33,7 +33,7 @@ locals {
 }
 
 resource "aws_iam_role" "cluster_role" {
-  name_prefix        = "eks_${var.cluster_name}_${var.region}"
+  name               = "eks_cluster_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",
@@ -62,20 +62,11 @@ resource "aws_iam_role_policy_attachment" "cluster_role" {
 
 # Node Policy and Role Creation
 
-#Policy for nodes to manage secrets
-resource "aws_iam_policy" "secrets_policy" {
-  name_prefix = "SecretsManager_Read_Only_Access_${var.cluster_name}_${var.region}"
-  description = "provides read only access to secrets"
-  policy      = file("${path.module}/policies/secretsManager.json")
-
-  tags = var.tags
-}
-
-#Policy for efs driver integeration
-resource "aws_iam_policy" "efs_policy" {
-  name_prefix = "efs_csi_driver_policy_${var.cluster_name}_${var.region}"
-  description = "efs policy for k8s cluster"
-  policy      = file("${path.module}/policies/efs-driver.json")
+#Policy for nodes to manage secrets and efs access
+resource "aws_iam_policy" "custom_node" {
+  name        = "custom_node_${var.cluster_name}_${var.region}"
+  description = "Custom policy for EKS nodes"
+  policy      = file("${path.module}/policies/node-custom.json")
 
   tags = var.tags
 }
@@ -101,16 +92,18 @@ locals {
     split("/", policy_arn)[length(split("/", policy_arn)) - 1] => policy_arn
   }
 
-  custom_inline = var.additional_node_inline_policy != null ? { CustomInline = aws_iam_policy.additional_inline_node_policy[0].arn } : {}
+  custom_inline = var.additional_node_inline_policy != null ? {
+    CustomInline = aws_iam_policy.additional_inline_node_policy[0].arn
+  } : {}
 
   node_policies_map = merge(local.managed_node_policies_map, {
-    SecretsReadOnlyAccess           = aws_iam_policy.secrets_policy.arn
-    AmazonEKS_EFS_CSI_Driver_Policy = aws_iam_policy.efs_policy.arn
+    ELBPermission    = aws_iam_policy.elb_policy.arn
+    CustomNodePolicy = aws_iam_policy.custom_node.arn
   }, local.additional_managed_node_policies_map, local.custom_inline)
 }
 
 resource "aws_iam_role" "node_role" {
-  name_prefix        = "eks_${var.cluster_name}_${var.region}"
+  name               = "eks_node_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
 {
   "Version": "2012-10-17",
@@ -136,6 +129,9 @@ resource "aws_iam_role_policy_attachment" "node_role" {
   policy_arn = each.value
 
 }
+
+
+#Grafana role 
 
 resource "aws_iam_role" "grafana" {
   name_prefix        = "grafana_${var.cluster_name}_${var.region}"

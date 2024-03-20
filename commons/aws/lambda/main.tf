@@ -12,7 +12,7 @@ resource "aws_lambda_function" "this" {
   function_name = var.name
   role          = var.lambda_role_arn
   handler       = var.handler
-  runtime       = "java8"
+  runtime       = "java8.al2"
   memory_size   = 1024
   timeout       = 300
   tags          = var.tags

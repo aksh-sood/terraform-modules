@@ -1,6 +1,6 @@
 
 output "password" {
-  value = random_password.rabbitmq_password.result
+  value     = random_password.rabbitmq_password.result
   sensitive = true
 }
 
