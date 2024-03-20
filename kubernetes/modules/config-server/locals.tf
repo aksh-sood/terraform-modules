@@ -12,6 +12,7 @@ locals {
       name            = "config-server"
       env             = {}
       target_port     = 8888
+      port            = 8888
       url_prefix      = ""
       image_tag       = "3.0.56"
       health_endpoint = ""
