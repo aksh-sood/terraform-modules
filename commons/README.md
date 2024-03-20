@@ -210,18 +210,6 @@ This module creates a AWS Kinesis Stream with default `retention_period` as `12`
 |:-----------|:-------|:--------------------------|
 | stream_arn | string | ARN of the Kinesis Stream |
 
-### [Rabbit MQ (kubernetes)](./kubernetes/rabbitmq)
-
-This module helps to expose the rabbitmq console url and make it accesciable over internet . It contains a set of kubenetes objects to that route any incoming traffic to the rabbitMQ console URL . 
-
-##### Inputs
-
-| Name   | Description         | Type        | Default |
-|:-------|:--------------------|:------------|:--------|
-| name\* | Name of the environment  | string      |         |
-| domain_name\* | Domain Name to add to gateways and services | string |         |
-| rabbitmq_endpoint | Console URL of rabbitmq | string | | 
-
 ### [Baton Application Namespace](./kubernetes/baton-application)
 
 Responsible for creation of namespaces and virtualservies, gateways, deployments, service accounts and takes care of these requirements for running the applications. Helm chart has been created for deploying these objects except the gateways and namespaces.
