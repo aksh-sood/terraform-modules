@@ -82,7 +82,7 @@ variable "performance_insights_retention_period" {
 
 variable "ca_cert_identifier" {
   description = "CA certificate identifier for the RDS cluster."
-  default     = "rds-ca-rsa2048-g1"
+  default     = "rds-ca-2019"
 }
 
 variable "enable_rds_event_notifications" {
