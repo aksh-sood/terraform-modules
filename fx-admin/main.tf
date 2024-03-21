@@ -20,7 +20,6 @@ module "s3_swift" {
   source = "../commons/aws/s3"
 
   name        = "${var.vendor}-${var.environment}-swift-messages"
-  environment = var.environment
   tags        = var.cost_tags
 }
 
@@ -28,7 +27,6 @@ module "s3" {
   source = "../commons/aws/s3"
 
   name        = "${var.vendor}-${var.environment}"
-  environment = var.environment
   tags        = var.cost_tags
 }
 
@@ -37,7 +35,7 @@ module "kinesis_firehose" {
 
   bucket_arn = module.s3.bucket_arn
 
-  environment = var.environment
+  name        = var.environment
   region      = var.region
   tags        = var.cost_tags
 }
@@ -46,7 +44,6 @@ module "normalized_trml_kinesis_stream" {
   source = "../commons/aws/stream"
 
   name        = "${var.environment}-normalized-trml"
-  environment = var.environment
   tags        = var.cost_tags
 }
 
@@ -54,7 +51,6 @@ module "matched_trades_kinesis_stream" {
   source = "../commons/aws/stream"
 
   name        = "${var.environment}-matched-trades"
-  environment = var.environment
   tags        = var.cost_tags
 }
 
@@ -64,7 +60,7 @@ module "kinesis_app" {
   normalized_trades_arn = module.normalized_trml_kinesis_stream.stream_arn
   matched_trades_arn    = module.matched_trades_kinesis_stream.stream_arn
 
-  environment = var.environment
+  name        = var.environment
   region      = var.region
   tags        = var.cost_tags
 }
@@ -72,7 +68,7 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  environment = var.environment
+  name        = var.environment
   region      = var.region
 }
 

@@ -37,7 +37,7 @@ module "vpc" {
   private_subnet_tags = merge(var.cost_tags, var.private_subnet_tags)
   private_subnet_tags_per_az = {
     for az in data.aws_availability_zones.this.names : az => {
-      Name = "Private Subnet - ${az}"
+      Name = "${var.name}-private-subnet-${az}"
     }
   }
 
@@ -47,7 +47,7 @@ module "vpc" {
   public_subnet_tags      = merge(var.cost_tags, var.public_subnet_tags)
   public_subnet_tags_per_az = {
     for az in data.aws_availability_zones.this.names : az => {
-      Name = "Public Subnet - ${az}"
+      Name = "${var.name}-public-subnet-${az}"
     }
   }
 
@@ -86,7 +86,7 @@ module "vpc" {
   public_inbound_acl_rules  = concat(var.common_acl_ingress_rules, var.public_acl_ingress_rules)
   public_outbound_acl_rules = concat(var.common_acl_egress_rules, var.public_acl_egress_rules)
 
-  tags = merge(var.cost_tags, var.vpc_tags)
+  tags = merge(var.cost_tags, var.vpc_tags,{ Name = var.name })
 
   depends_on = [null_resource.azs_list_validation, null_resource.siem_validation]
 }

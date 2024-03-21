@@ -75,24 +75,4 @@ The following technologies are used in local system while creating this script
 | AWS CLI	  | 2.11.15 |
 | Helm	    | 3.12.1  |
 
-Provider versions used while creation of script
-
-| Resource   | Version |
-|:-----------|:--------|
-| AWS        | 5.20.1  |
-| Helm       | 2.10.1  | 
-| Kubernetes | 2.10.0  |
-| Grafana    | 2.3.3   |
-| Kubectl    | 1.7.0   |
-
-Module versions
-
-| Resource   | Version |
-|:-----------|:--------|
-| RDS        | 8.5.0   |
-| EKS        | 19.20.0 |
-| EFS        | 1.3.1   | 
-| KMS        | 2.1.0   |
-| VPC        | 5.2.0   |
-
 Before running the script ensure that you have the AWS credentials configured in your system.

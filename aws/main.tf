@@ -47,6 +47,7 @@ module "security_hub" {
 module "vpc" {
   source = "./modules/vpc"
 
+  name                   = var.environment
   enable_siem            = var.enable_siem
   vpc_cidr               = var.vpc_cidr
   enable_nat_gateway     = var.enable_nat_gateway
@@ -56,7 +57,7 @@ module "vpc" {
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
   cost_tags              = var.cost_tags
   az_count               = local.az_count
-  vpc_tags               = merge(var.vpc_tags, { Name = var.environment })
+  vpc_tags               = merge(var.vpc_tags, )
   public_subnet_tags     = merge(var.public_subnet_tags, local.eks_public_subnet_tags)
   private_subnet_tags    = merge(var.private_subnet_tags, local.eks_private_subnet_tags)
 }
