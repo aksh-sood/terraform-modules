@@ -1,19 +1,20 @@
-region             = "us-west-2"
+region             = "us-east-1"
+k8s_cluster_name   = "fx-baton-test"
 environment        = "aksh"
 vendor             = "baton"
-kms_key_arn        = "arn:aws:kms:us-west-2:130759691668:key/fa72c934-3bb5-4b27-bdab-3713ef0b4ee1"
-eks_security_group = "sg-0cef8319b5e39eb4d"
+kms_key_arn        = "arn:aws:kms:us-east-1:130759691668:key/b70cca22-42d2-4a6d-97cd-19de3bf46fb2"
+eks_security_group = "sg-0a4d350af30ae23fd"
 public_subnet_ids = [
-  "subnet-0e0ab77e57f337475",
-  "subnet-04f77ecb3d0a30544",
-  "subnet-0103a1731403b7c98",
+  "subnet-00ec680faa39a81e5",
+  "subnet-02684afcae6897266",
+  "subnet-0b6143078f4a94c89",
 ]
 private_subnet_ids = [
-  "subnet-04cc1f5be5b9c36e8",
-  "subnet-0ff074c0009653892",
-  "subnet-0bc4b2f4f096b55da",
+  "subnet-0729343fda7ec9677",
+  "subnet-0077f163b43fdfdea",
+  "subnet-0bb4f4335e01fe64e",
 ]
-vpc_id                              = "vpc-0cc4119089691d51e"
+vpc_id                              = "vpc-0c13d8e32f6580cb8"
 activemq_engine_version             = "5.15.16"
 activemq_storage_type               = "efs"
 activemq_instance_type              = "mq.t2.micro"
@@ -46,7 +47,7 @@ rds_db_parameter_group_parameters = [
   }
 ]
 rds_enabled_cloudwatch_logs_exports = ["slowquery", "audit", "error"]
-rds_ca_cert_identifier              = "rds-ca-rsa2048-g1"
+rds_ca_cert_identifier              = "rds-ca-2019"
 rds_backup_retention_period         = 7
 
 rabbitmq_engine_version             = "3.11.20"

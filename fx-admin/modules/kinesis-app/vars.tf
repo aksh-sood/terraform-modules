@@ -9,7 +9,7 @@ variable "kinesis_policies" {
   ]
 }
 
-variable "environment" {}
+variable "name" {}
 variable "matched_trades_arn" {}
 variable "normalized_trades_arn" {}
 variable "tags" {}

@@ -1,5 +1,5 @@
 resource "aws_iam_role" "kinesis_role" {
-  name               = "FX_kinesis_app_role_${var.environment}_${var.region}"
+  name               = "FX_kinesis_app_role_${var.name}_${var.region}"
   assume_role_policy = <<-EOF
 {
     "Version": "2012-10-17",
@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "kinesis_role" {
 }
 
 resource "aws_kinesis_analytics_application" "match-trade-kinesis-app" {
-  name              = "${var.environment}-match-trade"
+  name              = "${var.name}-match-trade"
   code              = file("${path.module}/kinesis_app.sql")
   start_application = true
   tags              = var.tags
