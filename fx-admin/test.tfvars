@@ -47,7 +47,7 @@ rds_db_parameter_group_parameters = [
   }
 ]
 rds_enabled_cloudwatch_logs_exports = ["slowquery", "audit", "error"]
-rds_ca_cert_identifier              = "rds-ca-rsa2048-g1"
+rds_ca_cert_identifier              = "rds-ca-2019"
 rds_backup_retention_period         = 7
 
 rabbitmq_engine_version             = "3.11.20"

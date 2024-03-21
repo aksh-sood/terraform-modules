@@ -123,7 +123,7 @@ variable "rds_enabled_cloudwatch_logs_exports" {
 variable "rds_ca_cert_identifier" {
   description = "	The identifier of the CA certificate for the DB instance"
   type        = string
-  default     = "rds-ca-rsa2048-g1"
+  default     = "rds-ca-2019"
 }
 
 variable "rds_backup_retention_period" {
