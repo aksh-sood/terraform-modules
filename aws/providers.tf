@@ -17,6 +17,6 @@ provider "aws" {
 }
 
 provider "aws" {
-  region = var.client_vpn_metadata_bucket_region
+  region = var.enable_client_vpn ? var.client_vpn_metadata_bucket_region : var.region
   alias  = "vpn"
 }
