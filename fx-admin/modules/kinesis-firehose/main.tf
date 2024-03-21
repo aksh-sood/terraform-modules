@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 resource "aws_iam_role" "firehose_role" {
-  name = "FX_firehose_delivery_role_${var.environment}_${var.region}"
+  name = "FX_firehose_delivery_role_${var.name}_${var.region}"
 
   assume_role_policy = <<EOF
 {
@@ -24,7 +24,7 @@ EOF
 
 
 resource "aws_iam_policy" "firehose_policy" {
-  name = "FX-firehose-policy_${var.environment}_${var.region}"
+  name = "FX-firehose-policy_${var.name}_${var.region}"
 
   policy = templatefile("${path.module}/templates/firehose.json", {
     region     = var.region,
@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "firehose_role" {
 # FIREHOSE
 
 resource "aws_kinesis_firehose_delivery_stream" "trm_delivery_firehose_stream" {
-  name        = "trml-delivery-s3-${var.environment}"
+  name        = "trml-delivery-s3-${var.name}"
   destination = "extended_s3"
   tags        = var.tags
 
@@ -52,7 +52,7 @@ resource "aws_kinesis_firehose_delivery_stream" "trm_delivery_firehose_stream" {
 
 #TODO: Add SSE
 resource "aws_kinesis_firehose_delivery_stream" "failed_trml_firehose_stream" {
-  name        = "failed-trml-delivery-s3-${var.environment}"
+  name        = "failed-trml-delivery-s3-${var.name}"
   destination = "extended_s3"
 
   extended_s3_configuration {

@@ -10,5 +10,5 @@ variable "lambda_role_policies" {
   ]
 }
 
-variable "environment" {}
+variable "name" {}
 variable "region" {}

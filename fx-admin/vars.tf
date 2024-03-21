@@ -185,11 +185,6 @@ variable "domain_name" {
   default = "batonsystems.com"
 }
 
-variable "vpc_id" {}
-variable "eks_security_group" {}
-variable "environment" {}
-variable "kms_key_arn" {}
-variable "vendor" {}
 variable "baton_application_namespaces" {
 
   description = "List of namespaces and services and there required attributes"
@@ -264,3 +259,20 @@ variable "rabbitmq_apply_immediately" {
   type        = bool
   default     = false
 }
+
+variable "environment" {
+  description = "Name of the fx admin environment to be setup"
+  type =string
+  default = "test"
+}
+
+variable "k8s_cluster_name" {
+  description = "Name of the EKS cluster where applicaitons should be deployed"
+  type =string
+  default = "test"
+}
+
+variable "vpc_id" {}
+variable "eks_security_group" {}
+variable "kms_key_arn" {}
+variable "vendor" {}

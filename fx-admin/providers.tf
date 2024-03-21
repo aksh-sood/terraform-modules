@@ -26,15 +26,15 @@ provider "aws" {
 
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/${var.environment}"
+    config_path = "~/.kube/${var.k8s_cluster_name}"
   }
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/${var.environment}"
+  config_path = "~/.kube/${var.k8s_cluster_name}"
 }
 
 provider "kubectl" {
-  config_path = "~/.kube/${var.environment}"
+  config_path = "~/.kube/${var.k8s_cluster_name}"
   alias       = "this"
 }
