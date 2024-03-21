@@ -96,7 +96,7 @@ variable "secret_name" {
 variable "enable_config_server" {
   description = "Whether to enable config server"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "alert_manager_volume_size" {
