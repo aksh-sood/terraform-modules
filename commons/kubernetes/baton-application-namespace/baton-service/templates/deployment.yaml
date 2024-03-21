@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    application: {{ .Release.Name }}
+    app: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        application: {{ .Release.Name }}
+        app: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
+          imagePullPolicy: Always
+          readinessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: {{ .Values.url_prefix }}{{ .Values.health_endpoint }}
+              port: {{ .Values.targetPort }}
+              scheme: HTTP
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 10
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: {{ $v | quote }}
+            {{- end }}

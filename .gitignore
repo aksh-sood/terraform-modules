@@ -1,0 +1,12 @@
+.terraform
+.terraform.tfstate.lock.info
+terraform.tfstate
+terraform.tfstate.d
+terraform.tfstate.backup
+k8s
+*.tfstate
+alerts
+*.pem
+*.tfplan
+.backup
+.terraform.lock.hcl

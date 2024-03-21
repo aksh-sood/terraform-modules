@@ -1,0 +1,2 @@
+variable "tags" {}
+variable "name" {}
