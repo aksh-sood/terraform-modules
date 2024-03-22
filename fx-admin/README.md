@@ -7,6 +7,7 @@ This module contains the setup for FX Admin node resources required for onboardi
 - Kinesis analytics application
 - Lambda Functions
 - ActiveMQ
+- RabbitMQ
 - RDS Database
 - S3 Buckets for baton and swift messages
 - Baton Applications and namespaces configuraitons
@@ -19,6 +20,7 @@ This folder only contains two modules in itself . Please refer the below list to
 - [Lambda IAM](../commons/aws/lambda-iam/)
 - [Stream](../commons/aws/stream/)
 - [RDS](../commons/aws/rds/)
+- [RabbitMQ](../commons/aws/rabbitmq/)
 - [S3](../commons/aws/s3/)
 - [SQS](../commons/aws/sqs/)
 - [ActiveMQ](../commons/aws/activemq/)

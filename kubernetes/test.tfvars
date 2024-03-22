@@ -17,3 +17,4 @@ efs_id               = "fs-03597468bce81b81f"
 cloudflare_api_token = ""
 enable_siem          = false
 secret_name          = "test"
+enable_config_server = false
