@@ -24,9 +24,7 @@ locals {
 
 resource "random_password" "password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>?"
-  min_special      = 1
+  special          = false
   lower            = true
   min_lower        = 1
   numeric          = true
@@ -151,6 +149,15 @@ resource "aws_security_group_rule" "eks_sg" {
   protocol                 = "tcp"
   source_security_group_id = var.eks_sg
   security_group_id        = module.rds_cluster.security_group_id
+}
+
+resource "aws_security_group_rule" "allow_all" {
+  type              = "egress"
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  from_port         = 0
+  security_group_id = module.rds_cluster.security_group_id
 }
 
 resource "aws_rds_cluster_instance" "reader_instance" {

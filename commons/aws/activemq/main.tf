@@ -1,9 +1,7 @@
 #Generating a random password gor ActiveMQ
 resource "random_password" "activemq_password" {
   length           = 16
-  special          = true
-  override_special = "!#$&*-_+"
-  min_special      = 1
+  special          = false
   lower            = true
   min_lower        = 1
   numeric          = true

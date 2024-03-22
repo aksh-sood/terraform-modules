@@ -216,6 +216,7 @@ variable "baton_application_namespaces" {
       })
     }))
   }))
+  default = []
 }
 
 variable "rabbitmq_engine_version" {
