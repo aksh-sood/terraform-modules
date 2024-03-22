@@ -1,5 +1,5 @@
 # Description
-The following folder is a sub part of the entire Terraform IAAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS and RDS resources can be optionally executed depending upon the users needs .
+The following folder is a sub part of the entire Terraform IAAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS resources can be optionally executed depending upon the users needs .
 
 - VPC
 - Private Public Subnets

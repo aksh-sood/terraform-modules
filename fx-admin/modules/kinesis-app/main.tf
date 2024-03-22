@@ -47,6 +47,10 @@ resource "aws_kinesis_analytics_application" "match-trade-kinesis-app" {
   inputs {
     name_prefix = "SOURCE_SQL_STREAM"
 
+    starting_position_configuration {
+      starting_position = "NOW"
+    }
+
     kinesis_stream {
       resource_arn = var.normalized_trades_arn
       role_arn     = aws_iam_role.kinesis_role.arn

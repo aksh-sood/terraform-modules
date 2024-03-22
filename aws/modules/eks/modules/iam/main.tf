@@ -134,7 +134,7 @@ resource "aws_iam_role_policy_attachment" "node_role" {
 #Grafana role 
 
 resource "aws_iam_role" "grafana" {
-  name_prefix        = "grafana_${var.cluster_name}_${var.region}"
+  name               = "grafana_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF
   {
     "Version": "2012-10-17",
