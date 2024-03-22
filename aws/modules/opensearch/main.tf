@@ -105,5 +105,5 @@ resource "aws_opensearch_domain_policy" "main" {
 }
 EOF
 
-  depends_on = [time_sleep.delay_10_min]
+  depends_on = [time_sleep.domain_policy]
 }

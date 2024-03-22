@@ -24,9 +24,6 @@ locals {
 
 resource "random_password" "password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>?"
-  min_special      = 1
   lower            = true
   min_lower        = 1
   numeric          = true
