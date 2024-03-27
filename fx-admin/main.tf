@@ -89,6 +89,7 @@ module "s3_writer_lambda" {
   package_key               = "s3-writer-lambda-0.0.1-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {
@@ -127,6 +128,7 @@ module "normalized_trml_lambda" {
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {
@@ -148,6 +150,7 @@ module "matched_trades_lambda" {
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {

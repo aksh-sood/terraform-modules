@@ -41,12 +41,12 @@ resource "aws_security_group" "activemq_sg" {
   }
 
   # Adding name tag for Security group so that we can easily identify it
-  tags = var.tags
+  tags = merge(var.tags,{Name = "${var.name}-activemq-sg"})
 }
 
 resource "aws_mq_configuration" "mq_configuration" {
   description    = "ActiveMQ provisioning"
-  name           = var.name
+  name           = "${var.name}-activemq"
   engine_type    = "ActiveMQ"
   engine_version = var.engine_version
   data           = file("${path.module}/configuration/activemq_config.xml")

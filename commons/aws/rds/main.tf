@@ -95,7 +95,6 @@ module "rds_cluster" {
   # Tags
   tags = merge(var.cost_tags, {
     Name      = "${var.name}-RDS"
-    Terraform = "true"
   })
 
   #security-hub special requirements

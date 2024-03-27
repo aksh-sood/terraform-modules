@@ -6,6 +6,8 @@
       "Effect": "Allow",
       "Action": [
         "acm:*",
+        "kinesis:PutRecord",
+        "firehose:PutRecord",
         "apigateway:SetWebACL",
         "apprunner:AssociateWebAcl",
         "apprunner:DescribeWebAclForService",

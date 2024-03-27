@@ -1,11 +1,3 @@
-resource "aws_security_group" "lambda" {
-  name        = var.name
-  description = "security group for lambdas"
-  vpc_id      = var.vpc_id
-
-  tags = var.tags
-}
-
 resource "aws_lambda_function" "this" {
   s3_bucket     = var.lambda_packages_s3_bucket
   s3_key        = var.package_key
@@ -19,7 +11,7 @@ resource "aws_lambda_function" "this" {
 
   vpc_config {
     subnet_ids         = var.subnet_ids
-    security_group_ids = [aws_security_group.lambda.id]
+    security_group_ids = [var.security_group]
   }
 
   environment {

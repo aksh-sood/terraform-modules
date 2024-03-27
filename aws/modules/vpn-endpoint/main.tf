@@ -42,7 +42,7 @@ resource "aws_security_group" "client_vpn" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = var.cost_tags
+  tags = merge(var.cost_tags,{Name = "${var.name}-vpn-endpoint"})
 }
 
 resource "aws_ec2_client_vpn_endpoint" "client_vpn" {

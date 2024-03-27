@@ -23,6 +23,8 @@ resource "aws_security_group" "sg" {
 
     security_groups = [var.eks_sg]
   }
+
+  tags = merge(var.cost_tags, {Name = "${var.domain_name}-opensearch"})
 }
 
 resource "aws_opensearch_domain" "domain" {
@@ -61,7 +63,6 @@ resource "aws_opensearch_domain" "domain" {
   }
 
   tags = merge(var.cost_tags, {
-    "Terraform"   = true
     "Environment" = "${var.domain_name}"
   })
 

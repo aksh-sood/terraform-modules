@@ -55,7 +55,7 @@ module "vpc" {
   enable_nat_gateway     = var.enable_nat_gateway
   single_nat_gateway     = var.enable_nat_gateway
   one_nat_gateway_per_az = false
-  nat_gateway_tags       = var.cost_tags
+  nat_gateway_tags       = merge(var.cost_tags,{ Name = var.name })
 
   # Internet Gateway config
   igw_tags = var.cost_tags
@@ -97,5 +97,5 @@ module "vpc" {
 resource "aws_default_security_group" "default" {
   vpc_id = module.vpc.vpc_id
 
-  tags = merge(var.cost_tags, var.vpc_tags)
+  tags = merge(var.cost_tags, var.vpc_tags,{ Name = var.name })
 }
