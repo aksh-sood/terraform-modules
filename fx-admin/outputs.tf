@@ -28,11 +28,11 @@ output "rabbitmq_endpoint" {
 
 output "rds_writer_endpoint" {
   value       = module.rds_cluster.writer_endpoint
-  description = "Writer endpoint of the RDS cluster."
+  description = "Writer endpoint of the RDS cluster"
 }
 
 output "rds_reader_endpoint" {
-  description = "Reader endpoint of the RDS cluster."
+  description = "Reader endpoint of the RDS cluster"
   value       = module.rds_cluster.reader_endpoint
 }
 
@@ -43,4 +43,8 @@ output "rds_master_password" {
 
 output "rds_master_username" {
   value = module.rds_cluster.master_username
+}
+
+output "fqdn" {
+  value = var.create_dns_records ? module.cloudflare[0].domains : null
 }

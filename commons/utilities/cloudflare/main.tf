@@ -19,11 +19,11 @@ data "cloudflare_zone" "this" {
 }
 
 resource "cloudflare_record" "cnames" {
-  count = length(var.cnames)
+  for_each = var.cnames
 
   provider = cloudflare.this
 
-  name    = "${var.environment}-${var.cnames[count.index]}"
+  name    = "${var.name}-${each.key}"
   zone_id = data.cloudflare_zone.this.id
   type    = "CNAME"
   proxied = true

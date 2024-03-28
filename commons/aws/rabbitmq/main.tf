@@ -39,7 +39,7 @@ resource "aws_security_group" "rabbitmq" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = merge(var.tags,{Name ="${var.name}-rabbitmq-sg" })
+  tags = merge(var.tags,{Name ="${var.name}-rabbitmq" })
 }
 
 resource "aws_mq_broker" "rabbitmq" {

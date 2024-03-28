@@ -1,3 +1,45 @@
+locals {
+  cnames = toset(["rabbitmq"])
+}
+
+resource "null_resource" "domain_validation" {
+  lifecycle {
+    precondition {
+      condition = var.domain_name != "" && var.domain_name != null
+      error_message = "Provide domain_name"
+    }
+  }
+
+}
+
+resource "null_resource" "vpn_validation" {
+  lifecycle {
+    precondition {
+      condition = var.create_dns_records ? (
+        var.loadbalancer_url != "" && var.loadbalancer_url != null
+      ) : true
+      error_message = "Provide loadbalancer_urlor disable create_dns_records"
+    }
+  }
+
+}
+
+module "cloudflare" {
+  source = "../commons/utilities/cloudflare"
+  count  = var.create_dns_records ? 1 : 0
+
+  loadbalancer_url = var.loadbalancer_url
+
+  cnames           = setunion(local.cnames,var.cnames)
+  name             = var.environment
+  domain_name      = var.domain_name
+
+  providers = {
+    cloudflare.this = cloudflare.this
+  }
+
+}
+
 module "rabbitmq" {
   source = "../commons/aws/rabbitmq"
 

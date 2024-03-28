@@ -26,7 +26,11 @@ Responsible for installation of helm based eks addons in cluster which are liste
 
 The versions for the following can be supplied from the input variables.
 
-##### [Cloudflare](./kubernetes/module/cloudflare)
+##### [SFTP](./kubernetes/module/sftp)
+
+Provisions a SFTP server in the provided namespace. It is an optionally executable module which is set by `enable_sftp` variable.
+
+##### [Cloudflare](../commons/utilities/cloudflare)
 
 Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,prometheus, alertmanager.
 
@@ -135,6 +139,10 @@ terraform apply
 | lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
 | environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
 | secret_name\* | Secret name containing SSH key to be feed to config-server| string | |
+|config_server_image_tag\*| Version of config-server to deploy | number |  |
+| config_repo_url\* | SSH link to config repo repository for configuring ENV variables of applications | string | `"git@bitbucket.org:ubixi/config-repo.git"` |
+|sftp_namespace|Namespace for SFTP server to deploy | string | `"sftp"`|
+|sftp_username | username for SFTP server |  string | `"myuser"`|
 | domain_name\*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
 | acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
 | siem_storage_s3_bucket         | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |
@@ -279,3 +287,13 @@ This object taked the paramters needed by a single service to run adn are passed
 | grafana_password     | string | Admin passwrod for grafana dashboard     |
 | grafana_dev_password | string | Developer password for grafana dashboard |
 | loadbalancer_url     | string | URL of ALB LoadBalancer                  |
+| sftp_host | string | SFTP hostname | 
+| sftp_username | string | SFTP username |
+| sftp_password | string | SFTP password |
+| fqdn | list(string) | List of all the domains created| 
+| jaeger_username | string |  basic auth username for jaeger |
+| jaeger_password | string |basic auth password for jaeger | 
+| alertmanager_username| string |basic auth username for alertmanager |
+| alertmanager_password | string | basic auth password for alertmanager|
+| prometheus_username| string | basic auth username for prometheus | 
+| prometheus_password | string | basic auth password for prometheus|

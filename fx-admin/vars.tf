@@ -182,7 +182,12 @@ variable "public_subnet_ids" {
 }
 
 variable "domain_name" {
-  default = "batonsystems.com"
+  description = "Domain Name registered in DNS service"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-]{1,63}\\.[a-zA-Z]{2,6}$", var.domain_name))
+    error_message = "Domain name should be valid (e.g., example.com)"
+  }
 }
 
 variable "baton_application_namespaces" {
@@ -306,6 +311,25 @@ variable "k8s_cluster_name" {
   description = "Name of the EKS cluster where applications should be deployed"
   type =string
   default = "test"
+}
+
+variable "create_dns_records" {
+  default = false
+}
+
+variable "cnames" {
+  description = "subdomain suffix for cname records to generate"
+  type = set(string)
+  default = []
+}
+
+variable "loadbalancer_url" {
+  default = ""
+}
+
+variable "cloudflare_api_token" {
+  description = "API token to access cloudflare"
+  type        = string
 }
 
 variable "vpc_id" {}

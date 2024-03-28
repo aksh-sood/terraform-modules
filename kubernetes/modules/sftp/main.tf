@@ -13,7 +13,7 @@ resource "random_password" "password" {
 
 resource "kubernetes_namespace_v1" "this" {
   metadata {
-    name = "sftp"
+    name = var.namespace
   }
 }
 
@@ -24,7 +24,7 @@ resource "kubernetes_persistent_volume_claim_v1" "this" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = "sftp-sc"
+    storage_class_name = var.storage_class_name
     resources {
       requests = {
         storage = "40Gi"
@@ -82,7 +82,7 @@ resource "kubernetes_deployment_v1" "this" {
           image = "atmoz/sftp:latest"
           name  = "sftp"
           image_pull_policy = "Always"
-          args = [ "myuser:${random_password.password.result}:1001:100:Incoming,Outgoing" ]
+          args = [ "${var.sftp_username}:${random_password.password.result}:1001:100:Incoming,Outgoing" ]
 
           volume_mount {
             mount_path = "home/myuser"
