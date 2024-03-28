@@ -113,7 +113,7 @@ module "activemq" {
   storage_type               = var.activemq_storage_type
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
-  whitelist_security_groups  = [var.eks_security_group, module.matched_trades_lambda.security_group_id, module.normalized_trml_lambda.security_group_id]
+  whitelist_security_groups  = [var.eks_security_group]
 
   tags = var.cost_tags
 }

@@ -134,7 +134,7 @@ terraform apply
 | efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
 | lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
 | environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
-| secret_name\* | Secret name containing SSH key for SCM access to be feed to config-server| string | |
+| secret_name\* | Secret name containing SSH key to be feed to config-server| string | |
 | domain_name\*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
 | acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
 | siem_storage_s3_bucket         | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |
@@ -144,6 +144,7 @@ terraform apply
 | alert_manager_volume_size      | PVC size for alertmanager                                           | string                                                      | `"5Gi"`                                                                      |
 | cloudflare_api_token\*         | cloudflare API access token                                         | string                                                      |                                                                              |
 | enable_siem                    | Optional enabling of logging in ALB                                 | bool                                                        | `true`                                                                       |
+| enable_sftp | Optional enabling of SFTP server|bool | `true` |
 | baton_application_namespaces\* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 **NOTE: `enable_siem` parameter is used to enable/disable the logging of istio ingress . If set to `true` ,`siem_storage_s3_bucket` is required attribute with S3 bucekt in the same region as the EKS cluster**

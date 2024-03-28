@@ -88,7 +88,7 @@ variable "custom_alerts" {
 }
 
 variable "secret_name" {
-  description = "Name of the secret storing ssh key to configure into config map of config server"
+  description = "Name of the secret storing ssh key to configure into k8s secrets of config server"
   type        = string
   default     = ""
 }
@@ -121,6 +121,11 @@ variable "enable_siem" {
 }
 
 variable "create_dns_records" {
+  default = true
+}
+
+variable "enable_sftp" {
+  description = "Deploy SFTP server in Kubernetes cluster"
   default = true
 }
 

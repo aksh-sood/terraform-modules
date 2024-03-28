@@ -38,7 +38,9 @@ resource "kubernetes_storage_class_v1" "efs" {
   parameters = {
     provisioningMode = "efs-ap"
     fileSystemId     = "${var.efs_id}"
-    directoryPerms   = "700"
+    directoryPerms   = "777"
+    uid = 0
+    gid = 0
   }
 
   depends_on = [module.addons]
@@ -125,4 +127,9 @@ module "config_server" {
   }
 
   depends_on = [module.istio, null_resource.config_server_validation]
+}
+
+module "sftp" {
+  source = "./modules/sftp"
+  count = var.enable_sftp ? 1 : 0
 }

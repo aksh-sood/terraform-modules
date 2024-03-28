@@ -57,3 +57,8 @@ output "prometheus_password" {
 output "fqdn" {
   value = var.create_dns_records ? module.cloudflare[0].domains : null
 }
+
+output "sftp_user_password" {
+  description = "password for sftp user"
+  value =var.enable_sftp?module.sftp[0].sftp_user_password:null
+}

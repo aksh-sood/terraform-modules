@@ -58,3 +58,4 @@ rabbitmq_publicly_accessible        = false
 rabbitmq_username                   = "master"
 rabbitmq_enable_cluster_mode        = false
 domain_name ="batonsystem.com"
+sftp_user_password = ""

@@ -18,3 +18,4 @@ cloudflare_api_token = ""
 enable_siem          = false
 secret_name          = "test"
 enable_config_server = false
+enable_sftp          = false

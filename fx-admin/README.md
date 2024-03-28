@@ -146,6 +146,7 @@ terraform apply
 | vpc_id\*                                  | VPC ID to to link to lambdas , activeMQ , RDS                                                              | string                             |                                                                              |
 | eks_security_group\*                      | Security group linked to EKS                                                                               | string                             |                                                                              |
 | kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
+|sftp_user_password| SFTP user password | string |`""`|
 | baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 ### Baton Application Namespaces
