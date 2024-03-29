@@ -57,7 +57,7 @@ module "vpc" {
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
   cost_tags              = var.cost_tags
   az_count               = local.az_count
-  vpc_tags               = merge(var.vpc_tags, )
+  vpc_tags               = var.vpc_tags
   public_subnet_tags     = merge(var.public_subnet_tags, local.eks_public_subnet_tags)
   private_subnet_tags    = merge(var.private_subnet_tags, local.eks_private_subnet_tags)
 }

@@ -145,8 +145,14 @@ terraform apply
 | domain_name                               | Domain name to use for exposing endpoints                                                                  | string                             | `batonsystems.com`                                                           |
 | vpc_id\*                                  | VPC ID to to link to lambdas , activeMQ , RDS                                                              | string                             |                                                                              |
 | eks_security_group\*                      | Security group linked to EKS                                                                               | string                             |                                                                              |
+|loadbalancer_url\* | Target for configuring DNS records |  string |`""` |
+| cnames | Set of CNAME suffixed for subdomain |set(string)  |`[]` | 
+| cloudflare_api_token\* | API token for configuring cloudflare provider |  string | |
 | kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
-| baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |
+| sftp_host\* | Hostname for baton SFTP server | string | |
+| sftp_user\* | Username for baton SFTP server| string | 
+| sftp_password\* |  Password for baton SFTP server | string |  baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 ### Baton Application Namespaces
 
@@ -265,3 +271,17 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
     }
 ]
 ```
+### Output
+
+| Name                 | Type   | Description                              |
+| :------------------- | :----- | :--------------------------------------- |
+|activemq_url       | string |endpoint of activemq|
+|activemq_username  | string |ActiveMQ Username credential|
+|activemq_password  | string |ActiveMQ password credential|
+|rabbitmq_endpoint  | string |endpoint of rabbitMQ |
+|rabbitmq_username  | string |rabbitMQ Username credential|
+|rabbitmq_password  | string |rabbitMQ password credential|
+|rds_writer_endpoint| string |Writer endpoint of the RDS cluster|
+|rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
+|rds_master_username| string |RDS master username credential|
+|rds_master_password| string |RDS master password credential|

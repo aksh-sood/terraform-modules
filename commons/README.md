@@ -15,8 +15,21 @@ This folder works like a universal module for multiple directories in this scrip
   - Baton Namepspace
   - Baton Application 
   - RabbitMQ
+- Utilities
+  - CloudFlare 
 
 # Modules
+
+### [Cloudflare](../commons/utilities/cloudflare)
+
+Responsible for create CNAME records on cloudlfare.
+
+| Name                                      | Description                               | Type         | Default                                                                     |
+|:------------------------------------------|:------------------------------------------|:-------------|:----------------------------------------------------------------------------|
+|cnames | Set of suffix for subdomain in CNAME records | set(string) |  | 
+|name | Name of environment | string |  | 
+|domain_name | domain name registered in cloudflare | string |  | 
+|loadbalancer_url |target domain for CNAME records | string | 
 
 ### [RDS](./aws/rds/)
 

@@ -16,3 +16,4 @@ variable "lambda_role_arn" {}
 variable "vpc_id" {}
 variable "lambda_packages_s3_bucket" {}
 variable "tags" {}
+variable "security_group" {}

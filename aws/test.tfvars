@@ -64,9 +64,9 @@ eks_node_groups = {
   volume_size                   = 20
 
   node_groups = [{
-    name = "node1"
+    name = "default"
 
-    instance_types = ["m5.large"]
+    instance_types = ["m6a.large"]
 
     min_size = 2
     max_size = 2

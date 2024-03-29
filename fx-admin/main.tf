@@ -1,3 +1,47 @@
+data "aws_caller_identity" "current" {}
+
+locals {
+  cnames = toset(["rabbitmq"])
+}
+
+resource "null_resource" "domain_validation" {
+  lifecycle {
+    precondition {
+      condition     = var.domain_name != "" && var.domain_name != null
+      error_message = "Provide domain_name"
+    }
+  }
+
+}
+
+resource "null_resource" "vpn_validation" {
+  lifecycle {
+    precondition {
+      condition = var.create_dns_records ? (
+        var.loadbalancer_url != "" && var.loadbalancer_url != null
+      ) : true
+      error_message = "Provide loadbalancer_urlor disable create_dns_records"
+    }
+  }
+
+}
+
+module "cloudflare" {
+  source = "../commons/utilities/cloudflare"
+  count  = var.create_dns_records ? 1 : 0
+
+  loadbalancer_url = var.loadbalancer_url
+
+  cnames      = local.cnames
+  name        = var.environment
+  domain_name = var.domain_name
+
+  providers = {
+    cloudflare.this = cloudflare.this
+  }
+
+}
+
 module "rabbitmq" {
   source = "../commons/aws/rabbitmq"
 
@@ -19,15 +63,15 @@ module "rabbitmq" {
 module "s3_swift" {
   source = "../commons/aws/s3"
 
-  name        = "${var.vendor}-${var.environment}-swift-messages"
-  tags        = var.cost_tags
+  name = "${var.vendor}-${var.environment}-swift-messages"
+  tags = var.cost_tags
 }
 
 module "s3" {
   source = "../commons/aws/s3"
 
-  name        = "${var.vendor}-${var.environment}"
-  tags        = var.cost_tags
+  name = "${var.vendor}-${var.environment}"
+  tags = var.cost_tags
 }
 
 module "kinesis_firehose" {
@@ -35,23 +79,23 @@ module "kinesis_firehose" {
 
   bucket_arn = module.s3.bucket_arn
 
-  name        = var.environment
-  region      = var.region
-  tags        = var.cost_tags
+  name   = var.environment
+  region = var.region
+  tags   = var.cost_tags
 }
 
 module "normalized_trml_kinesis_stream" {
   source = "../commons/aws/stream"
 
-  name        = "${var.environment}-normalized-trml"
-  tags        = var.cost_tags
+  name = "${var.environment}-normalized-trml"
+  tags = var.cost_tags
 }
 
 module "matched_trades_kinesis_stream" {
   source = "../commons/aws/stream"
 
-  name        = "${var.environment}-matched-trades"
-  tags        = var.cost_tags
+  name = "${var.environment}-matched-trades"
+  tags = var.cost_tags
 }
 
 module "kinesis_app" {
@@ -60,16 +104,16 @@ module "kinesis_app" {
   normalized_trades_arn = module.normalized_trml_kinesis_stream.stream_arn
   matched_trades_arn    = module.matched_trades_kinesis_stream.stream_arn
 
-  name        = var.environment
-  region      = var.region
-  tags        = var.cost_tags
+  name   = var.environment
+  region = var.region
+  tags   = var.cost_tags
 }
 
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  name        = var.environment
-  region      = var.region
+  name   = var.environment
+  region = var.region
 }
 
 module "sqs" {
@@ -89,6 +133,7 @@ module "s3_writer_lambda" {
   package_key               = "s3-writer-lambda-0.0.1-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {
@@ -112,7 +157,7 @@ module "activemq" {
   storage_type               = var.activemq_storage_type
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
-  whitelist_security_groups  = [var.eks_security_group, module.matched_trades_lambda.security_group_id, module.normalized_trml_lambda.security_group_id]
+  whitelist_security_groups  = [var.eks_security_group]
 
   tags = var.cost_tags
 }
@@ -127,6 +172,7 @@ module "normalized_trml_lambda" {
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {
@@ -148,6 +194,7 @@ module "matched_trades_lambda" {
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
   vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
   environment_variables = {
@@ -207,4 +254,34 @@ module "baton_application_namespace" {
   providers = {
     kubectl.this = kubectl.this
   }
+}
+
+
+module "secrets" {
+  source = "../commons/aws/secrets"
+
+  name        = var.environment
+  kms_key_arn = var.kms_key_arn
+  secrets = merge({
+    database_writer_url   = module.rds_cluster.writer_endpoint,
+    database_readonly_url = module.rds_cluster.reader_endpoint,
+    database_username     = module.rds_cluster.master_username,
+    database_password     = module.rds_cluster.master_password,
+    activemq_url_1        = module.activemq.url,
+    activemq_url_2        = module.activemq.url,
+    activemq_username     = module.activemq.username,
+    activemq_password     = module.activemq.password,
+    rabbitmq_url          = replace(module.rabbitmq.console_url, "https://", ""),
+    rabbitmq_username     = module.rabbitmq.username,
+    rabbitmq_password     = module.rabbitmq.password
+    aws_account           = data.aws_caller_identity.current.account_id
+    aws_region            = var.region,
+    sftp_host_triana      = var.sftp_host
+    sftp_user_triana      = var.sftp_username
+    sftp_password_triana  = var.sftp_password
+    sftp_host_baton       = var.sftp_host
+    sftp_user_baton       = var.sftp_username
+    sftp_password_baton   = var.sftp_password
+
+  }, var.additional_secrets)
 }

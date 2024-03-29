@@ -182,7 +182,12 @@ variable "public_subnet_ids" {
 }
 
 variable "domain_name" {
-  default = "batonsystems.com"
+  description = "Domain Name registered in DNS service"
+  type        = string
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-]{1,63}\\.[a-zA-Z]{2,6}$", var.domain_name))
+    error_message = "Domain name should be valid (e.g., example.com)"
+  }
 }
 
 variable "baton_application_namespaces" {
@@ -216,7 +221,42 @@ variable "baton_application_namespaces" {
       })
     }))
   }))
-  default = []
+
+  default = [
+    {
+      namespace       = "fx-baton-test"
+      customer        = "osttra"
+      istio_injection = false
+      services = [
+        {
+          name        = "directory-service"
+          target_port = 8080
+          url_prefix  = "/directory"
+          image_tag   = "1.0.4"
+        },
+        {
+          name        = "normalizer"
+          target_port = 8080
+          url_prefix  = "/normalizer"
+          image_tag   = "2.0.13"
+        },
+        {
+          name        = "notaryservice"
+          target_port = 8080
+          url_prefix  = "/notary"
+          image_tag   = "2.0.4"
+        },
+        {
+          name        = "swiftservice"
+          target_port = 8080
+          url_prefix  = "/swift"
+          image_tag   = "2.0.2"
+        }
+      ]
+    }
+  ]
+
+
 }
 
 variable "rabbitmq_engine_version" {
@@ -263,14 +303,46 @@ variable "rabbitmq_apply_immediately" {
 
 variable "environment" {
   description = "Name of the fx admin environment to be setup"
-  type =string
-  default = "test"
+  type        = string
+  default     = "test"
 }
 
 variable "k8s_cluster_name" {
-  description = "Name of the EKS cluster where applicaitons should be deployed"
-  type =string
-  default = "test"
+  description = "Name of the EKS cluster where applications should be deployed"
+  type        = string
+  default     = "test"
+}
+
+variable "create_dns_records" {
+  default = false
+}
+
+variable "loadbalancer_url" {
+  default = ""
+}
+
+variable "cloudflare_api_token" {
+  description = "API token to access cloudflare"
+  type        = string
+}
+variable "additional_secrets" {
+  description = "additional map of secrets to be saved in secrets manager"
+  default     = {}
+}
+
+variable "sftp_host" {
+  description = "Host name for sftp"
+  type        = string
+}
+
+variable "sftp_username" {
+  description = "Username for sftp"
+  type        = string
+}
+
+variable "sftp_password" {
+  description = "Password for sftp"
+  type        = string
 }
 
 variable "vpc_id" {}
