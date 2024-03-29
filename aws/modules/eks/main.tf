@@ -53,7 +53,7 @@ resource "aws_key_pair" "generated_key" {
   tags     = var.eks_tags
 
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.ssh_key.private_key_pem}' > ./${var.cluster_name}-eks-nodes.pem"
+    command = "echo '${tls_private_key.ssh_key.private_key_pem}' > $HOME/${var.cluster_name}-eks-nodes.pem"
   }
 }
 

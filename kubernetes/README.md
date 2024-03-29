@@ -1,6 +1,6 @@
 # Description
 
-The following folder is a sub part of the entire Terraform IAAC project and deals with the creation of Kubernetes resources listed below.
+The following folder is a sub part of the entire Terraform IAC project and deals with the creation of Kubernetes resources listed below.
 
 - LBC Addon
 - Istio installation in EKS cluster
@@ -10,6 +10,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - Grafana Dashboards and Users
 - Cloudflare CNAME records
 - Jaeger
+- Filebeat Agent and opensearch public access
 
 # Modules
 
@@ -22,17 +23,25 @@ The isito module installs the isito service mesh onto the EKS cluster in `istio-
 
 ##### [Addons](./kubernetes/module/addons)
 
-Responsible for installation of helm based eks addons in cluster which are listed below. - lbc-controller
+Responsible for installation of helm based eks addons in cluster which are listed below. 
+
+- lbc-controller
 
 The versions for the following can be supplied from the input variables.
 
-##### [Cloudflare](./kubernetes/module/cloudflare)
+##### [SFTP](./kubernetes/module/sftp)
+
+Provisions a SFTP server in the provided namespace. It is an optionally executable module which is set by `enable_sftp` variable.
+
+##### [Cloudflare](../commons/utilities/cloudflare)
 
 Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,prometheus, alertmanager.
 
 ##### [Config Server](./kubernetes/module/cloudflare)
 
-This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that ocontains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
+This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that contains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
+
+Config server only supports SSH keys of type **RSA**, please refer this [documentation](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_authentication) for more information. Use the following command to generate the key `ssh-keygen -m PEM -t rsa -b 4096 -f ~/config_server_deploy_key.rsa`. Follow this [link](https://support.atlassian.com/bitbucket-cloud/docs/set-up-personal-ssh-keys-on-linux/#Provide-Bitbucket-Cloud-with-your-public-key) for steps to whitelist the SSH key on BitBucket
 
 ##### [Jaeger](./kubernetes/module/jaeger)
 
@@ -45,8 +54,6 @@ Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheu
 The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warning and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as `200Gi`,`5Gi` and `10Gi` respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
 
 CNAME records are also created via this module for prometheus, grafana and alertmanager exposing the services at `{environment}-{service}-{domain}` EXAMPLE `test-grafana-123.com`.
-
-This module also uses `kubectl` and `cloudflare` providers which are configured in root providers file and passed down in the main file as `Gateway`,`CNAME` records and `VirtualService` objects are created here.
 
 ###### [Grafana Config](./kubernetes/module/monitoring/modules/grafana-config)
 
@@ -64,7 +71,7 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 ├── main.tf
 ├── modules
 │   ├── addons
-│   ├── cloudflare
+│   ├── sftp
 │   ├── config-server
 │   ├── istio
 │   ├── jaeger
@@ -101,7 +108,7 @@ The main configuration lies inside the modules folder which has a multiple sub d
 
 - Configure AWS credentials
 
-- Install the necessary modules for each of the folders by going into the relevant directories and applying the below command.
+- Install the necessary modules for each of the folders by going into the relevant directories and executing the below command.
 
 ```
 terraform init
@@ -123,28 +130,33 @@ terraform apply
 
 ### Inputs
 
-| Name                           | Description                                                               | Type                                                        | Default                                                                      |
-| :----------------------------- | :------------------------------------------------------------------------ | :---------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| kube_prometheus_stack_version  | Prometheus version to be installed                                        | string                                                      | `"49.2.0"`                                                                   |
-| istio_version                  | isito version to be installed                                             | string                                                      | `"1.20.0"`                                                                   |
-| slack_channel_name\*           | slack channnel name to recieve prometheus alerts                          | string                                                      |                                                                              |
-| slack_web_hook\*               | slack applicaiton webhook for prometheus alerts                           | string                                                      |                                                                              |
-| pagerduty_key\*                | PagerDuty key for prometheus alerts                                       | string                                                      |                                                                              |
-| efs_id\*                       | EFS ID from aws script for persistent storage                             | string                                                      |                                                                              |
-| efs_addon_version              | Version of the efs driver                                                 | string                                                      | `"2.2.0"`                                                                    |
-| lbc_addon_version              | Version of lbc driver                                                     | string                                                      | `"1.6.0"`                                                                    |
-| environment\*                  | Environment for which the resources are being provisioned                 | string                                                      |                                                                              |
-| secret_name\*                  | Secret name containing SSH key for SCM access to be feed to config-server | string                                                      |                                                                              |
-| domain_name\*                  | Domain name registerd in the DNS service                                  | string                                                      |                                                                              |
-| acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress       | string                                                      |                                                                              |
-| siem_storage_s3_bucket         | S3 bucket name for alerts and logging                                     | string                                                      |                                                                              |
-| custom_alerts                  | List of custom alerts for prometheus                                      | [map(custom_alerts)](#markdown-header-custom-alerts-config) | `[]`                                                                         |
-| grafana_role_arn\*             | ARN for the grafana role                                                  | string                                                      |                                                                              |
-| prometheus_volume_size         | PVC size for prometheus                                                   | string                                                      | `"200Gi"`                                                                    |
-| alert_manager_volume_size      | PVC size for alertmanager                                                 | string                                                      | `"5Gi"`                                                                      |
-| cloudflare_api_token\*         | cloudflare API access token                                               | string                                                      |                                                                              |
-| enable_siem                    | Optional enabling of logging in ALB                                       | bool                                                        | `true`                                                                       |
-| baton_application_namespaces\* | List of namespaces and services with requirments                          | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| Name                           | Description                                                         | Type                                                        | Default                                                                      |
+| :----------------------------- | :------------------------------------------------------------------ | :---------------------------------------------------------- | :--------------------------------------------------------------------------- |
+| kube_prometheus_stack_version  | Prometheus version to be installed                                  | string                                                      | `"49.2.0"`                                                                   |
+| istio_version                  | isito version to be installed                                       | string                                                      | `"1.20.0"`                                                                   |
+| slack_channel_name\*           | slack channnel name to recieve prometheus alerts                    | string                                                      |                                                                              |
+| slack_web_hook\*               | slack applicaiton webhook for prometheus alerts                     | string                                                      |                                                                              |
+| pagerduty_key\*                | PagerDuty key for prometheus alerts                                 | string                                                      |                                                                              |
+| efs_id\*                       | EFS ID from aws script for persistent storage                       | string                                                      |                                                                              |
+| efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |
+| lbc_addon_version              | Version of lbc driver                                               | string                                                      | `"1.6.0"`                                                                    |
+| environment\*                  | Environment for which the resources are being provisioned           | string                                                      |                                                                              |
+| bitbucket_key_secrets_manager_name\* | Secret name containing SSH key to be feed to config-server| string | |
+|config_server_image_tag\*| Version of config-server to deploy | number |  |
+| config_repo_url\* | SSH link to config repo repository for configuring ENV variables of applications | string | `"git@bitbucket.org:ubixi/config-repo.git"` |
+|sftp_namespace|Namespace for SFTP server to deploy | string | `"sftp"`|
+|sftp_username | username for SFTP server |  string | `"myuser"`|
+| domain_name\*                  | Domain name registerd in the DNS service                            | string                                                      |                                                                              |
+| acm_certificate_arn\*          | ARN of the domain certificate from the AWS script for istio ingress | string                                                      |                                                                              |
+| siem_storage_s3_bucket         | S3 bucket name for alerts and logging                               | string                                                      |                                                                              |
+| custom_alerts                  | List of custom alerts for prometheus                                | [map(custom_alerts)](#markdown-header-custom-alerts-config) | `[]`                                                                         |
+| grafana_role_arn\*             | ARN for the grafana role                                            | string                                                      |                                                                              |
+| prometheus_volume_size         | PVC size for prometheus                                             | string                                                      | `"200Gi"`                                                                    |
+| alert_manager_volume_size      | PVC size for alertmanager                                           | string                                                      | `"5Gi"`                                                                      |
+| cloudflare_api_token\*         | cloudflare API access token                                         | string                                                      |                                                                              |
+| enable_siem                    | Optional enabling of logging in ALB                                 | bool                                                        | `true`                                                                       |
+| enable_sftp | Optional enabling of SFTP server|bool | `true` |
+| baton_application_namespaces\* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 **NOTE: `enable_siem` parameter is used to enable/disable the logging of istio ingress . If set to `true` ,`siem_storage_s3_bucket` is required attribute with S3 bucekt in the same region as the EKS cluster**
 
@@ -278,3 +290,12 @@ This object taked the paramters needed by a single service to run adn are passed
 | grafana_password     | string | Admin passwrod for grafana dashboard     |
 | grafana_dev_password | string | Developer password for grafana dashboard |
 | loadbalancer_url     | string | URL of ALB LoadBalancer                  |
+| sftp_host | string | SFTP hostname | 
+| sftp_username | string | SFTP username |
+| sftp_password | string | SFTP password |
+| jaeger_username | string |  basic auth username for jaeger |
+| jaeger_password | string |basic auth password for jaeger | 
+| alertmanager_username| string |basic auth username for alertmanager |
+| alertmanager_password | string | basic auth password for alertmanager|
+| prometheus_username| string | basic auth username for prometheus | 
+| prometheus_password | string | basic auth password for prometheus|

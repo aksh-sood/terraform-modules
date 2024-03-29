@@ -11,6 +11,7 @@ This module contains the setup for FX Admin node resources required for onboardi
 - RDS Database
 - S3 Buckets for baton and swift messages
 - Baton Applications and namespaces configuraitons
+- Cloudflare CNAME records for RabbitMQ
 
 # Modules
 
@@ -20,10 +21,10 @@ This folder only contains two modules in itself . Please refer the below list to
 - [Lambda IAM](../commons/aws/lambda-iam/)
 - [Stream](../commons/aws/stream/)
 - [RDS](../commons/aws/rds/)
+- [RabbitMQ](../commons/aws/rabbitmq/)
 - [S3](../commons/aws/s3/)
 - [SQS](../commons/aws/sqs/)
 - [ActiveMQ](../commons/aws/activemq/)
-- [RabbitMQ](../commons/aws/rabbitmq/)
 - [Baton Application Namespaces](../commons/kubernetes/baton-application-namespace/)
 
 ##### [Kinesis App](./modules/kinesis-app/)
@@ -47,6 +48,7 @@ Below mentioned modules are sourced via [commons](../commons/) folder , below is
 - _rds_cluster_ : RDS Cluster with Aurora MySQL instances
 - _s3_ : Creates a S3 bucket for Baton
 - _s3_swift_ : Creates a S3 bucket gor SWIFT messages
+- _cloudflare_ : Create CNAME records in cloudflare
 
 # Folder Structure
 
@@ -76,7 +78,7 @@ The backend.tf file has configuration for infrastructure state storage to S3 buc
 
 - Configure AWS credentials
 
-- Install the necessary modules for each of the folders by going into the relevant directories and applying the below command.
+- Install the necessary modules for each of the folders by going into the relevant directories and executing the below command.
 
 ```
 terraform init
@@ -134,7 +136,7 @@ terraform apply
 | activemq_username                         | Username to authenticate into the ActiveMQ server                                                          | String                             | `"admin"`                                                                    |
 | rabbitmq_engine_version                   | Version of the RabbitMQ broker engine                                                                      | String                             | `3.11.20`                                                                    |
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
-| rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `mq.m5.large`                                                                |
+| rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |
 | rabbitmq_publicly_accessible              | Whether to enable connections from applications outside of the VPC that hosts the broker's subnets.        | Bool                               | `false`                                                                      |
 | rabbitmq_username                         | Username of the user.                                                                                      | String                             | `master`                                                                     |
@@ -145,8 +147,14 @@ terraform apply
 | domain_name                               | Domain name to use for exposing endpoints                                                                  | string                             | `batonsystems.com`                                                           |
 | vpc_id\*                                  | VPC ID to to link to lambdas , activeMQ , RDS                                                              | string                             |                                                                              |
 | eks_security_group\*                      | Security group linked to EKS                                                                               | string                             |                                                                              |
+|loadbalancer_url\* | Target for configuring DNS records |  string |`""` |
+| cnames | Set of CNAME suffixed for subdomain |set(string)  |`[]` | 
+| cloudflare_api_token\* | API token for configuring cloudflare provider |  string | |
 | kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
-| baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |
+| sftp_host\* | Hostname for baton SFTP server | string | |
+| sftp_user\* | Username for baton SFTP server| string | 
+| sftp_password\* |  Password for baton SFTP server | string |  baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 ### Baton Application Namespaces
 
@@ -265,3 +273,17 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
     }
 ]
 ```
+### Output
+
+| Name                 | Type   | Description                              |
+| :------------------- | :----- | :--------------------------------------- |
+|activemq_url       | string |endpoint of activemq|
+|activemq_username  | string |ActiveMQ Username credential|
+|activemq_password  | string |ActiveMQ password credential|
+|rabbitmq_endpoint  | string |endpoint of rabbitMQ |
+|rabbitmq_username  | string |rabbitMQ Username credential|
+|rabbitmq_password  | string |rabbitMQ password credential|
+|rds_writer_endpoint| string |Writer endpoint of the RDS cluster|
+|rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
+|rds_master_username| string |RDS master username credential|
+|rds_master_password| string |RDS master password credential|
