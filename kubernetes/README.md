@@ -1,6 +1,6 @@
 # Description
 
-The following folder is a sub part of the entire Terraform IAAC project and deals with the creation of Kubernetes resources listed below.
+The following folder is a sub part of the entire Terraform IAC project and deals with the creation of Kubernetes resources listed below.
 
 - LBC Addon
 - Istio installation in EKS cluster
@@ -10,6 +10,7 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - Grafana Dashboards and Users
 - Cloudflare CNAME records
 - Jaeger
+- Filebeat Agent and opensearch public access
 
 # Modules
 
@@ -22,7 +23,9 @@ The isito module installs the isito service mesh onto the EKS cluster in `istio-
 
 ##### [Addons](./kubernetes/module/addons)
 
-Responsible for installation of helm based eks addons in cluster which are listed below. - lbc-controller
+Responsible for installation of helm based eks addons in cluster which are listed below. 
+
+- lbc-controller
 
 The versions for the following can be supplied from the input variables.
 
@@ -36,7 +39,9 @@ Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,p
 
 ##### [Config Server](./kubernetes/module/cloudflare)
 
-This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that ocontains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
+This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that contains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
+
+Config server only supports SSH keys of type **RSA**, please refer this [documentation](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_authentication) for more information. Use the following command to generate the key `ssh-keygen -m PEM -t rsa -b 4096 -f ~/config_server_deploy_key.rsa`. Follow this [link](https://support.atlassian.com/bitbucket-cloud/docs/set-up-personal-ssh-keys-on-linux/#Provide-Bitbucket-Cloud-with-your-public-key) for steps to whitelist the SSH key on BitBucket
 
 ##### [Jaeger](./kubernetes/module/jaeger)
 
@@ -49,8 +54,6 @@ Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheu
 The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warning and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as `200Gi`,`5Gi` and `10Gi` respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
 
 CNAME records are also created via this module for prometheus, grafana and alertmanager exposing the services at `{environment}-{service}-{domain}` EXAMPLE `test-grafana-123.com`.
-
-This module also uses `kubectl` and `cloudflare` providers which are configured in root providers file and passed down in the main file as `Gateway`,`CNAME` records and `VirtualService` objects are created here.
 
 ###### [Grafana Config](./kubernetes/module/monitoring/modules/grafana-config)
 
@@ -68,7 +71,7 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 ├── main.tf
 ├── modules
 │   ├── addons
-│   ├── cloudflare
+│   ├── sftp
 │   ├── config-server
 │   ├── istio
 │   ├── jaeger
@@ -105,7 +108,7 @@ The main configuration lies inside the modules folder which has a multiple sub d
 
 - Configure AWS credentials
 
-- Install the necessary modules for each of the folders by going into the relevant directories and applying the below command.
+- Install the necessary modules for each of the folders by going into the relevant directories and executing the below command.
 
 ```
 terraform init

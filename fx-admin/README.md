@@ -11,6 +11,7 @@ This module contains the setup for FX Admin node resources required for onboardi
 - RDS Database
 - S3 Buckets for baton and swift messages
 - Baton Applications and namespaces configuraitons
+- Cloudflare CNAME records for RabbitMQ
 
 # Modules
 
@@ -47,6 +48,7 @@ Below mentioned modules are sourced via [commons](../commons/) folder , below is
 - _rds_cluster_ : RDS Cluster with Aurora MySQL instances
 - _s3_ : Creates a S3 bucket for Baton
 - _s3_swift_ : Creates a S3 bucket gor SWIFT messages
+- _cloudflare_ : Create CNAME records in cloudflare
 
 # Folder Structure
 
@@ -76,7 +78,7 @@ The backend.tf file has configuration for infrastructure state storage to S3 buc
 
 - Configure AWS credentials
 
-- Install the necessary modules for each of the folders by going into the relevant directories and applying the below command.
+- Install the necessary modules for each of the folders by going into the relevant directories and executing the below command.
 
 ```
 terraform init
@@ -134,7 +136,7 @@ terraform apply
 | activemq_username                         | Username to authenticate into the ActiveMQ server                                                          | String                             | `"admin"`                                                                    |
 | rabbitmq_engine_version                   | Version of the RabbitMQ broker engine                                                                      | String                             | `3.11.20`                                                                    |
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
-| rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `mq.m5.large`                                                                |
+| rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |
 | rabbitmq_publicly_accessible              | Whether to enable connections from applications outside of the VPC that hosts the broker's subnets.        | Bool                               | `false`                                                                      |
 | rabbitmq_username                         | Username of the user.                                                                                      | String                             | `master`                                                                     |

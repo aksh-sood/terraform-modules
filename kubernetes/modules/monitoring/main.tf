@@ -12,9 +12,7 @@ terraform {
 
 resource "random_password" "password" {
   length           = 16
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>?"
-  min_special      = 1
+  special          = false
   lower            = true
   min_lower        = 1
   numeric          = true
@@ -22,7 +20,6 @@ resource "random_password" "password" {
   upper            = true
   min_upper        = 1
 }
-
 
 resource "helm_release" "kube_prometheus_stack" {
   repository       = "https://prometheus-community.github.io/helm-charts"

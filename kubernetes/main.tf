@@ -126,9 +126,9 @@ module "config_server" {
   source = "./modules/config-server"
   count  = var.enable_config_server ? 1 : 0
 
-  secret_name             = var.bitbucket_key_secrets_manager_name
-  config_repo_url         = var.config_repo_url
-  image_tag               = var.config_server_image_tag
+  secret_name     = var.bitbucket_key_secrets_manager_name
+  config_repo_url = var.config_repo_url
+  image_tag       = var.config_server_image_tag
 
   providers = {
     kubectl.this = kubectl.this
