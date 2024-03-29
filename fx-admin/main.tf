@@ -283,5 +283,5 @@ module "secrets" {
     sftp_user_baton       = var.sftp_username
     sftp_password_baton   = var.sftp_password
 
-  }, var.additional_secrets)
+  }, jsondecode(var.additional_secrets))
 }

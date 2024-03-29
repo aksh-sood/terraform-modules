@@ -274,7 +274,7 @@ variable "rabbitmq_enable_cluster_mode" {
 variable "rabbitmq_instance_type" {
   description = "Broker's instance type"
   type        = string
-  default     = "mq.m5.large"
+  default     = "mq.t3.micro"
 }
 
 variable "rabbitmq_auto_minor_version_upgrade" {

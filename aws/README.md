@@ -1,5 +1,5 @@
 # Description
-The following folder is a sub part of the entire Terraform IAAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS and RDS resources can be optionally executed depending upon the users needs .
+The following folder is a sub part of the entire Terraform IAC project and deals with only the creation of AWS resources listed below. Of all the resources listed below the EKS and Opensearch resources can be optionally executed depending upon the users needs .
 
 - VPC
 - Private Public Subnets
@@ -14,12 +14,13 @@ The following folder is a sub part of the entire Terraform IAAC project and deal
 - EKS Managed Node Groups
 - IAM roles and policies for EKS Cluster and Nodes
 - EFS Drive for persistent volume and security Group For EFS
+- Opensearch Kibana Domain
 
 # Modules
 
 ##### [VPC](./aws/modules/vpc)
 
-The VPC module deals with the creation of VPC in the given region with internet and NAT gateway and also the different different public and private subnets with different ACL's as well. The VPC has flow logging enabled and has dedicated public and private network ACL and rules set . It also provisions one NAT gateway by default in the first az.
+The VPC module deals with the creation of VPC in the given region with internet and NAT gateway and also the different public and private subnets with different ACL's as well. The VPC has flow logging enabled and has dedicated public and private network ACL and rules set . It also provisions one NAT gateway by default in the first public subnet.
 
 **Note:** Make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB depending upon the resources being provisioned.
 **Note:** If the `create_eks` variable is set to `true` then minimum AZs requried in that region should be 3 .
@@ -35,13 +36,13 @@ The following security standards are implemented by default and can be overridde
 - nist-800-53/v/5.0.0
 
 **NOTE:**
-- **If the security hub is already subscribe for a region then set the `subscribe_security_hub` as `false` or import the resource using following command to prevent any errors `terraform import module.security-hub.aws_securityhub_account.default <account_id>` as terraform does not support any data sources for security hub**
+- **If the security hub is already subscribed for a region then set the `subscribe_security_hub` as `false` or import the resource using following command to prevent any errors `terraform import module.security-hub.aws_securityhub_account.default <account_id>` as terraform does not support any data sources for security hub**
 - **The rules that are disabled once , removing them from the list does not enable that rule back**
-- **This module does not deal with the remediation of the security hub controls. the remediations are caaried in each module depending upon the resource it is provision**
+- **This module does not deal with the remediation of the security hub controls. the remediations are carried in each module depending upon the resource it is provision**
 
 ##### [Domain Certificate Module](./aws/modules/domain-certificate/)
 
-The certificate module creates a domain certificate in the AWS Certificate Manager by importing the certificate data from S3 bucket (**Note:** For the certificate data to be read the file transfer type for objects required is in any text format which is set by the script). There are no inputs for this module.
+The certificate module creates a domain certificate in the AWS Certificate Manager by importing the certificate data from S3 bucket (**Note:** For the certificate data to be read the file transfer type for objects required is in any text format which is set by the script).
 
 ##### [KMS](./aws/modules/kms/)
 
@@ -49,7 +50,7 @@ The KMS module creates a KMS key are that is used for default EBS encryption and
 
 ##### [VPN-ENDPOINT](./aws/modules/vpn-endpoint/)
 
-The vpn-endpoint module creates assosiated vpn linking to the first private subnet from the [VPC](./aws/modules/vpc) module. It is based upon federated access for which the saml file should be located at **./aws/modules/vpn-endpoint/** with name **saml-metadata.xml** which is replaces by a dummy in source code for security reasons . The acces group id is associated to both the internal vpc network as well as internet access. It also creates a cloudwatch log group which is used to log the traffic of vpn endpoint . Inside the module a locally signed certificate is also created which is used as server certificate once uploaded to Amazon Certificate Manager.  
+The vpn-endpoint module creates assosiated VPN linking to the first private subnet from the [VPC](./aws/modules/vpc) module. It is based upon federated access for which the saml file that is fetched from S3 bucket. The access group id is associated to both the internal vpc network as well as internet access. It also creates a cloudwatch log group which is used to log the traffic of vpn endpoint.
 
 ##### [EKS](./aws/modules/eks/)
 
@@ -69,7 +70,6 @@ Responsible for installation of addons in cluster which are listed below.
     - coredns
     - aws-efs-csi-driver
     - kube-proxy
-    - lbc-controller
 
 4. [IAM](./aws/modules/eks/modules/iam)
 The IAM module is used to create the user managed policies and map them to cluster role and node role after creating it. The IAM folder also has one more sub directory called [policies](./aws/modules/eks/modules/iam/policies/) which has all the policies in json format for their creation. The same module also creates a role and attach policy to it for grafana assumed role within the eks cluster.
@@ -78,9 +78,7 @@ The IAM module is used to create the user managed policies and map them to clust
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
 
 ##### [Opensearch](./aws/modules/opensearch/)
-This module is triggered automatically if the `create_eks` variable is set to true. The OpenSearch domain module creates an OpenSearch domain with the specified configuration.
-
-
+This module is triggered if the `create_eks` variable is set to `true`. The OpenSearch domain module creates an OpenSearch domain with the specified configuration.
 
 # Folder Structure
 Below is the structure of AWS Folder.
@@ -91,7 +89,6 @@ Below is the structure of AWS Folder.
 ├── locals.tf
 ├── main.tf
 ├── modules
-|   ├── activemq
 │   ├── security-hub
 │   ├── domain-certificate
 │   ├── vpn-endpoint
@@ -119,9 +116,9 @@ The vars.tf file has the input variables for for customizing the resources.
 
 The outputs.tf file has the variables that are shown at the end of the script in the console from the module as result.
 
-The backend.tf file has configuration for infrastructure state storage to S3 bucket.The key for state storage are named after teh folders in resource folders in in the bucket that is AWS and kubernetes.
+The backend.tf file has configuration for infrastructure state storage to S3 bucket.The key for state storage are named after the folders in resource folders in in the bucket that is AWS and Kubernetes.
 
-The terraform.tf file can be used to access the variables to edit the configuration and make changes to the infrastructure
+The terraform.tfvars file can be used to access the variables to edit the configuration and make changes to the infrastructure
 
 The main configuration lies inside the modules folder which has a multiple sub directories that are called by the main.tf file. The module has a main.tf ,vars.tf and outputs.tf file. 
 
@@ -129,7 +126,7 @@ The main configuration lies inside the modules folder which has a multiple sub d
 
 * Configure AWS credentials 
 
-* Install the necessary modules for each of the folders by going into the relevant directories and applying the below command.
+* Install the necessary modules for each of the folders by going into the relevant directories and executing the below command.
 ```
 terraform init
 ```
@@ -174,11 +171,11 @@ terraform apply
 |acm_certificate_chain |S3 object for domain certificate key chain|string|`"batonsystem.com/cloudflare/origin_ca_rsa_root.pem"`|
 |security_hub_standards | Security hub standards to to enabled |list(string)| `["aws-foundational-security-best-practices/v/1.0.0","cis-aws-foundations-benchmark/v/1.4.0","pci-dss/v/3.2.1","nist-800-53/v/5.0.0"]`|
 |disabled_security_hub_controls| Security hub controls to be disabled for each of the implemented standards | map(maps(string))|[Disabled Security Hub Controls](#markdown-header-disabled-security-hub-controls)|
-| enable_client_vpn | Create client vpn endpoint | bool | `false` |
+| enable_client_vpn | Create client VPN endpoint | bool | `false` |
 | client_vpn_metadata_bucket_region | Region where the S3 bucket storing metadata for SAML configuration is located | string | `us-west-2` |
 | client_vpn_metadata_bucket_name* | Name of the bucket where the S3 bucket storing metadata for SAML configuration is located | string | |
 | client_vpn_metadata_object_key* | Key of the object where the S3 bucket storing metadata for SAML configuration is located | string |  |
-| enable_client_vpn_split_tunneling* | Enable Split tunneling  | bool | `false` |
+| enable_client_vpn_split_tunneling* | Enable split tunneling  | bool | `false` |
 | client_vpn_access_group_id* | Access group ID from SSO  | string |  |
 | opensearch_engine_version  | The version of the OpenSearch engine   | string |`OpenSearch_2.11`|
 | opensearch_instance_type   | The type of instance for OpenSearch    | string |`t3.medium.search`|
@@ -190,15 +187,15 @@ terraform apply
 
 #### EKS Node Group Config
 
-The following object defines the entire required configuraiton for the eks managed node_groups as well as the global settings. With the following parameters .
+The following object defines the entire required configuraiton for the EKS managed node_groups as well as the global settings. With the following parameters .
 
 | Name  | Description |Type | Default | 
 |:-----------|:---------|:-----------|:---------|
-|additional_node_inline_policies| inline policy to attach to nodes| string | `null`|
-|additional_node_policies|additional aws managed node policies for EKS nodes |map(string)|`null`|
-|volume_type*| type of EBS volume for each node | string |`"gp3"`|
-|volume_size*| size of EBS volmue for each node | number |`20`|
-|node_groups *****| configuration for multiple node groups| list(node_groups) | [Node Groups](#markdown-header-node-groups)|
+|additional_node_inline_policies| Inline policy to attach to nodes| string | `null`|
+|additional_node_policies|additional AWS managed node policies for EKS nodes |map(string)|`null`|
+|volume_type\*| type of EBS volume for each node | string |`"gp3"`|
+|volume_size\*| size of EBS volmue for each node | number |`20`|
+|node_groups\*| configuration for multiple node groups| list(node_groups) | [Node Groups](#markdown-header-node-groups)|
 
 #### Node Groups
 
@@ -206,11 +203,11 @@ The following object defines the differnet node group settings with parameters m
 
 | Name  | Description |Type | Default | 
 |:-----------|:---------|:-----------|:---------|
-| name* | name of the node group | string | `"node1"`|
-| min_size* | minimum and desired number of nodes in node group | number | `1`|
-| max_size* | maximum number of nodes in node group | number | `1`|
-| additional_security_groups | additional custom security groups for EKS nodes |list(string) |`[]`|
-| instance_types* | List of types of EC2 instances to create nodes| list(string) | `["m5.large"]`|
+| name* | Name of the node group | string | `"node1"`|
+| min_size\* | Minimum and desired number of nodes in node group | number | `1`|
+| max_size\* | Maximum number of nodes in node group | number | `1`|
+| additional_security_groups | Additional custom security groups for EKS nodes |list(string) |`[]`|
+| instance_types\* | List of types of EC2 instances to create nodes| list(string) | `["m5.large"]`|
 | labels| Lables for EKS nodes | map(string)| `{}` |
 | tags| Tags to associate with nodes| map(string)| `{}`|
 

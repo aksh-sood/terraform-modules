@@ -107,12 +107,13 @@ variable "config_repo_url" {
 variable "config_server_image_tag" {
   description = "Version of the config-server to deploy"
   type        = number
+  default     = 59
 }
 
 variable "enable_config_server" {
   description = "Whether to enable config server"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "alert_manager_volume_size" {
