@@ -23,6 +23,11 @@ variable "acm_certificate_arn" {
 variable "domain_name" {
   description = "Domain Name registered in DNS service"
   type        = string
+
+  validation {
+    condition     = can(regex("^[a-zA-Z0-9-]{1,63}\\.[a-zA-Z]{2,6}$", var.domain_name))
+    error_message = "Domain name should be valid (e.g., example.com)"
+  }
 }
 
 variable "istio_version" {
@@ -87,16 +92,28 @@ variable "custom_alerts" {
   default = []
 }
 
-variable "secret_name" {
-  description = "Name of the secret storing ssh key to configure into config map of config server"
+variable "bitbucket_key_secrets_manager_name" {
+  description = "Name of the secret storing ssh key to configure into k8s secrets of config server"
   type        = string
   default     = ""
+}
+
+variable "config_repo_url" {
+  description = "SSH link to config repo repository for configuring ENV variables of applications"
+  type        = string
+  default     = "git@bitbucket.org:ubixi/config-repo.git"
+}
+
+variable "config_server_image_tag" {
+  description = "Version of the config-server to deploy"
+  type        = number
+  default     = 59
 }
 
 variable "enable_config_server" {
   description = "Whether to enable config server"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "alert_manager_volume_size" {
@@ -112,8 +129,8 @@ variable "prometheus_volume_size" {
 }
 
 variable "cloudflare_api_token" {
+  description = "API token to access cloudflare"
   type        = string
-  description = "api token to access cloudflare"
 }
 
 variable "enable_siem" {
@@ -122,6 +139,23 @@ variable "enable_siem" {
 
 variable "create_dns_records" {
   default = true
+}
+
+variable "enable_sftp" {
+  description = "Deploy SFTP server in Kubernetes cluster"
+  default     = true
+}
+
+variable "sftp_namespace" {
+  description = "Namespace to deploy SFTP server in"
+  type        = string
+  default     = "sftp"
+}
+
+variable "sftp_username" {
+  description = "username for SFTP server"
+  type        = string
+  default     = "myuser"
 }
 
 variable "opensearch_password" {}

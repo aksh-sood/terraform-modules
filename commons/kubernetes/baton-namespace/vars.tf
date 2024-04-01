@@ -6,7 +6,7 @@ variable "services" {
     target_port      = number
     url_prefix       = string
     env              = map(string)
-    port             = optional(number,8080)
+    port             = optional(number, 8080)
     subdomain_suffix = optional(string, "")
     image_tag        = optional(string, "latest")
     volumeMounts = optional(object({

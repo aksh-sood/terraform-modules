@@ -23,14 +23,14 @@ locals {
 }
 
 resource "random_password" "password" {
-  length           = 16
-  special          = false
-  lower            = true
-  min_lower        = 1
-  numeric          = true
-  min_numeric      = 1
-  upper            = true
-  min_upper        = 1
+  length      = 16
+  special     = false
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
 }
 
 # Define RDS Aurora Cluster module
@@ -94,8 +94,7 @@ module "rds_cluster" {
 
   # Tags
   tags = merge(var.cost_tags, {
-    Name      = "${var.name}-RDS"
-    Terraform = "true"
+    Name = "${var.name}-RDS"
   })
 
   #security-hub special requirements
