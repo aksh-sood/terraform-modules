@@ -224,7 +224,7 @@ variable "baton_application_namespaces" {
 
   default = [
     {
-      namespace       = "fx-baton-test"
+      namespace       = "fx-baton-uat"
       customer        = "osttra"
       istio_injection = false
       services = [
