@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: activemq
+  namespace: ${namespace}
+spec:
+  hosts:
+    - ${namespace}-activemq.${domain_name}
+  gateways:
+    - ${namespace}-gateway
+    - mesh
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 8161
+            host: activemq

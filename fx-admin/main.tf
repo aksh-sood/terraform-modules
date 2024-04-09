@@ -14,7 +14,7 @@ resource "null_resource" "domain_validation" {
 
 }
 
-resource "null_resource" "vpn_validation" {
+resource "null_resource" "loadbalacer_url_validation" {
   lifecycle {
     precondition {
       condition = var.create_dns_records ? (
@@ -243,13 +243,16 @@ module "baton_application_namespace" {
 
   for_each = { for ns in var.baton_application_namespaces : ns.namespace => ns }
 
-  domain_name     = var.domain_name
-  namespace       = each.value.namespace
-  customer        = each.value.customer
-  docker_registry = each.value.docker_registry
-  istio_injection = each.value.istio_injection
-  services        = each.value.services
-  common_env      = each.value.common_env
+  domain_name       = var.domain_name
+  namespace         = each.value.namespace
+  customer          = each.value.customer
+  docker_registry   = each.value.docker_registry
+  istio_injection   = each.value.istio_injection
+  services          = each.value.services
+  common_env        = each.value.common_env
+  enable_activemq   = each.value.enable_activemq
+  activemq_username = module.activemq.username
+  activemq_password = module.activemq.password
 
   providers = {
     kubectl.this = kubectl.this

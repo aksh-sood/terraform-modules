@@ -1,3 +1,4 @@
+additionalPrometheusRulesMap: ${alerts}
 alertmanager: ${alertmanager}
 prometheus:
   prometheusSpec:

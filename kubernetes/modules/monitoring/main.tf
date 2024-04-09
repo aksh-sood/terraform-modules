@@ -11,14 +11,14 @@ terraform {
 }
 
 resource "random_password" "password" {
-  length           = 16
-  special          = false
-  lower            = true
-  min_lower        = 1
-  numeric          = true
-  min_numeric      = 1
-  upper            = true
-  min_upper        = 1
+  length      = 16
+  special     = false
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
 }
 
 resource "helm_release" "kube_prometheus_stack" {
@@ -35,12 +35,12 @@ resource "helm_release" "kube_prometheus_stack" {
       grafana_volume_size    = var.grafana_volume_size
       grafana_password       = random_password.password.result
       # TODO: manage custom alerting issue for terragrunt
-      # alerts                 = file("${path.module}/configs/alerts.yaml")
-      # alerts = templatefile("${path.module}/configs/alerts.yaml", {
-      #   custom_alerts = jsonencode(var.custom_alerts)
-      #   #  prometheus_volume_size=var.prometheus_volume_size
-      #   #  grafana_volume_size=var.grafana_volume_size 
-      # })
+      alerts = file("${path.module}/configs/alerts.yaml")
+      alerts = templatefile("${path.module}/configs/alerts.yaml", {
+        custom_alerts = jsonencode(var.custom_alerts)
+        #  prometheus_volume_size=var.prometheus_volume_size
+        #  grafana_volume_size=var.grafana_volume_size 
+      })
       alertmanager = templatefile("${path.module}/configs/alertmanager.yaml", {
         slack_web_hook            = var.slack_web_hook
         slack_channel_name        = var.slack_channel_name

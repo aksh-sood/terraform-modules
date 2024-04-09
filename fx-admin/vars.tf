@@ -196,13 +196,15 @@ variable "baton_application_namespaces" {
   type = list(object({
     namespace       = string
     customer        = string
+    enable_activemq = optional(bool, false)
     docker_registry = optional(string, "150399859526.dkr.ecr.us-west-2.amazonaws.com")
     istio_injection = optional(bool, true)
     common_env      = optional(map(string), {})
     services = list(object({
       name             = string
-      target_port      = number
       url_prefix       = string
+      target_port      = number
+      port             = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
       env              = optional(map(string), {})
