@@ -125,6 +125,12 @@ variable "create_eks" {
   default = true
 }
 
+variable "enable_cluster_autoscaler" {
+  description = "Weather to install cluster autoscaler or not"
+  type        = bool
+  default     = false
+}
+
 variable "cluster_version" {
   description = "eks cluster verison"
   type        = string

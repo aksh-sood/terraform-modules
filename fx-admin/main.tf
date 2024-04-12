@@ -146,7 +146,7 @@ module "s3_writer_lambda" {
 module "activemq" {
   source = "../commons/aws/activemq"
 
-  name                       = var.environment
+  name                       = "${var.environment}-activemq"
   region                     = var.region
   vpc_id                     = var.vpc_id
   subnet_ids                 = var.public_subnet_ids

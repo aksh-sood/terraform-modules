@@ -132,7 +132,7 @@ module "eks" {
   eks_node_groups        = var.eks_node_groups
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
   private_subnet_cidrs   = var.private_subnet_cidrs
-  eks_tags               = var.cost_tags
+  eks_tags               = merge(var.cost_tags, var.enable_cluster_autoscaler ? { "k8s.io/cluster-autoscaler/enabled" = true } : {})
   private_subnets_cidr   = var.private_subnet_cidrs
   additional_eks_addons  = var.additional_eks_addons
 

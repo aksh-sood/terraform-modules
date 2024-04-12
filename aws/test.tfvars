@@ -40,6 +40,8 @@ acm_private_key = "key.pem"
 
 create_eks = true
 
+enable_cluster_autoscaler = false
+
 enable_siem = false
 
 enable_client_vpn = false
