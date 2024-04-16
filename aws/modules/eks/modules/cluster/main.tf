@@ -48,15 +48,6 @@ module "eks" {
 
 }
 
-resource "aws_security_group_rule" "cluster_self_whitelist" {
-  type                     = "ingress"
-  protocol                 = "-1"
-  to_port                  = 0
-  from_port                = 0
-  source_security_group_id = module.eks.cluster_primary_security_group_id
-  security_group_id        = module.eks.cluster_primary_security_group_id
-}
-
 resource "aws_security_group_rule" "node_self_whitelist" {
   type                     = "ingress"
   protocol                 = "-1"

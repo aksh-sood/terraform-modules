@@ -126,15 +126,16 @@ module "eks" {
   public_subnet_ids  = module.vpc.public_subnets
   kms_key_arn        = module.kms.key_arn
 
-  region                 = var.region
-  cluster_name           = var.environment
-  cluster_version        = var.cluster_version
-  eks_node_groups        = var.eks_node_groups
-  siem_storage_s3_bucket = var.siem_storage_s3_bucket
-  private_subnet_cidrs   = var.private_subnet_cidrs
-  eks_tags               = merge(var.cost_tags, var.enable_cluster_autoscaler ? { "k8s.io/cluster-autoscaler/enabled" = true } : {})
-  private_subnets_cidr   = var.private_subnet_cidrs
-  additional_eks_addons  = var.additional_eks_addons
+  region                    = var.region
+  cluster_name              = var.environment
+  cluster_version           = var.cluster_version
+  eks_node_groups           = var.eks_node_groups
+  siem_storage_s3_bucket    = var.siem_storage_s3_bucket
+  private_subnet_cidrs      = var.private_subnet_cidrs
+  eks_tags                  = var.cost_tags
+  private_subnets_cidr      = var.private_subnet_cidrs
+  additional_eks_addons     = var.additional_eks_addons
+  enable_cluster_autoscaler = var.enable_cluster_autoscaler
 
   depends_on = [module.vpc]
 }

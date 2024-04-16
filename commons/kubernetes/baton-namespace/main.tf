@@ -53,7 +53,6 @@ module "activemq" {
   domain_name       = var.domain_name
   namespace         = var.namespace
   activemq_username = var.activemq_username
-  activemq_password = var.activemq_password
 
   providers = {
     kubectl.this = kubectl.this
@@ -70,7 +69,7 @@ resource "kubectl_manifest" "gateway" {
     namespace = var.namespace,
     hosts = jsonencode(toset(concat([
       for app in module.baton_application : app.host
-    ], var.enable_activemq ? module.activemq.activemq_url : [])))
+    ], var.enable_activemq ? module.activemq[0].activemq_url : [])))
   })
 
   depends_on = [kubernetes_namespace_v1.application]

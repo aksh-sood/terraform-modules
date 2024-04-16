@@ -126,7 +126,7 @@ variable "create_eks" {
 }
 
 variable "enable_cluster_autoscaler" {
-  description = "Weather to install cluster autoscaler or not"
+  description = "Whether to install cluster autoscaler or not"
   type        = bool
   default     = false
 }
@@ -187,7 +187,7 @@ variable "eks_node_groups" {
 }
 
 variable "subscribe_security_hub" {
-  description = "Wheather to subscribe security hub or not"
+  description = "Whether to subscribe security hub or not"
   type        = bool
   default     = false
 }

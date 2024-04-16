@@ -23,8 +23,8 @@ module "cluster_autoscaler" {
   source = "./modules/cluster-autoscaler"
   count  = var.enable_cluster_autoscaler ? 1 : 0
 
-  cluster_name = var.environment
-  version      = var.cluster_autoscaler_version
+  cluster_name       = var.environment
+  controller_version = var.cluster_autoscaler_version
 }
 
 module "cloudflare" {

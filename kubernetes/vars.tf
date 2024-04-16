@@ -159,7 +159,7 @@ variable "sftp_username" {
 }
 
 variable "enable_cluster_autoscaler" {
-  description = "Weather to install cluster autoscaler or not"
+  description = "Whether to install cluster autoscaler or not"
   type        = bool
   default     = false
 }

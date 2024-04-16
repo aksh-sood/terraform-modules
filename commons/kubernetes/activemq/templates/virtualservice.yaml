@@ -16,5 +16,5 @@ spec:
       route:
         - destination:
             port:
-              number: 8161
+              number: 8160 # Intentionally kept as 8160 not 8161 
             host: activemq

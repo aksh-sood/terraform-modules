@@ -1,2 +1,2 @@
 variable "cluster_name" {}
-variable "version" {}
+variable "controller_version" {}

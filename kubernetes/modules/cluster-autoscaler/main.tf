@@ -350,7 +350,7 @@ resource "kubernetes_manifest" "deployment" {
                 "--expander=least-waste",
                 "--node-group-auto-discovery=asg:tag=k8s.io/cluster-autoscaler/enabled,k8s.io/cluster-autoscaler/${var.cluster_name}",
               ]
-              "image"           = "registry.k8s.io/autoscaling/cluster-autoscaler:${var.version}" //TODO:version change
+              "image"           = "registry.k8s.io/autoscaling/cluster-autoscaler:${var.controller_version}" //TODO:version change
               "imagePullPolicy" = "Always"
               "name"            = "cluster-autoscaler"
               "resources" = {

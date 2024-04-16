@@ -10,6 +10,17 @@ terraform {
   }
 }
 
+resource "random_password" "password" {
+  length      = 16
+  special     = false
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
+}
+
 resource "kubernetes_manifest" "service" {
   manifest = {
     "apiVersion" = "v1"
@@ -60,7 +71,7 @@ resource "kubernetes_manifest" "deployment" {
     "apiVersion" = "apps/v1"
     "kind"       = "Deployment"
     "metadata" = {
-      "name"      = "activemq-deployment"
+      "name"      = "activemq"
       "namespace" = var.namespace
     }
     "spec" = {
@@ -86,7 +97,7 @@ resource "kubernetes_manifest" "deployment" {
                 },
                 {
                   "name"  = "ACTIVEMQ_ADMIN_PASSWORD"
-                  "value" = var.activemq_password
+                  "value" = random_password.password.result
                 },
               ]
               "image" = "webcenter/activemq"

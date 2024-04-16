@@ -38,12 +38,7 @@ variable "enable_activemq" {
 
 variable "activemq_username" {
   type    = string
-  default = null
-}
-
-variable "activemq_password" {
-  type    = string
-  default = null
+  default = "admin"
 }
 
 variable "namespace" {

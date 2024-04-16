@@ -35,3 +35,4 @@ variable "siem_storage_s3_bucket" {}
 variable "azs" {}
 variable "private_subnets_cidr" {}
 variable "additional_eks_addons" {}
+variable "enable_cluster_autoscaler" {}
