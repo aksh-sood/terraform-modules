@@ -14,7 +14,7 @@ resource "null_resource" "domain_validation" {
 
 }
 
-resource "null_resource" "vpn_validation" {
+resource "null_resource" "loadbalacer_url_validation" {
   lifecycle {
     precondition {
       condition = var.create_dns_records ? (
@@ -146,7 +146,7 @@ module "s3_writer_lambda" {
 module "activemq" {
   source = "../commons/aws/activemq"
 
-  name                       = var.environment
+  name                       = "${var.environment}-activemq"
   region                     = var.region
   vpc_id                     = var.vpc_id
   subnet_ids                 = var.public_subnet_ids
@@ -238,24 +238,6 @@ module "rds_cluster" {
 }
 
 
-module "baton_application_namespace" {
-  source = "../commons/kubernetes/baton-namespace"
-
-  for_each = { for ns in var.baton_application_namespaces : ns.namespace => ns }
-
-  domain_name     = var.domain_name
-  namespace       = each.value.namespace
-  customer        = each.value.customer
-  docker_registry = each.value.docker_registry
-  istio_injection = each.value.istio_injection
-  services        = each.value.services
-  common_env      = each.value.common_env
-
-  providers = {
-    kubectl.this = kubectl.this
-  }
-}
-
 
 module "secrets" {
   source = "../commons/aws/secrets"
@@ -283,5 +265,37 @@ module "secrets" {
     sftp_user_baton       = var.sftp_username
     sftp_password_baton   = var.sftp_password
 
-  }, jsondecode(var.additional_secrets))
+  }, var.additional_secrets)
+}
+
+module "baton_application_namespace" {
+  source = "../commons/kubernetes/baton-namespace"
+
+  for_each = { for ns in local.baton_application_namespaces : ns.namespace => ns }
+
+  domain_name     = var.domain_name
+  namespace       = each.value.namespace
+  customer        = each.value.customer
+  docker_registry = each.value.docker_registry
+  istio_injection = each.value.istio_injection
+  services        = each.value.services
+  common_env      = each.value.common_env
+  enable_activemq = each.value.enable_activemq
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.secrets]
+}
+
+module "directory_service_data_import" {
+  source = "./modules/data-import-job"
+  count  = var.import_directory_service_db ? 1 : 0
+
+  username       = module.rds_cluster.master_username
+  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
+  rds_writer_url = module.rds_cluster.writer_endpoint
+  password       = module.rds_cluster.master_password
+
 }

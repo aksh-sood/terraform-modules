@@ -30,6 +30,17 @@ variable "enable_gateway" {
   default     = true
 }
 
+variable "enable_activemq" {
+  description = "Whether to enable activemq inside the namespace"
+  type        = bool
+  default     = false
+}
+
+variable "activemq_username" {
+  type    = string
+  default = "admin"
+}
+
 variable "namespace" {
   type = string
 }

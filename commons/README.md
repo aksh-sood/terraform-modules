@@ -303,7 +303,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           name            = "app1"
           health_endpoint = "/health"
           target_port     = 8080
-          subdomain_suffix= "api"
+          subdomain_suffix= "-api"
           url_prefix      = "/app1"
           env             = { "key1" = "v1", "key2" = "v2" }
           image_tag       = "latest"
@@ -345,7 +345,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           name            = "app2"
           health_endpoint = "/health"
           target_port     = 8080
-          endpoint        = "api"
+          subdomain_suffix= "-api"
           url_prefix      = "/app2"
           env             = { "key3" = "v3", "key4" = "v4" }
           image_tag       = "latest"

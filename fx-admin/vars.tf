@@ -190,19 +190,27 @@ variable "domain_name" {
   }
 }
 
+variable "import_directory_service_db" {
+  description = "Whether to import data into directory service database"
+  type        = bool
+  default     = true
+}
+
 variable "baton_application_namespaces" {
 
   description = "List of namespaces and services and there required attributes"
   type = list(object({
     namespace       = string
     customer        = string
+    enable_activemq = optional(bool, false)
     docker_registry = optional(string, "150399859526.dkr.ecr.us-west-2.amazonaws.com")
     istio_injection = optional(bool, true)
     common_env      = optional(map(string), {})
     services = list(object({
       name             = string
-      target_port      = number
       url_prefix       = string
+      port             = number
+      target_port      = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
       env              = optional(map(string), {})
@@ -222,41 +230,7 @@ variable "baton_application_namespaces" {
     }))
   }))
 
-  default = [
-    {
-      namespace       = "fx-baton-test"
-      customer        = "osttra"
-      istio_injection = false
-      services = [
-        {
-          name        = "directory-service"
-          target_port = 8080
-          url_prefix  = "/directory"
-          image_tag   = "1.0.4"
-        },
-        {
-          name        = "normalizer"
-          target_port = 8080
-          url_prefix  = "/normalizer"
-          image_tag   = "2.0.13"
-        },
-        {
-          name        = "notaryservice"
-          target_port = 8080
-          url_prefix  = "/notary"
-          image_tag   = "2.0.4"
-        },
-        {
-          name        = "swiftservice"
-          target_port = 8080
-          url_prefix  = "/swift"
-          image_tag   = "2.0.2"
-        }
-      ]
-    }
-  ]
-
-
+  default = []
 }
 
 variable "rabbitmq_engine_version" {
