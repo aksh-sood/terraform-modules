@@ -1,13 +1,7 @@
-resource "kubernetes_namespace_v1" "data_import" {
-  metadata {
-    name = "utility"
-  }
-}
-
 resource "kubernetes_config_map" "sql_dump" {
   metadata {
     name      = "directory-service-dump"
-    namespace = kubernetes_namespace_v1.data_import.metadata[0].name
+    namespace = var.namespace
   }
 
   data = {
@@ -17,10 +11,10 @@ resource "kubernetes_config_map" "sql_dump" {
   }
 }
 
-resource "kubernetes_job_v1" "demo" {
+resource "kubernetes_job_v1" "data_import" {
   metadata {
     name      = "directory-service-data-import"
-    namespace = kubernetes_namespace_v1.data_import.metadata[0].name
+    namespace = var.namespace
   }
   spec {
     template {
@@ -41,9 +35,13 @@ resource "kubernetes_job_v1" "demo" {
           }
         }
         container {
-          name    = "alpine"
-          image   = "alpine:3.19.1"
-          command = ["sh", "-c", "apk add mysql-client && mysql -h $HOSTNAME -u $USERNAME -P 3306 -p$PASSWORD --force < /etc/config/directory-service.sql"]
+          name  = "alpine"
+          image = "alpine:3.19.1"
+          command = [
+            "sh",
+            "-c",
+            "apk update && apk add mysql-client && mysql -h $HOSTNAME -u $USERNAME -P 3306 -p$PASSWORD --force < /etc/config/directory-service.sql && echo 'IMPORT COMPLETE'"
+          ]
           env {
             name  = "HOSTNAME"
             value = var.rds_writer_url
@@ -54,11 +52,11 @@ resource "kubernetes_job_v1" "demo" {
           }
           env {
             name  = "USERNAME"
-            value = var.username
+            value = var.rds_username
           }
           env {
             name  = "PASSWORD"
-            value = var.password
+            value = var.rds_password
           }
           volume_mount {
             name       = "sql-script"

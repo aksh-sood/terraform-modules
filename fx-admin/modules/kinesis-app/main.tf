@@ -228,4 +228,10 @@ resource "aws_kinesis_analytics_application" "match-trade-kinesis-app" {
       }
     }
   }
+
+  # The ignore lifecycle block is added to ignore changes to code parameter  
+  # as it always generates a change in plan whenever triggered which can cause conflict with GITOPS model
+  lifecycle {
+    ignore_changes = [code]
+  }
 }

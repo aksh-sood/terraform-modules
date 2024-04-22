@@ -1,29 +1,33 @@
-region             = "us-east-1"
-k8s_cluster_name   = "aksh"
-environment        = "fx-aksh"
-vendor             = "baton"
-kms_key_arn        = ""
-eks_security_group = "sg-0b457f8b5e9e06f64"
+region           = "us-east-1"
+k8s_cluster_name = "aksh"
+environment      = "fx-aksh"
+vendor           = "baton"
+
+kms_key_arn = "arn:aws:kms:us-east-1:654654400200:key/6d71af0e-847f-4828-a412-1f32ae6590a5"
+
+eks_security_group = "sg-0ec9391aa0a3ec915"
 public_subnet_ids = [
-  "subnet-027cf539ee4fec653",
-  "subnet-030761f49e0e65470",
-  "subnet-08ceb9faebe2892f0",
+  "subnet-07fd1a58bbda18cc7",
+  "subnet-05a6f8b9e4d0a8bd3",
+  "subnet-0a1a44f36e0c51f00",
 ]
 private_subnet_ids = [
-  "subnet-06d3bcf175f291d64",
-  "subnet-0c84771978a4849f7",
-  "subnet-06d59b712c39a378a",
+  "subnet-06b81709a01a147e8",
+  "subnet-09909a8a6b475fa72",
+  "subnet-0fae77824cac3a9f5",
 ]
-vpc_id                              = "vpc-0e25b5870597a61e4"
+vpc_id = "vpc-0c01476faf9a113a1"
+
 activemq_engine_version             = "5.15.16"
 activemq_storage_type               = "efs"
 activemq_instance_type              = "mq.t2.micro"
 activemq_apply_immediately          = true
 activemq_auto_minor_version_upgrade = false
-activemq_publicly_accessible        = true
 activemq_username                   = "admin"
-import_directory_service_db         = true
-baton_application_namespaces        = []
+activemq_whitelist_ips              = ["223.187.113.120/32", "115.111.183.90/32"]
+
+import_directory_service_db  = true
+baton_application_namespaces = []
 
 rds_mysql_version                         = "8.0"
 rds_instance_type                         = "db.t4g.large"
@@ -55,14 +59,20 @@ rabbitmq_engine_version             = "3.11.20"
 rabbitmq_instance_type              = "mq.m5.large"
 rabbitmq_apply_immediately          = true
 rabbitmq_auto_minor_version_upgrade = false
-rabbitmq_publicly_accessible        = false
+rabbitmq_publicly_accessible        = true
 rabbitmq_username                   = "master"
 rabbitmq_enable_cluster_mode        = false
-domain_name                         = "batonsystems.com"
-additional_secrets                  = {}
-sftp_host                           = "sftp.sftp"
-sftp_username                       = "myuser"
-sftp_password                       = ""
-cloudflare_api_token                = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
-create_dns_records                  = false
-loadbalancer_url                    = ""
+rabbitmq_virtual_host               = "/nex_osttra"
+rabbitmq_exchange                   = "trml_osttra"
+
+domain_name = "batonsystems.com"
+
+additional_secrets = {}
+
+sftp_host     = "sftp.sftp"
+sftp_username = "myuser"
+sftp_password = "?4qECWjC9N2DEW73"
+
+create_dns_records   = false
+cloudflare_api_token = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
+loadbalancer_url     = "k8s-istiosys-istioalb-55e6079a17-99484393.us-east-1.elb.amazonaws.com"

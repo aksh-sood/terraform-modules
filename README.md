@@ -31,6 +31,7 @@ Below is a list of resources created :-
     - Filebeat
     - Config server
     - SFTP server
+    - Cluster AutoScaler
   
   - FX Admin
     - Kinesis Streams
@@ -39,6 +40,10 @@ Below is a list of resources created :-
     - Lambda Functions
     - ActiveMQ
     - RDS Database
+    - Secrets
+    - Utility
+      - Data Import Job
+      - RabbitMQ Config
     - S3 Buckets for baton and swift messages
 
   - Commons
@@ -51,7 +56,10 @@ Below is a list of resources created :-
       - ActiveMQ
       - SQS
     - Kubernetes
-      - Baton Application Namepspaces
+      - ActiveMQ
+      - RabbitMQ
+      - Baton Namepspace
+      - Baton Application
     - Utilities
       - Cloudflare
 
@@ -65,7 +73,7 @@ Additionally, the corresponding structure and resources would be too large. Even
 
 The Terraform community also suggests keeping these folders separate for better management and due to their limitations.
 
-The [commons](./commons/) folder is used a utility across multiple folders with common resources being created across multiple folders adn acts as a universal module for other folders.
+The [commons](./commons/) folder is used a utility across multiple folders with common resources being created across multiple folders and acts as a universal module for other folders.
 
 The [FX Admin](./fx-admin/) folder deals with the creation of resources strictly for the admin account which distributes the messages to other customer accounts .
 

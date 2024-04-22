@@ -20,7 +20,7 @@ This folder works like a universal module for multiple directories in this scrip
 
 # Modules
 
-### [Cloudflare](../commons/utilities/cloudflare)
+### [Cloudflare](./utilities/cloudflare)
 
 Responsible for create CNAME records on cloudlfare.
 
@@ -94,7 +94,7 @@ This module provisions a single ACTIVEMQ Broker and security group for it .
 | username | string | Username for ActiveMQ      |
 | password | string | Password for ActiveMQ      |
 
-### [RABBITMQ](./aws/activemq/)
+### [RABBITMQ (AWS)](./aws/activemq/)
 
 This module provisions a single RABBITMQ Broker and security group for it .
 
@@ -223,6 +223,18 @@ This module creates a AWS Kinesis Stream with default `retention_period` as `12`
 |:-----------|:-------|:--------------------------|
 | stream_arn | string | ARN of the Kinesis Stream |
 
+### [Rabbit MQ (kubernetes)](./kubernetes/rabbitmq)
+
+This module helps to expose the rabbitmq console url and make it accesciable over internet. It contains a set of kubenetes objects to that route any incoming traffic to the rabbitMQ console URL. 
+
+##### Inputs
+
+| Name   | Description         | Type        | Default |
+|:-------|:--------------------|:------------|:--------|
+| name\* | Name of the environment  | string      |         |
+| domain_name\* | Domain Name to add to gateways and services | string |         |
+| rabbitmq_endpoint\* | Console URL of rabbitmq | string | | 
+
 ### [Baton Application Namespace](./kubernetes/baton-application)
 
 Responsible for creation of namespaces and virtualservies, gateways, deployments, service accounts and takes care of these requirements for running the applications. Helm chart has been created for deploying these objects except the gateways and namespaces.
@@ -244,10 +256,11 @@ The following object deals with the namespaces and other kubernetes resources fo
 |:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
 | namespace\* | Namespace value | string |  |
 | istio_injection | Whether to enable istio injection or not | bool | `true` |
+| enable_activemq | Whether to enable ActiveMQ deployment or not | bool | `false` |
 | common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}` |
 | customer\*        | Name of the customer| string      |          |
 | domain_name\* | Name of domain to link with gateways and services| string | |
-| docker_registry\* | Registry to pull the docker images from | string | |
+| docker_registry | Registry to pull the docker images from | string | |
 | services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
 
 ### Baton Services
@@ -298,10 +311,12 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
       docker_registry = "123456789.dkr.ecr.us-west-2.amazonaws.com"
       common_env      = { "key7" = "v7", "key8" = "v8" }
       customer        = "cust1"
+      enable_activemq = true
       services = [
         {
           name            = "app1"
           health_endpoint = "/health"
+          port            = 8080
           target_port     = 8080
           subdomain_suffix= "-api"
           url_prefix      = "/app1"
@@ -330,6 +345,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           name            = "app3"
           health_endpoint = "/health"
           target_port     = 8080
+          port            = 8080
           url_prefix      = "/app3"
           env             = {}
           image_tag       = "latest"
@@ -344,6 +360,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
         {
           name            = "app2"
           health_endpoint = "/health"
+          port            = 8080
           target_port     = 8080
           subdomain_suffix= "-api"
           url_prefix      = "/app2"
@@ -354,3 +371,9 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
     }
 ]
 ```
+
+##### Outputs
+
+| Name       | Type   | Description               |
+|:-----------|:-------|:--------------------------|
+|activemq_credentials| map | credentials for different ActiveMQ deployments within a namespace|

@@ -168,6 +168,12 @@ variable "activemq_username" {
   default   = "admin"
 }
 
+variable "activemq_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ"
+  type        = list(string)
+  default     = []
+}
+
 variable "lambda_packages_s3_bucket" {
   description = "S3 bucket name with JAR packages for lambda functions"
   type        = string
@@ -209,8 +215,8 @@ variable "baton_application_namespaces" {
     services = list(object({
       name             = string
       url_prefix       = string
-      port             = number
-      target_port      = optional(number, 8080)
+      target_port      = number
+      port             = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
       env              = optional(map(string), {})
@@ -230,7 +236,39 @@ variable "baton_application_namespaces" {
     }))
   }))
 
-  default = []
+  default = [
+    {
+      namespace       = "fx-baton-uat"
+      customer        = "osttra"
+      istio_injection = false
+      services = [
+        {
+          name        = "directory-service"
+          target_port = 8080
+          url_prefix  = "/directory"
+          image_tag   = "1.0.4"
+        },
+        {
+          name        = "normalizer"
+          target_port = 8080
+          url_prefix  = "/normalizer"
+          image_tag   = "2.0.13"
+        },
+        {
+          name        = "notaryservice"
+          target_port = 8080
+          url_prefix  = "/notary"
+          image_tag   = "2.0.4"
+        },
+        {
+          name        = "swiftservice"
+          target_port = 8080
+          url_prefix  = "/swift"
+          image_tag   = "2.0.2"
+        }
+      ]
+    }
+  ]
 }
 
 variable "rabbitmq_engine_version" {
@@ -257,12 +295,6 @@ variable "rabbitmq_auto_minor_version_upgrade" {
   default     = false
 }
 
-variable "rabbitmq_publicly_accessible" {
-  description = "Whether to enable connections from applications outside of the VPC that hosts the broker's subnets. Default is `false`"
-  type        = bool
-  default     = false
-}
-
 variable "rabbitmq_username" {
   description = "Username of the user. Default is `master`"
   type        = string
@@ -273,6 +305,16 @@ variable "rabbitmq_apply_immediately" {
   description = "Specifies whether any broker modifications are applied immediately, or during the next maintenance window. Default is `false`"
   type        = bool
   default     = false
+}
+
+variable "rabbitmq_virtual_host" {
+  description = "Name of the virtual host to create in rabbitmq"
+  default     = "/nex_osttra"
+}
+
+variable "rabbitmq_exchange" {
+  description = "Name of the exchange to configure in rabbitmq"
+  default     = "trml_osttra"
 }
 
 variable "environment" {
@@ -322,4 +364,6 @@ variable "sftp_password" {
 variable "vpc_id" {}
 variable "eks_security_group" {}
 variable "kms_key_arn" {}
-variable "vendor" {}
+variable "vendor" {
+  type = string
+}

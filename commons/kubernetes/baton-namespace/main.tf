@@ -69,7 +69,7 @@ resource "kubectl_manifest" "gateway" {
     namespace = var.namespace,
     hosts = jsonencode(toset(concat([
       for app in module.baton_application : app.host
-    ], var.enable_activemq ? module.activemq[0].activemq_url : [])))
+    ], var.enable_activemq ? module.activemq[0].url : [])))
   })
 
   depends_on = [kubernetes_namespace_v1.application]

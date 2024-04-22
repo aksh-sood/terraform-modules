@@ -2,10 +2,10 @@ variable "services" {
   description = "List of services and there required attributes"
   type = list(object({
     name             = string
-    health_endpoint  = string
     target_port      = number
     url_prefix       = string
-    env              = map(string)
+    env              = optional(map(string), {})
+    health_endpoint  = optional(string, "/health")
     port             = optional(number, 8080)
     subdomain_suffix = optional(string, "")
     image_tag        = optional(string, "latest")
@@ -63,4 +63,7 @@ variable "customer" {
   type = string
 }
 
-variable "common_env" {}
+variable "common_env" {
+  type    = map(string)
+  default = {}
+}

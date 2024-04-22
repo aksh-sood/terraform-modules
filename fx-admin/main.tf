@@ -54,16 +54,29 @@ module "rabbitmq" {
   instance_type              = var.rabbitmq_instance_type
   username                   = var.rabbitmq_username
   auto_minor_version_upgrade = var.rabbitmq_auto_minor_version_upgrade
-  publicly_accessible        = var.rabbitmq_publicly_accessible
   apply_immediately          = var.rabbitmq_apply_immediately
 
   tags = var.cost_tags
+}
+
+
+module "rabbitmq_eks_config" {
+  source = "../commons/kubernetes/rabbitmq"
+
+  name              = var.environment
+  domain_name       = var.domain_name
+  rabbitmq_endpoint = replace(module.rabbitmq.console_url, "https://", "")
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
 }
 
 module "s3_swift" {
   source = "../commons/aws/s3"
 
   name = "${var.vendor}-${var.environment}-swift-messages"
+
   tags = var.cost_tags
 }
 
@@ -71,6 +84,7 @@ module "s3" {
   source = "../commons/aws/s3"
 
   name = "${var.vendor}-${var.environment}"
+
   tags = var.cost_tags
 }
 
@@ -81,7 +95,8 @@ module "kinesis_firehose" {
 
   name   = var.environment
   region = var.region
-  tags   = var.cost_tags
+
+  tags = var.cost_tags
 }
 
 module "normalized_trml_kinesis_stream" {
@@ -95,6 +110,7 @@ module "matched_trades_kinesis_stream" {
   source = "../commons/aws/stream"
 
   name = "${var.environment}-matched-trades"
+
   tags = var.cost_tags
 }
 
@@ -136,10 +152,12 @@ module "s3_writer_lambda" {
   security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
+
   environment_variables = {
     region         = var.region
     s3_bucket_name = "${var.vendor}-${var.environment}"
   }
+
   tags = var.cost_tags
 }
 
@@ -157,7 +175,8 @@ module "activemq" {
   storage_type               = var.activemq_storage_type
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
-  whitelist_security_groups  = [var.eks_security_group]
+  whitelist_security_groups  = var.eks_security_group
+  whitelist_ips              = var.activemq_whitelist_ips
 
   tags = var.cost_tags
 }
@@ -197,6 +216,7 @@ module "matched_trades_lambda" {
   security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
+
   environment_variables = {
     data_type           = "matched_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
@@ -237,8 +257,6 @@ module "rds_cluster" {
   cost_tags                             = var.cost_tags
 }
 
-
-
 module "secrets" {
   source = "../commons/aws/secrets"
 
@@ -268,6 +286,39 @@ module "secrets" {
   }, var.additional_secrets)
 }
 
+resource "kubernetes_namespace_v1" "utility" {
+  metadata {
+    name = "utility"
+  }
+}
+
+module "directory_service_data_import" {
+  source = "./modules/data-import-job"
+  count  = var.import_directory_service_db ? 1 : 0
+
+  namespace = kubernetes_namespace_v1.utility.metadata[0].name
+
+  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
+  rds_writer_url = module.rds_cluster.writer_endpoint
+  rds_username   = module.rds_cluster.master_username
+  rds_password   = module.rds_cluster.master_password
+
+  depends_on = [module.rds_cluster]
+
+}
+
+module "rabbitmq_config" {
+  source = "./modules/rabbitmq-config"
+
+  namespace = kubernetes_namespace_v1.utility.metadata[0].name
+
+  rabbitmq_url      = module.rabbitmq.console_url
+  rabbitmq_username = module.rabbitmq.username
+  rabbitmq_password = module.rabbitmq.password
+  vhost             = var.rabbitmq_virtual_host
+  exchange          = var.rabbitmq_exchange
+}
+
 module "baton_application_namespace" {
   source = "../commons/kubernetes/baton-namespace"
 
@@ -279,23 +330,11 @@ module "baton_application_namespace" {
   docker_registry = each.value.docker_registry
   istio_injection = each.value.istio_injection
   services        = each.value.services
-  common_env      = each.value.common_env
   enable_activemq = each.value.enable_activemq
 
   providers = {
     kubectl.this = kubectl.this
   }
 
-  depends_on = [module.secrets]
-}
-
-module "directory_service_data_import" {
-  source = "./modules/data-import-job"
-  count  = var.import_directory_service_db ? 1 : 0
-
-  username       = module.rds_cluster.master_username
-  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
-  rds_writer_url = module.rds_cluster.writer_endpoint
-  password       = module.rds_cluster.master_password
-
+  depends_on = [module.secrets, module.rabbitmq_config, module.directory_service_data_import]
 }
