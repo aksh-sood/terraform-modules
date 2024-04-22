@@ -56,6 +56,7 @@ output "activemq_credentials" {
 }
 
 output "app_password" {
+  description = "Basic Auth password for metrics endpoint of the application"
   value = module.basic_auth_application.app_password
   sensitive   = true
 }

@@ -312,15 +312,16 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
 
 | Name                 | Type   | Description                              |
 | :------------------- | :----- | :--------------------------------------- |
-|activemq_url       | string |endpoint of activemq|
-|activemq_username  | string |ActiveMQ Username credential|
-|activemq_password  | string |ActiveMQ password credential|
-|rabbitmq_endpoint  | string |endpoint of rabbitMQ |
-|rabbitmq_username  | string |rabbitMQ Username credential|
-|rabbitmq_password  | string |rabbitMQ password credential|
-|rabbitmq_nlb_url   | string |rabbitMQ Network Loadbalancer URL|
-|rds_writer_endpoint| string |Writer endpoint of the RDS cluster|
-|rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
-|rds_master_username| string |RDS master username credential|
-|rds_master_password| string |RDS master password credential|
-|activemq_credentials| list(map) | Credentials for different ActiveMQ deployments within a namespace|
+|activemq_url         | string |endpoint of activemq|
+|activemq_username    | string |ActiveMQ Username credential|
+|activemq_password    | string |ActiveMQ password credential|
+|rabbitmq_endpoint    | string |endpoint of rabbitMQ |
+|rabbitmq_username    | string |rabbitMQ Username credential|
+|rabbitmq_password    | string |rabbitMQ password credential|
+|rabbitmq_nlb_url     | string |rabbitMQ Network Loadbalancer URL|
+|rds_writer_endpoint  | string |Writer endpoint of the RDS cluster|
+|rds_reader_endpoint  | string |Reader endpoint of the RDS cluster|
+|rds_master_username  | string |RDS master username credential|
+|rds_master_password  | string |RDS master password credential|
+|activemq_credentials | list(map) | Credentials for different ActiveMQ deployments within a namespace|
+|app_password         | string | Basic Auth password for metrics endpoint of the applications| 

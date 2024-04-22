@@ -144,6 +144,7 @@ module "kinesis_firehose" {
 
   bucket_arn  = module.s3.bucket_arn
   kms_key_arn = module.kms_sse.arn
+  
   name        = var.environment
   region      = var.region
 
@@ -238,6 +239,7 @@ module "activemq" {
   whitelist_security_groups  = var.eks_security_group
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
+  
   tags                       = var.cost_tags
 }
 
@@ -358,10 +360,11 @@ module "directory_service_data_import" {
   count  = var.import_directory_service_db ? 1 : 0
 
   namespace      = kubernetes_namespace_v1.utility.metadata[0].name
-  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
   rds_writer_url = module.rds_cluster.writer_endpoint
   rds_username   = module.rds_cluster.master_username
   rds_password   = module.rds_cluster.master_password
+  
+  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
   bucket_region  = var.directory_service_data_s3_bucket_region
   bucket_name    = var.directory_service_data_s3_bucket_name
   bucket_path    = var.directory_service_data_s3_bucket_path
@@ -372,13 +375,16 @@ module "directory_service_data_import" {
 
   depends_on = [module.rds_cluster, null_resource.directory_service_data_import_validation]
 }
+
 module "rabbitmq_config" {
   source    = "./modules/rabbitmq-config"
+
   namespace = kubernetes_namespace_v1.utility.metadata[0].name
 
   rabbitmq_url      = module.rabbitmq.console_url
   rabbitmq_username = module.rabbitmq.username
   rabbitmq_password = module.rabbitmq.password
+
   vhost             = var.rabbitmq_virtual_host
   exchange          = var.rabbitmq_exchange
 }
