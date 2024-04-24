@@ -168,6 +168,12 @@ variable "activemq_username" {
   default   = "admin"
 }
 
+variable "activemq_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ"
+  type        = list(string)
+  default     = []
+}
+
 variable "lambda_packages_s3_bucket" {
   description = "S3 bucket name with JAR packages for lambda functions"
   type        = string
@@ -190,19 +196,27 @@ variable "domain_name" {
   }
 }
 
+variable "import_directory_service_db" {
+  description = "Whether to import data into directory service database"
+  type        = bool
+  default     = true
+}
+
 variable "baton_application_namespaces" {
 
   description = "List of namespaces and services and there required attributes"
   type = list(object({
     namespace       = string
     customer        = string
+    enable_activemq = optional(bool, false)
     docker_registry = optional(string, "150399859526.dkr.ecr.us-west-2.amazonaws.com")
     istio_injection = optional(bool, true)
     common_env      = optional(map(string), {})
     services = list(object({
       name             = string
-      target_port      = number
       url_prefix       = string
+      target_port      = number
+      port             = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
       env              = optional(map(string), {})
@@ -255,8 +269,6 @@ variable "baton_application_namespaces" {
       ]
     }
   ]
-
-
 }
 
 variable "rabbitmq_engine_version" {
@@ -283,12 +295,6 @@ variable "rabbitmq_auto_minor_version_upgrade" {
   default     = false
 }
 
-variable "rabbitmq_publicly_accessible" {
-  description = "Whether to enable connections from applications outside of the VPC that hosts the broker's subnets. Default is `false`"
-  type        = bool
-  default     = false
-}
-
 variable "rabbitmq_username" {
   description = "Username of the user. Default is `master`"
   type        = string
@@ -299,6 +305,16 @@ variable "rabbitmq_apply_immediately" {
   description = "Specifies whether any broker modifications are applied immediately, or during the next maintenance window. Default is `false`"
   type        = bool
   default     = false
+}
+
+variable "rabbitmq_virtual_host" {
+  description = "Name of the virtual host to create in rabbitmq"
+  default     = "/nex_osttra"
+}
+
+variable "rabbitmq_exchange" {
+  description = "Name of the exchange to configure in rabbitmq"
+  default     = "trml_osttra"
 }
 
 variable "environment" {
@@ -327,7 +343,7 @@ variable "cloudflare_api_token" {
 }
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
-  type        = map(any)
+  type = map(any)
   default     = {}
 }
 
@@ -349,4 +365,6 @@ variable "sftp_password" {
 variable "vpc_id" {}
 variable "eks_security_group" {}
 variable "kms_key_arn" {}
-variable "vendor" {}
+variable "vendor" {
+  type = string
+}

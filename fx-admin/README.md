@@ -4,7 +4,7 @@ This module contains the setup for FX Admin node resources required for onboardi
 
 - Kinesis Streams
 - Kinesis Firehose
-- Kinesis analytics application
+- Kinesis Analytics Application
 - Lambda Functions
 - ActiveMQ
 - RabbitMQ
@@ -12,20 +12,28 @@ This module contains the setup for FX Admin node resources required for onboardi
 - S3 Buckets for baton and swift messages
 - Baton Applications and namespaces configuraitons
 - Cloudflare CNAME records for RabbitMQ
+- AWS Secrets to store different credentails
+- Kubernetes objects to expose RabbitMQ to internet
+- Kubernetes Job to automate RabbitMQ Configuration 
+- Kubernetes Job to import directory service database
 
 # Modules
 
-This folder only contains two modules in itself . Please refer the below list to [know more](../commons/README.md) about modules bring reffered here.
+This folder only contains three modules in itself . Please refer the below list to [know more](../commons/README.md) about modules bring reffered here.
 
 - [Lambda](../commons/aws/lambda/)
 - [Lambda IAM](../commons/aws/lambda-iam/)
 - [Stream](../commons/aws/stream/)
 - [RDS](../commons/aws/rds/)
-- [RabbitMQ](../commons/aws/rabbitmq/)
 - [S3](../commons/aws/s3/)
 - [SQS](../commons/aws/sqs/)
-- [ActiveMQ](../commons/aws/activemq/)
-- [Baton Application Namespaces](../commons/kubernetes/baton-application-namespace/)
+- [Secrets](../commons/aws/secrets/)
+- [RabbitMQ (AWS)](../commons/aws/rabbitmq/)
+- [ActiveMQ (AWS)](../commons/aws/activemq/)
+- [Cloudflare](../commons/utilities/cloudflare/)
+- [RabbitMQ (Kubernetes)](../commons/kubernetes/rabbitmq/)
+- [ActiveMQ (Kubernets)](../commons/kubernetes/activemq/)
+- [Baton Application Namespace](../commons/kubernetes/baton-application-namespace/)
 
 ##### [Kinesis App](./modules/kinesis-app/)
 
@@ -34,6 +42,13 @@ The following module deals with creation of Kinesis Analytical Application with 
 #### [Kinesis Firehose](./modules/kinesis-firehose/)
 
 The following mode creates a kinesis firehose stream to write into S3 bucket that is internally creates in this script.
+
+#### [Data Import Job](./modules/data-import-job/)
+
+This module creates job that imports data into RDS which is required for initializing **directory-service** for FX Admin account. The [SQL dump file](./modules/data-import-job/directory-service.sql)  is set in a config map which is mounted to the job for execution.
+
+#### [RabbitMQ Config](./modules/rabbitmq-config/)
+This module creates a Kubernetes job which configures RabbitMQ. A **vhost** and **exchange** is creates by this module which are required for data pipeline to work properly.
 
 ## Common Modules Usage
 
@@ -49,6 +64,9 @@ Below mentioned modules are sourced via [commons](../commons/) folder , below is
 - _s3_ : Creates a S3 bucket for Baton
 - _s3_swift_ : Creates a S3 bucket gor SWIFT messages
 - _cloudflare_ : Create CNAME records in cloudflare
+- _rabbitmq_ : Creates RabbitMQ broker in private subnets
+- _secrets_ : Creates AWS secrets to store important credentials
+- _baton_namespace_ : Creates different deployments and other necessary kuberntes objects 
 
 # Folder Structure
 
@@ -57,6 +75,8 @@ Below mentioned modules are sourced via [commons](../commons/) folder , below is
 ├── backend.tf
 ├── main.tf
 ├── modules
+│   ├── utilities
+│   ├── kinesis-firehose
 │   └── kinesis-app
 ├── outputs.tf
 ├── providers.tf
@@ -138,9 +158,10 @@ terraform apply
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
 | rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |
-| rabbitmq_publicly_accessible              | Whether to enable connections from applications outside of the VPC that hosts the broker's subnets.        | Bool                               | `false`                                                                      |
 | rabbitmq_username                         | Username of the user.                                                                                      | String                             | `master`                                                                     |
-| rabbitmq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window. | Bool                               | `false`                                                                      |
+| rabbitmq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window. | bool | `false` |
+|rabbitmq_virtual_host|Virtual host to create in rabbitmq|string|`/next_osttra`|
+|rabbitmq_exchange|Exchange to create in rabbitmq |string|`trml_osttra`|
 | lambda_packages_s3_bucket                 | S3 bucket name for bucket storing binary files for lambdas                                                 | string                             | `"fx-dev-lambda-packages"`                                                   |
 | public_subnets\*                          | List of IDs of public subnets                                                                              | list(string)                       |                                                                              |
 | private_subnets\*                         | List of IDs of private subnets                                                                             | list(string)                       |                                                                              |
@@ -165,8 +186,9 @@ The following object deals with the namespaces and other kubernetes resources fo
 |:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
 | namespace\*       | Namespace value                                                            | string         |                                                    |
 | istio_injection | Whether to enable istio injection or not                                   | bool           | `true`         |
+|enable_activemq|To deploy activemq in this namespace|bool|`false`|
 | common_env        | Environment properties common between multiple services across a namespace | map(string)    | `{}`                                               |
-| customer\*        | Name of the customer                                                                                                                   | string      |          |
+| customer\*        | Name of the customer | string      |          |
 | docker_registry\* | Registry to pull the docker images from | string ||
 | services\*        | List of services to create in the mentioned namespace                      | list(services) | [Baton Services](#markdown-headers-baton-services) |
 
@@ -179,16 +201,17 @@ This object taked the paramters needed by a single service to run and are passed
 | Name              | Description                                                                                                                            | Type        | Default  |
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 | name\*            | Name of the service                                                                                                                    | string      |          |
-| target_port\*     | Port exposed by the service                                                                                                            | number      |          |
-| health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
-| subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
-| url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
-| image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
+| target_port     | Port exposed on the container |number      |     `8080`     |
+| port\*     | Port exposed by the pod | number      |          |
+| health_endpoint | Health check endpoint of the service | string      |`"/health"`|
+| subdomain_suffix  | Suffix to append to the environment name in sub domain for a service| string  |`""` |
+| url_prefix\*      | Prefix for the service URL  | string      |          |
+| image_tag         | Version of the image to be used| string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 |volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
 
 **Note: By default `{ "APP_ENVIRONMENT" = customer, "SPRING_PROFILES_ACTIVE" = namespace }` are always appended to `env` attribute.**
-
+**Note: subdomain_suffix must begin in `-` eg: `-api`**
 ### Volume Mounts
 
 Object parameters for adding mounts to  [Baton Services](#markdown-headers-baton-services). The objects `volume` and `mounts` configurations are typical to the kubernetes YAML configurations.
@@ -217,12 +240,14 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
       docker_registry = "123456789.dkr.ecr.us-west-2.amazonaws.com"
       common_env      = { "key7" = "v7", "key8" = "v8" }
       customer        = "cust1"
+      enable_activemq = true
       services = [
         {
           name            = "app1"
           health_endpoint = "/health"
           target_port     = 8080
-          subdomain_suffix= "api"
+          port            = 8088
+          subdomain_suffix= "-api"
           url_prefix      = "/app1"
           env             = { "key1" = "v1", "key2" = "v2" }
           image_tag       = "latest"
@@ -249,6 +274,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           name            = "app3"
           health_endpoint = "/health"
           target_port     = 8080
+          port            = 7088
           url_prefix      = "/app3"
           env             = {}
           image_tag       = "latest"
@@ -258,13 +284,14 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
     {
       namespace       = "ns2"
       istio_injection = false
+      enable_activemq = true
       customer        = "cust2"
       services = [
         {
           name            = "app2"
           health_endpoint = "/health"
           target_port     = 8080
-          endpoint        = "api"
+          subdomain_suffix= "-api"
           url_prefix      = "/app2"
           env             = { "key3" = "v3", "key4" = "v4" }
           image_tag       = "latest"
@@ -287,3 +314,4 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
 |rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
 |rds_master_username| string |RDS master username credential|
 |rds_master_password| string |RDS master password credential|
+|activemq_credentials| list(map) | Credentials for different ActiveMQ deployments within a namespace|

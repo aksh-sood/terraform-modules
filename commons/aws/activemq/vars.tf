@@ -3,6 +3,7 @@ variable "region" {}
 variable "vpc_id" {}
 variable "subnet_ids" {}
 variable "whitelist_security_groups" {}
+variable "whitelist_ips" {}
 variable "tags" {}
 variable "engine_version" {}
 variable "storage_type" {}

@@ -1,4 +1,4 @@
-region = "us-west-2"
+region = "us-east-1"
 
 environment = "aksh"
 
@@ -30,15 +30,17 @@ create_certificate = true
 
 acm_certificate_arn = null
 
-acm_certificate_bucket = "test-certificate-iaac"
+acm_certificate_bucket = "baton-certificates"
 
-acm_certificate = "cert.pem"
+acm_certificate = "cloudflare/batonsystems.com.crt"
 
-acm_certificate_chain = "origin_ca_rsa_root.pem"
+acm_certificate_chain = "cloudflare/origin_ca_rsa_root.pem"
 
-acm_private_key = "key.pem"
+acm_private_key = "cloudflare/batonsystems.com.key"
 
 create_eks = true
+
+enable_cluster_autoscaler = true
 
 enable_siem = false
 
@@ -68,8 +70,8 @@ eks_node_groups = {
 
     instance_types = ["m6a.large"]
 
-    min_size = 2
-    max_size = 2
+    min_size = 1
+    max_size = 1
 
     additional_security_groups = []
 

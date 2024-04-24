@@ -44,3 +44,9 @@ output "rds_master_password" {
 output "rds_master_username" {
   value = module.rds_cluster.master_username
 }
+
+output "activemq_credentials" {
+  description = "ActiveMQ Credentials for EKS deployments"
+  value       = [for ns in module.baton_application_namespace : ns.activemq_credentials if ns.activemq_credentials != null]
+  sensitive   = true
+}
