@@ -1,4 +1,3 @@
-#Generating a random password gor ActiveMQ
 resource "random_password" "activemq_password" {
   length      = 16
   special     = false
@@ -10,27 +9,24 @@ resource "random_password" "activemq_password" {
   min_upper   = 1
 }
 
-
-# Creating a new Security group for Activemq 
 resource "aws_security_group" "activemq_sg" {
   name        = "Activemq-${var.name}-${var.region}"
   description = "Activemq Security group for ${var.name}"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description     = ""
-    from_port       = 61617
-    to_port         = 61617
-    protocol        = "tcp"
-    security_groups = var.whitelist_security_groups
-  }
-  ingress {
-    description     = ""
-    from_port       = 8162
-    to_port         = 8162
-    protocol        = "tcp"
-    security_groups = var.whitelist_security_groups
-  }
+  # ingress {
+  #   from_port       = 61617
+  #   to_port         = 61617
+  #   protocol        = "tcp"
+  #   security_groups = var.whitelist_security_groups
+  # }
+
+  # ingress {
+  #   from_port       = 8162
+  #   to_port         = 8162
+  #   protocol        = "tcp"
+  #   security_groups = var.whitelist_security_groups
+  # }
 
   egress {
     from_port        = 0
@@ -40,24 +36,72 @@ resource "aws_security_group" "activemq_sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  # Adding name tag for Security group so that we can easily identify it
   tags = merge(var.tags, { Name = "${var.name}-activemq" })
 }
 
+resource "aws_security_group_rule" "security_group_whitelist_61617" {
+  type                     = "ingress"
+  from_port                = 61617
+  to_port                  = 61617
+  protocol                 = "tcp"
+  source_security_group_id = var.whitelist_security_groups
+  security_group_id        = aws_security_group.activemq_sg.id
+}
+
+resource "aws_security_group_rule" "security_group_whitelist_8162" {
+  type                     = "ingress"
+  from_port                = 8162
+  to_port                  = 8162
+  protocol                 = "tcp"
+  source_security_group_id = var.whitelist_security_groups
+  security_group_id        = aws_security_group.activemq_sg.id
+}
+
+resource "aws_security_group_rule" "whitelisted_ips_port_61617" {
+  count = length(var.whitelist_ips)
+
+  type              = "ingress"
+  from_port         = 61617
+  to_port           = 61617
+  protocol          = "tcp"
+  cidr_blocks       = [element(var.whitelist_ips, count.index)]
+  security_group_id = aws_security_group.activemq_sg.id
+}
+
+resource "aws_security_group_rule" "whitelisted_ips_port_8162" {
+  count = length(var.whitelist_ips)
+
+  type              = "ingress"
+  from_port         = 8162
+  to_port           = 8162
+  protocol          = "tcp"
+  cidr_blocks       = [element(var.whitelist_ips, count.index)]
+  security_group_id = aws_security_group.activemq_sg.id
+}
+
 resource "aws_mq_configuration" "mq_configuration" {
-  description    = "ActiveMQ provisioning"
   name           = "${var.name}-activemq"
+  description    = "ActiveMQ for ${var.name}"
   engine_type    = "ActiveMQ"
   engine_version = var.engine_version
-  data           = file("${path.module}/configuration/activemq_config.xml")
+  data           = file("${path.module}/config.xml")
+
+  # The ignore lifecycle block is added to ignore changes to ActiveMQ configuration 
+  # as it always generates a change in plan whenever triggered which can cause conflict with GITOPS model
+  lifecycle {
+    ignore_changes = [
+      data
+    ]
+  }
 }
 
 resource "aws_mq_broker" "activemq" {
   broker_name = var.name
+
   configuration {
     id = aws_mq_configuration.mq_configuration.id
-
   }
+
   engine_type                = "ActiveMQ"
   engine_version             = var.engine_version
   storage_type               = var.storage_type

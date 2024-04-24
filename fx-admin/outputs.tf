@@ -47,5 +47,6 @@ output "rds_master_username" {
 
 output "activemq_credentials" {
   description = "ActiveMQ Credentials for EKS deployments"
-  value       = module.baton_application_namespace[*].activemq_credentials
+  value       = [for ns in module.baton_application_namespace : ns.activemq_credentials if ns.activemq_credentials != null]
+  sensitive   = true
 }

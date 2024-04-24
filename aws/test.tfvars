@@ -40,7 +40,7 @@ acm_private_key = "cloudflare/batonsystems.com.key"
 
 create_eks = true
 
-enable_cluster_autoscaler = false
+enable_cluster_autoscaler = true
 
 enable_siem = false
 
@@ -70,8 +70,8 @@ eks_node_groups = {
 
     instance_types = ["m6a.large"]
 
-    min_size = 2
-    max_size = 2
+    min_size = 1
+    max_size = 1
 
     additional_security_groups = []
 
