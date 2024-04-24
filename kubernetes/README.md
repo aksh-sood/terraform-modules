@@ -10,56 +10,63 @@ The following folder is a sub part of the entire Terraform IAC project and deals
 - Grafana Dashboards and Users
 - Cloudflare CNAME records
 - Jaeger
+- SFTP Server
+- Config Server
+- Cluster Autoscaler
 - Filebeat Agent and opensearch public access
 
 # Modules
 
-##### [Istio](./kubernetes/module/istio)
+##### [Istio](./kubernetes/modules/istio)
 
 The isito module installs the isito service mesh onto the EKS cluster in `istio-system` namespace and creates an ingress object of type Application Load Balancer exposing the cluster to the outside world. It also implements basic authentication over WASM plugin for domains like jaeger, alertmanager, prometheus.
 
 **Note:** The ALB created from this module can only enable flow logging if the logging S3 bucket supplied is in the same AWS region as the ALB. Also make sure that S3 bucket policies are configured properly to allow logs from different sources like VPC and ELB.
 **WARNING:** If the S3 logging bucket is not in the same region then `loadbalancer_url` is not generated leading to failiure of script.
 
-##### [Addons](./kubernetes/module/addons)
+##### [Addons](./kubernetes/modules/addons)
 
 Responsible for installation of helm based eks addons in cluster which are listed below. 
 
 - lbc-controller
 
-The versions for the following can be supplied from the input variables.
+The versions for the abovfollowinge can be supplied from the input variables.
 
-##### [SFTP](./kubernetes/module/sftp)
+##### [SFTP](./kubernetes/modules/sftp)
 
 Provisions a SFTP server in the provided namespace. It is an optionally executable module which is set by `enable_sftp` variable.
 
+##### [Cluster AutoScaler](./kubernetes/modules/cluster-autoscaler)
+
+Install's Cluster Autoscaler controller for autoscalling EKS nodes. It is an optionally executable module triggered via `enable_cluster_autoscaler`.
+
 ##### [Cloudflare](../commons/utilities/cloudflare)
 
-Responsible for create CNAME records on cloudlfare for grafana, kibana, jaeger,prometheus, alertmanager.
+Responsible for creating CNAME records on cloudlfare for **grafana, kibana, jaeger,prometheus, alertmanager.**
 
-##### [Config Server](./kubernetes/module/cloudflare)
+##### [Config Server](./kubernetes/modules/config-server)
 
 This module uses the `baton-namespace` module from [commons](../commons/kubernetes/baton-namespace/) to dpeloy config server in `config-server` namespace. It contains the secrets required for configuring different services. As prerequisite an AWS secret must be provided that contains the SSH key to fetch config-repo from SCM . The configuratin of config-server is stored as a local variable and not expsed outside as it is sensitive and will rarely change.
 
 Config server only supports SSH keys of type **RSA**, please refer this [documentation](https://docs.spring.io/spring-cloud-config/docs/current/reference/html/#_authentication) for more information. Use the following command to generate the key `ssh-keygen -m PEM -t rsa -b 4096 -f ~/config_server_deploy_key.rsa`. Follow this [link](https://support.atlassian.com/bitbucket-cloud/docs/set-up-personal-ssh-keys-on-linux/#Provide-Bitbucket-Cloud-with-your-public-key) for steps to whitelist the SSH key on BitBucket
 
-##### [Jaeger](./kubernetes/module/jaeger)
+##### [Jaeger](./kubernetes/modules/jaeger)
 
 This module is responsible for installation and configuration of jaeger tracing components on top of istio . The jaeger components are not installed via helm and neither are they configured in this module. The maintainers of istio also maintain a configuration for [jaeger installation](https://istio.io/latest/docs/ops/integrations/jaeger/#installation) which we apply in this module using kubectl provider .
 
-##### [Monitoring](./kubernetes/module/monitoring)
+##### [Monitoring](./kubernetes/modules/monitoring)
 
-Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/module/monitoring/configs/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/configs/alertmanager.yaml) file respectively.
+Installs the Kube Stack Prometheus on the EKS cluster and also creates prometheus alerts and grafana dashboards for the same. The configuration for the alertmanager and alerts is supplied from the helm values by templating the values file and suppling it the values for alerts and Alert Manager form two different files [alerts](./kubernetes/modules/monitoring/configs/alerts.yaml) and [alertmanager](./kubernetes/module/monitoring/configs/alertmanager.yaml) file respectively.
 
 The grafana configuration is carried out in a seperate submodule . The alerts notification is sent to slack if severity is of type warning and if critical then to pagerduty. The storage volume for the PVC'S for Prometheus,Alertmanager and Grafana is also set at this level with variables configured for each of them as `200Gi`,`5Gi` and `10Gi` respectively by default, the Prometheus and Alertmanager volume size can be changed from top level vars or tfvars file but for grafana volume needs to be configured from [monitoring vars file](./modules/monitoring/vars.tf).
 
 CNAME records are also created via this module for prometheus, grafana and alertmanager exposing the services at `{environment}-{service}-{domain}` EXAMPLE `test-grafana-123.com`.
 
-###### [Grafana Config](./kubernetes/module/monitoring/modules/grafana-config)
+###### [Grafana Config](./kubernetes/modules/monitoring/modules/grafana-config)
 
 This module is a legacy module as it uses grafana provider to create the dashboards, Hence this module cannot be dependent on any other module and cannot be set to optional if required. The reason for configuring the grafana provider inside monitoring module is that grafana is not a hashicorp module and is a seperate project .
 
-The Grafana provider uses the URL to access grafana and admin credentials are configured in it for authentication. The [dashboards](./kubernetes/module/monitoring/modules/grafana-config/dashboards) folder contains the json files for creating different grafana dashboards. Also a no admin user (developer) is also created.
+The Grafana provider uses the URL to access grafana and admin credentials are configured in it for authentication. The [dashboards](./kubernetes/modules/monitoring/modules/grafana-config/dashboards) folder contains the json files for creating different grafana dashboards. Also a no admin user (developer) is also created.
 
 **Note:** The grafana service needs to be exposed via main monitoring module which is used by the grafana provider to create the objects.
 
@@ -71,6 +78,7 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 ├── main.tf
 ├── modules
 │   ├── addons
+│   ├── cluster-autoscaler
 │   ├── sftp
 │   ├── config-server
 │   ├── istio
@@ -90,7 +98,7 @@ The Grafana provider uses the URL to access grafana and admin credentials are co
 └── vars.tf
 ```
 
-The providers.tf file contains the necessary packages that are required to run the script i.e helm and kubernetes provider .(**Note:** Grafana Provider is configured inside the [grafana-config](./kubernetes/module/monitoring/modules/grafana-config) submodule as it is not a hashicorp module and runs into issues wiht the randomly generated password if used in root providers file)
+The providers.tf file contains the necessary packages that are required to run the script i.e helm and kubernetes provider .(**Note:** Grafana Provider is configured inside the [grafana-config](./kubernetes/modules/monitoring/modules/grafana-config) submodule as it is not a hashicorp module and runs into issues wiht the randomly generated password if used in root providers file)
 
 The main.tf file is the file that triggers the modules for creation of resources.
 
@@ -156,6 +164,7 @@ terraform apply
 | cloudflare_api_token\*         | cloudflare API access token                                         | string                                                      |                                                                              |
 | enable_siem                    | Optional enabling of logging in ALB                                 | bool                                                        | `true`                                                                       |
 | enable_sftp | Optional enabling of SFTP server|bool | `true` |
+| enable_cluster_autoscaler | Optional installation of cluster autoscaler controller| bool|`false`|
 | baton_application_namespaces\* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 
 **NOTE: `enable_siem` parameter is used to enable/disable the logging of istio ingress . If set to `true` ,`siem_storage_s3_bucket` is required attribute with S3 bucekt in the same region as the EKS cluster**

@@ -23,8 +23,8 @@ module "baton_application" {
   source   = "../baton-application"
   for_each = { for svc in var.services : svc.name => svc }
 
+  namespace        = kubernetes_namespace_v1.application.metadata[0].name
   domain_name      = var.domain_name
-  namespace        = var.namespace
   customer         = var.customer
   docker_registry  = var.docker_registry
   name             = each.value.name
@@ -46,6 +46,19 @@ module "baton_application" {
 
 }
 
+module "activemq" {
+  source = "../activemq"
+  count  = var.enable_activemq ? 1 : 0
+
+  domain_name       = var.domain_name
+  namespace         = var.namespace
+  activemq_username = var.activemq_username
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+}
+
 resource "kubectl_manifest" "gateway" {
 
   provider = kubectl.this
@@ -54,9 +67,9 @@ resource "kubectl_manifest" "gateway" {
 
   yaml_body = templatefile("${path.module}/templates/gateway.yaml", {
     namespace = var.namespace,
-    hosts = jsonencode(toset([
+    hosts = jsonencode(toset(concat([
       for app in module.baton_application : app.host
-    ]))
+    ], var.enable_activemq ? module.activemq[0].url : [])))
   })
 
   depends_on = [kubernetes_namespace_v1.application]

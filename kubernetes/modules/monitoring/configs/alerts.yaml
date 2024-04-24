@@ -1,8 +1,8 @@
 #do not remove this comment (added here to maintain yaml formatting ) 
  rule-name:
    groups:
-  #  - name: custom_alerts
-  #    rules: ${custom_alerts}
+   - name: custom_alerts
+     rules: ${custom_alerts}
    - name: kube_infra_alerts
      rules:       
 

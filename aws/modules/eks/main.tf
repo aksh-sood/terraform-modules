@@ -94,7 +94,7 @@ module "eks_node" {
   node_security_group_id = try(each.value.additional_security_groups, [])
 
 
-  tags = try(merge(var.eks_tags, each.value.tags), var.eks_tags)
+  tags = try(merge(var.eks_tags, each.value.tags), var.eks_tags, var.enable_cluster_autoscaler ? { "k8s.io/cluster-autoscaler/enabled" = true } : {})
 }
 
 module "addons" {

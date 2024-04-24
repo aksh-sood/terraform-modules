@@ -158,6 +158,16 @@ variable "sftp_username" {
   default     = "myuser"
 }
 
+variable "enable_cluster_autoscaler" {
+  description = "Whether to install cluster autoscaler or not"
+  type        = bool
+  default     = false
+}
+
+variable "cluster_autoscaler_version" {
+  default = "v1.26.2"
+}
+
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}
