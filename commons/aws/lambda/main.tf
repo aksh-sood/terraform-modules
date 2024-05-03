@@ -18,6 +18,10 @@ resource "aws_lambda_function" "this" {
     variables = var.environment_variables
   }
 
+  tracing_config {
+    mode = "Active"
+  }
+
 }
 
 resource "aws_lambda_event_source_mapping" "this" {

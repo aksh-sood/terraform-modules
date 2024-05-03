@@ -7,13 +7,13 @@ siem_storage_s3_bucket = "eks-auto-vpc-flow-logs"
 environment                        = "aksh"
 pagerduty_key                      = "8d81b91f50e54dc09a2400fbeb019c84"
 custom_alerts                      = []
-opensearch_endpoint                = "vpc-aksh-utmch42tcaz773hpfrv6juzjgy.us-east-1.es.amazonaws.com"
+opensearch_endpoint                = "vpc-aksh-n7k2tg27ttkdt2rdekklp5zrau.us-east-1.es.amazonaws.com"
 opensearch_username                = "master"
 opensearch_password                = "#=Ts77aZkCoVl0#j"
 domain_name                        = "batonsystems.com"
-grafana_role_arn                   = "arn:aws:iam::654654400200:role/grafana_aksh_us-east-1"
-acm_certificate_arn                = "arn:aws:acm:us-east-1:654654400200:certificate/a4261e44-41f7-4ca0-a082-43f0c07da90c"
-efs_id                             = "fs-0e5bf518774467773"
+grafana_role_arn                   = "arn:aws:iam::130759691668:role/grafana_aksh_us-east-1"
+acm_certificate_arn                = "arn:aws:acm:us-east-1:130759691668:certificate/3665fd33-916f-47f3-886f-370fb8771747"
+efs_id                             = "fs-06f20525a4c5440d1"
 cloudflare_api_token               = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
 enable_cluster_autoscaler          = false
 create_dns_records                 = false

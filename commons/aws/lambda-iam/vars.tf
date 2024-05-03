@@ -6,6 +6,7 @@ variable "lambda_role_policies" {
     "AWSLambda_FullAccess",
     "AmazonSQSFullAccess",
     "AmazonEC2FullAccess",
+    "AWSXRayDaemonWriteAccess",
     "service-role/AWSLambdaKinesisExecutionRole"
   ]
 }
