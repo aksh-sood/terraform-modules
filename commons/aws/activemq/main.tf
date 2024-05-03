@@ -88,6 +88,10 @@ resource "aws_mq_broker" "activemq" {
     id = aws_mq_configuration.mq_configuration.id
   }
 
+  logs {
+    audit = true
+  }
+
   engine_type                = "ActiveMQ"
   engine_version             = var.engine_version
   storage_type               = var.storage_type
