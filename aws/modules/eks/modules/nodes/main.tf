@@ -73,6 +73,10 @@ resource "aws_launch_template" "this" {
     }
   }
 
+  metadata_options {
+    http_tokens = "required"
+  }
+
   key_name      = var.ssh_key
   ebs_optimized = true
 

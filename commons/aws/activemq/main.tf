@@ -14,20 +14,6 @@ resource "aws_security_group" "activemq_sg" {
   description = "Activemq Security group for ${var.name}"
   vpc_id      = var.vpc_id
 
-  # ingress {
-  #   from_port       = 61617
-  #   to_port         = 61617
-  #   protocol        = "tcp"
-  #   security_groups = var.whitelist_security_groups
-  # }
-
-  # ingress {
-  #   from_port       = 8162
-  #   to_port         = 8162
-  #   protocol        = "tcp"
-  #   security_groups = var.whitelist_security_groups
-  # }
-
   egress {
     from_port        = 0
     to_port          = 0

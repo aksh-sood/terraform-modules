@@ -343,6 +343,7 @@ variable "cloudflare_api_token" {
 }
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
+  type = map(any)
   default     = {}
 }
 
@@ -357,7 +358,6 @@ variable "sftp_username" {
 }
 
 variable "sftp_password" {
-  description = "Password for sftp"
   type        = string
 }
 
