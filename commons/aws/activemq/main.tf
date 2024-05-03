@@ -90,6 +90,7 @@ resource "aws_mq_broker" "activemq" {
 
   logs {
     audit = true
+    general = true
   }
 
   engine_type                = "ActiveMQ"

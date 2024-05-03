@@ -55,10 +55,15 @@ resource "aws_mq_broker" "rabbitmq" {
   publicly_accessible        = var.publicly_accessible
   subnet_ids                 = var.enable_cluster_mode ? var.subnet_ids : [var.subnet_ids[0]]
   security_groups            = [aws_security_group.rabbitmq.id]
+
   user {
     console_access = true
     username       = var.username
     password       = random_password.rabbitmq_password.result
+  }
+
+  logs {
+    general = true
   }
 
   tags = var.tags
