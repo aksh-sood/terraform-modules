@@ -158,7 +158,7 @@ resource "aws_security_group_rule" "allow_egress_in_vpc" {
   type              = "egress"
   to_port           = 0
   protocol          = "-1"
-  cidr_blocks       = [data.aws_vpc.rds]
+  cidr_blocks       = [data.aws_vpc.rds.cidr_block]
   from_port         = 0
   security_group_id = module.rds_cluster.security_group_id
 }

@@ -9,11 +9,11 @@ pagerduty_key                      = "8d81b91f50e54dc09a2400fbeb019c84"
 custom_alerts                      = []
 opensearch_endpoint                = "vpc-aksh-n7k2tg27ttkdt2rdekklp5zrau.us-east-1.es.amazonaws.com"
 opensearch_username                = "master"
-opensearch_password                = "#=Ts77aZkCoVl0#j"
+opensearch_password                = "lw95U(95mTByh8xR"
 domain_name                        = "batonsystems.com"
 grafana_role_arn                   = "arn:aws:iam::130759691668:role/grafana_aksh_us-east-1"
-acm_certificate_arn                = "arn:aws:acm:us-east-1:130759691668:certificate/3665fd33-916f-47f3-886f-370fb8771747"
-efs_id                             = "fs-06f20525a4c5440d1"
+acm_certificate_arn                = "arn:aws:acm:us-east-1:130759691668:certificate/dfdd383d-6f44-472b-b08b-55e596754615"
+efs_id                             = "fs-085658b5b09e355f9"
 cloudflare_api_token               = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
 enable_cluster_autoscaler          = false
 create_dns_records                 = false

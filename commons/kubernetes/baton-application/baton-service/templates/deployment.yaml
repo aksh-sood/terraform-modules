@@ -21,6 +21,12 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
+          # securityContext:
+          #   allowPrivilegeEscalation: false
+          #   runAsNonRoot: true
+          #   readOnlyRootFilesystem: true
+          #   seccompProfile:
+          #     type: RunTimeDefault
           imagePullPolicy: Always
           {{- if and ( .Values.health_endpoint ) ( .Values.url_prefix ) }}
           readinessProbe:

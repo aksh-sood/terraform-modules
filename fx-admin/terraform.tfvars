@@ -3,20 +3,20 @@ k8s_cluster_name = "aksh"
 environment      = "fx-baton-test-aksh"
 vendor           = "baton"
 
-kms_key_arn =  "arn:aws:kms:us-east-1:130759691668:key/fda8f21d-9968-4b2f-82d7-ff81e63ffae4"
+kms_key_arn =  "arn:aws:kms:us-east-1:130759691668:key/a724d116-1055-40d3-bdcd-4475811c0038"
 
-eks_security_group = "sg-07c5d8f049353f1f8"
+eks_security_group = "sg-0e5843820fd5a792f"
 public_subnet_ids = [
-  "subnet-0ab460d851ac1e433",
-  "subnet-0f626c3d2a84a8f82",
-  "subnet-00e5acc2fa79e55c4",
+  "subnet-014e6cc8dca4d3396",
+  "subnet-0538b2f56bc74d965",
+  "subnet-049755802b049b066",
 ]
 private_subnet_ids = [
-  "subnet-00a9ddb4d58ad7650",
-  "subnet-0cca9ad1c4382efb2",
-  "subnet-07c0de52c9ba48ab7",
+  "subnet-056dd27ab8d29a801",
+  "subnet-0811230091ecfed5d",
+  "subnet-098fafb71852195b8",
 ]
-vpc_id = "vpc-08544128b722af93c"
+vpc_id = "vpc-03a7a2a41f5e5124b"
 
 activemq_engine_version             = "5.15.16"
 activemq_storage_type               = "efs"
@@ -70,8 +70,8 @@ additional_secrets = {}
 
 sftp_host     = "sftp.sftp"
 sftp_username = "myuser"
-sftp_password = "wb3F!1VtQyit?qZH"
+sftp_password = "FkJ+DzUi9WPO9Fm7"
 
 create_dns_records   = false
 cloudflare_api_token = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
-loadbalancer_url     = "k8s-istiosys-istioalb-55e6079a17-1297063893.us-east-1.elb.amazonaws.com"
+loadbalancer_url     =  "k8s-istiosys-istioalb-55e6079a17-601583054.us-east-1.elb.amazonaws.com"

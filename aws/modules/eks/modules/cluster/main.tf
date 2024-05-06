@@ -36,6 +36,9 @@ module "eks" {
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = true
 
+  #logging
+  cluster_enabled_log_types = [ "audit", "api", "authenticator", "controllerManager", "scheduler"]
+
   #configuration of kms key  
   create_kms_key = false
   cluster_encryption_config = {
