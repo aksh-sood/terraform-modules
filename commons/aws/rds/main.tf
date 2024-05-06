@@ -1,3 +1,7 @@
+data "aws_vpc" "rds" {
+  id = var.vpc_id
+}
+
 locals {
   additional_security_group_ids = [
     for item in var.ingress_whitelist : item if can(regex("^sg-[a-fA-F0-9]{8,17}$", item))
@@ -150,11 +154,11 @@ resource "aws_security_group_rule" "eks_sg" {
   security_group_id        = module.rds_cluster.security_group_id
 }
 
-resource "aws_security_group_rule" "allow_all" {
+resource "aws_security_group_rule" "allow_egress_in_vpc" {
   type              = "egress"
   to_port           = 0
   protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
+  cidr_blocks       = [data.aws_vpc.rds]
   from_port         = 0
   security_group_id = module.rds_cluster.security_group_id
 }
