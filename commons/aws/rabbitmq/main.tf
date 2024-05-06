@@ -35,8 +35,7 @@ resource "aws_security_group" "rabbitmq" {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    security_groups = var.whitelist_security_groups
   }
 
   tags = merge(var.tags, { Name = "${var.name}-rabbitmq" })
