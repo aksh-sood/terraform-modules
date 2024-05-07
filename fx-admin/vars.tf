@@ -75,7 +75,7 @@ variable "rds_ingress_whitelist" {
 variable "rds_enable_deletion_protection" {
   description = "Enable Cluster deletion protection"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "rds_enable_auto_minor_version_upgrade" {
