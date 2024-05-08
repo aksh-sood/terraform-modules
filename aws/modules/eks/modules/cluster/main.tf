@@ -22,18 +22,9 @@ module "eks" {
   node_security_group_use_name_prefix       = false
   iam_role_use_name_prefix                  = false
   cluster_encryption_policy_use_name_prefix = false
-  cluster_security_group_additional_rules = {
-    node_whitelist = {
-      protocol                   = "-1"
-      from_port                  = 0
-      to_port                    = 0
-      type                       = "ingress"
-      source_node_security_group = true
-    }
-    # block_public_egress = {
-      
-    # }
-  }
+
+  # security groups
+  create_node_security_group = false
 
   #public and private access for cluster endpoint
   cluster_endpoint_public_access  = true
@@ -54,13 +45,13 @@ module "eks" {
 
 }
 
-resource "aws_security_group_rule" "node_self_whitelist" {
+resource "aws_security_group_rule" "cluster_self_whitelist" {
   type                     = "ingress"
   protocol                 = "-1"
   to_port                  = 0
   from_port                = 0
-  source_security_group_id = module.eks.node_security_group_id
-  security_group_id        = module.eks.node_security_group_id
+  source_security_group_id = module.eks.cluster_primary_security_group_id
+  security_group_id        = module.eks.cluster_primary_security_group_id
 }
 
 #fetching kube config file from aws
