@@ -46,7 +46,7 @@ variable "rds_parameter_group_family" {
 variable "rds_enable_performance_insights" {
   description = "Enable RDS Performance Insights"
   type        = bool
-  default     = false
+  default     = true
 }
 variable "rds_performance_insights_retention_period" {
   description = "Retention period for performance Insights"

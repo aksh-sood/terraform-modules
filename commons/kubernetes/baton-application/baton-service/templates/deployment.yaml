@@ -24,9 +24,10 @@ spec:
           # securityContext:
           #   allowPrivilegeEscalation: false
           #   runAsNonRoot: true
+          #   runAsUser: 999
           #   readOnlyRootFilesystem: true
           #   seccompProfile:
-          #     type: RunTimeDefault
+          #     type: RuntimeDefault
           imagePullPolicy: Always
           {{- if and ( .Values.health_endpoint ) ( .Values.url_prefix ) }}
           readinessProbe:

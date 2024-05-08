@@ -30,6 +30,9 @@ module "eks" {
       type                       = "ingress"
       source_node_security_group = true
     }
+    # block_public_egress = {
+      
+    # }
   }
 
   #public and private access for cluster endpoint
