@@ -4,7 +4,7 @@ domain: ""
 subdomain_suffix: ""
 env: {}
 health_endpoint: "/health"
-image_tag: latest
+image_tag: 1.0.0
 targetPort: 8080
 port: 8080
 url_prefix: ""
