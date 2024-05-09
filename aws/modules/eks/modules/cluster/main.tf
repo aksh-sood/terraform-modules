@@ -24,6 +24,17 @@ module "eks" {
   cluster_encryption_policy_use_name_prefix = false
 
   # security groups
+  cluster_security_group_additional_rules = {
+    # node_whitelist = {
+    #   protocol                   = "-1"
+    #   from_port                  = 0
+    #   to_port                    = 0
+    #   type                       = "egress"
+    # }
+    # block_public_egress = {
+      
+    # }
+  }
   create_node_security_group = false
 
   #public and private access for cluster endpoint
@@ -45,8 +56,8 @@ module "eks" {
 
 }
 
-resource "aws_security_group_rule" "cluster_self_whitelist" {
-  type                     = "ingress"
+resource "aws_security_group_rule" "cluster_egress_block" {
+  type                     = "egress"
   protocol                 = "-1"
   to_port                  = 0
   from_port                = 0
