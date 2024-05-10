@@ -39,7 +39,7 @@ resource "kubernetes_service_v1" "this" {
     namespace = kubernetes_namespace_v1.this.metadata.0.name
   }
   spec {
-    type = "LoadBalancer"
+    type = "NodePort"
     selector = {
       app = "sftp"
     }
@@ -47,6 +47,7 @@ resource "kubernetes_service_v1" "this" {
       name        = "ssh"
       port        = 22
       target_port = 22
+      node_port   = 30022
     }
 
   }

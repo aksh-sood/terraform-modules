@@ -12,6 +12,23 @@ locals {
   }
 }
 
+resource "aws_security_group" "elb_sg"  {
+  name        = "ELB-${var.cluster_name}-${var.region}"
+  description = "ELB Security group for ${var.cluster_name}"
+  vpc_id      = var.vpc_id
+
+  tags = merge(var.eks_tags, { Name = "${var.cluster_name}-elb" })
+}
+
+# resource "aws_security_group_rule" "security_group_whitelist_22" {
+#   type                     = "ingress"
+#   from_port                = 22
+#   to_port                  = 22
+#   protocol                 = "tcp"
+#   source_security_group_id = var.whitelist_security_groups
+#   security_group_id        = aws_security_group.elb_sg.id
+# }
+
 module "iam" {
   source = "./modules/iam"
 
