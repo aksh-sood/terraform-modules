@@ -4,6 +4,14 @@ data "http" "ip" {
 
 locals {
   elb_whitelist_rules = {
+    vpc_whitelist = {
+      type                       = "ingress"
+      from_port                  = "-1"
+      to_port                    = "-1"
+      protocol                   = "-1"
+      description                = "whitelist traffic within VPC"
+      cidr_blocks                = [var.vpc_cidr]
+    }
     whitelist_executors_ip_443 = {
       type                       = "ingress"
       from_port                  = 443

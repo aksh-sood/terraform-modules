@@ -127,6 +127,7 @@ module "eks" {
   kms_key_arn        = module.kms.key_arn
 
   region                    = var.region
+  vpc_cidr                  = var.vpc_cidr
   cluster_name              = var.environment
   cluster_version           = var.cluster_version
   eks_node_groups           = var.eks_node_groups
@@ -156,4 +157,18 @@ module "opensearch" {
   ebs_volume_size = var.opensearch_ebs_volume_size
   master_username = var.opensearch_master_username
   cost_tags       = var.cost_tags
+}
+
+resource "null_resource" "revoke_eks_egress_all_traffic" {
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+    aws ec2 revoke-security-group-egress --group-id ${module.eks[0].primary_security_group_id} --protocol '-1' --port '-1' --cidr 0.0.0.0/0 --region ${var.region} >>/dev/null 2>&1 || true
+    EOT
+  }
+
+  depends_on = [ module.opensearch  ]
 }

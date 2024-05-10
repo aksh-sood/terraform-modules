@@ -4,6 +4,10 @@ variable "eks_addons" {
   default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver"]
 }
 
+variable "vpc_cidr" {
+  type = string
+}
+
 variable "node_groups" {
 
   default = [{
