@@ -168,8 +168,14 @@ variable "activemq_username" {
   default   = "admin"
 }
 
-variable "activemq_whitelist_ips" {
-  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ"
+variable "activemq_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ (ingress)"
+  type        = list(string)
+  default     = []
+}
+
+variable "activemq_egress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ (egress)"
   type        = list(string)
   default     = []
 }

@@ -176,7 +176,8 @@ module "activemq" {
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
   whitelist_security_groups  = var.eks_security_group
-  whitelist_ips              = var.activemq_whitelist_ips
+  ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
+  egress_whitelist_ips       = var.activemq_egress_whitelist_ips
 
   tags = var.cost_tags
 }

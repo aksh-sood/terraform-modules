@@ -24,7 +24,8 @@ activemq_instance_type              = "mq.t2.micro"
 activemq_apply_immediately          = true
 activemq_auto_minor_version_upgrade = false
 activemq_username                   = "admin"
-activemq_whitelist_ips              = ["223.187.113.120/32", "115.111.183.90/32"]
+activemq_ingress_whitelist_ips      = ["223.187.113.120/32", "115.111.183.90/32"]
+activemq_egress_whitelist_ips       = ["223.187.113.120/32", "115.111.183.90/32"]
 
 import_directory_service_db  = true
 # baton_application_namespaces = []
