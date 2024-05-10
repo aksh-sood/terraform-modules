@@ -13,7 +13,7 @@ resource "random_password" "password" {
 
 resource "aws_security_group" "sg" {
   name        = "${var.domain_name}-opensearch"
-  description = "Managed by Terraform"
+  description = "opensearch security group"
   vpc_id      = var.vpc_id
 
   ingress {

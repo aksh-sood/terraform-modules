@@ -1,3 +1,44 @@
+data "http" "ip" {
+  url = "https://ifconfig.me/ip"
+}
+
+locals {
+  elb_whitelist_rules = {
+    whitelist_executors_ip_443 = {
+      type                       = "ingress"
+      from_port                  = 443
+      to_port                    = 443
+      protocol                   = "tcp"
+      description                = "Whitelist IP of machine running the script"
+      cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
+    }
+    whitelist_executors_ip_22 = {
+      type                       = "ingress"
+      from_port                  = 22
+      to_port                    = 22
+      protocol                   = "tcp"
+      description                = "Whitelist IP of machine running the script"
+      cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
+    }
+    elb_whitelist_80 = {
+      type                       = "ingress"
+      from_port                  = 80
+      to_port                    = 80
+      protocol                   = "tcp"
+      description                = "Whitelist HTTP traffic for elb"
+      source_security_group_id=var.elb_security_group
+    }
+    elb_whitelist_443 = {
+      type                       = "ingress"
+      from_port                  = 443
+      to_port                    = 443
+      protocol                   = "tcp"
+      description                = "Whitelist HTTPS traffic for elb"
+      source_security_group_id=var.elb_security_group
+    }
+  }
+}
+
 # eks cluster
 module "eks" {
   source = "terraform-aws-modules/eks/aws"
@@ -24,22 +65,7 @@ module "eks" {
   cluster_encryption_policy_use_name_prefix = false
 
   # security groups
-  cluster_security_group_additional_rules = {
-    elb_whitelist_80 = {
-      type                       = "ingress"
-      from_port                  = 80
-      to_port                    = 80
-      protocol                   = "tcp"
-      source_security_group_id=var.elb_security_group
-    }
-    elb_whitelist_443 = {
-      type                       = "ingress"
-      from_port                  = 443
-      to_port                    = 443
-      protocol                   = "tcp"
-      source_security_group_id=var.elb_security_group
-    }
-  }
+  # cluster_security_group_additional_rules = {}
   create_node_security_group = false
 
   #public and private access for cluster endpoint
@@ -61,14 +87,22 @@ module "eks" {
 
 }
 
-resource "aws_security_group_rule" "cluster_egress_block" {
-  type                     = "egress"
-  protocol                 = "-1"
-  to_port                  = 0
-  from_port                = 0
-  source_security_group_id = module.eks.cluster_primary_security_group_id
-  security_group_id        = module.eks.cluster_primary_security_group_id
+resource "aws_security_group_rule" "cluster" {
+  for_each = { for k, v in local.elb_whitelist_rules : k => v  }
+
+  # Required
+  security_group_id = module.eks.cluster_primary_security_group_id
+  protocol          = each.value.protocol
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  type              = each.value.type
+
+  # Optional
+  description              = lookup(each.value, "description", null)
+  cidr_blocks              = lookup(each.value, "cidr_blocks", null)
+  source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
+
 
 #fetching kube config file from aws
 resource "null_resource" "cluster_config_pull" {
