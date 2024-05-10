@@ -19,6 +19,7 @@ enable_cluster_autoscaler          = false
 create_dns_records                 = false
 enable_siem                        = false
 enable_config_server               = true
+elb_security_group                 = "sg-07ab410280303ee51"
 bitbucket_key_secrets_manager_name = "config-server-key"
 config_repo_url                    = "git@bitbucket.org:ubixi/config-repo.git"
 config_server_image_tag            = 56

@@ -170,6 +170,11 @@ variable "cluster_autoscaler_version" {
   default = "v1.26.2"
 }
 
+variable "elb_security_group" {
+  description = "security group for load balancers"
+  type = string
+}
+
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}

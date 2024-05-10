@@ -14,6 +14,7 @@ variable "public_subnet_ids" {
 }
 
 variable "kms_key_arn" {}
+variable "elb_security_group" {}
 variable "cluster_role_arn" {}
 variable "eks_tags" {}
 

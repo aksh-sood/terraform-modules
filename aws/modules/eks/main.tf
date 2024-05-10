@@ -20,14 +20,41 @@ resource "aws_security_group" "elb_sg"  {
   tags = merge(var.eks_tags, { Name = "${var.cluster_name}-elb" })
 }
 
-# resource "aws_security_group_rule" "security_group_whitelist_22" {
-#   type                     = "ingress"
-#   from_port                = 22
-#   to_port                  = 22
-#   protocol                 = "tcp"
-#   source_security_group_id = var.whitelist_security_groups
-#   security_group_id        = aws_security_group.elb_sg.id
-# }
+resource "aws_security_group_rule" "ingress_security_group_whitelist_80" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  cidr_blocks              = ["0.0.0.0/0"]
+  security_group_id        = aws_security_group.elb_sg.id
+}
+
+resource "aws_security_group_rule" "ingress_security_group_whitelist_443" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  cidr_blocks              = ["0.0.0.0/0"]
+  security_group_id        = aws_security_group.elb_sg.id
+}
+
+resource "aws_security_group_rule" "egress_security_group_whitelist_80" {
+  type                     = "egress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = module.cluster.primary_security_group_id
+  security_group_id        = aws_security_group.elb_sg.id
+}
+
+resource "aws_security_group_rule" "egress_security_group_whitelist_443" {
+  type                     = "egress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = module.cluster.primary_security_group_id
+  security_group_id        = aws_security_group.elb_sg.id
+}
 
 module "iam" {
   source = "./modules/iam"
@@ -52,6 +79,7 @@ module "cluster" {
   public_subnet_ids  = var.public_subnet_ids
   kms_key_arn        = var.kms_key_arn
   eks_tags           = var.eks_tags
+  elb_security_group = aws_security_group.elb_sg.id
 
   depends_on = [module.iam]
 }

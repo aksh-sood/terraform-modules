@@ -69,6 +69,7 @@ module "istio" {
   acm_certificate_arn    = var.acm_certificate_arn
   istio_version          = var.istio_version
   siem_storage_s3_bucket = var.siem_storage_s3_bucket
+  security_group         = var.elb_security_group
 
   providers = {
     kubectl.this = kubectl.this

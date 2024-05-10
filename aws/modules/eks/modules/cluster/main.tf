@@ -25,15 +25,20 @@ module "eks" {
 
   # security groups
   cluster_security_group_additional_rules = {
-    # node_whitelist = {
-    #   protocol                   = "-1"
-    #   from_port                  = 0
-    #   to_port                    = 0
-    #   type                       = "egress"
-    # }
-    # block_public_egress = {
-      
-    # }
+    elb_whitelist_80 = {
+      type                       = "ingress"
+      from_port                  = 80
+      to_port                    = 80
+      protocol                   = "tcp"
+      source_security_group_id=var.elb_security_group
+    }
+    elb_whitelist_443 = {
+      type                       = "ingress"
+      from_port                  = 443
+      to_port                    = 443
+      protocol                   = "tcp"
+      source_security_group_id=var.elb_security_group
+    }
   }
   create_node_security_group = false
 
