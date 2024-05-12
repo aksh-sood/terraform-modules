@@ -13,7 +13,7 @@ eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
       cidr_blocks                = [ip]
     } }
   elb_whitelist_rules = merge(local.eks_ingress_whitelist_ips,{
-    vpc_whitelist = {
+    vpc_ingress_whitelist = {
       type                       = "ingress"
       from_port                  = 0
       to_port                    = 0
