@@ -3,6 +3,16 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "vpc_cidr" {
+  type = string
+}
+
+variable "eks_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to EKS (ingress)"
+  type        = list(string)
+  default     = []
+}
+
 variable "private_subnet_ids" {
   description = "list of private subnets where cluster and ndoes will reside"
   type        = list(string)
@@ -14,6 +24,7 @@ variable "public_subnet_ids" {
 }
 
 variable "kms_key_arn" {}
+variable "elb_security_group" {}
 variable "cluster_role_arn" {}
 variable "eks_tags" {}
 

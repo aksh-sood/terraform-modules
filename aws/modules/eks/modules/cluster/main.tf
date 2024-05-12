@@ -1,9 +1,56 @@
+data "http" "ip" {
+  url = "https://ifconfig.me/ip"
+}
+
+locals {
+
+eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
+      type                       = "ingress"
+      from_port                  = 0
+      to_port                    = 0
+      protocol                   = "-1"
+      description                = "whitelist traffic within VPC"
+      cidr_blocks                = [ip]
+    } }
+  elb_whitelist_rules = merge(local.eks_ingress_whitelist_ips,{
+    vpc_ingress_whitelist = {
+      type                       = "ingress"
+      from_port                  = 0
+      to_port                    = 0
+      protocol                   = "-1"
+      description                = "whitelist traffic within VPC"
+      cidr_blocks                = [var.vpc_cidr]
+    }
+    whitelist_executors_ip_443 = {
+      type                       = "ingress"
+      from_port                  = 443
+      to_port                    = 443
+      protocol                   = "tcp"
+      description                = "Whitelist IP of machine running the script"
+      cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
+    }
+    elb_whitelist_80 = {
+      type                       = "ingress"
+      from_port                  = 80
+      to_port                    = 80
+      protocol                   = "tcp"
+      description                = "Whitelist HTTP traffic for elb"
+      source_security_group_id=var.elb_security_group
+    }
+    elb_whitelist_443 = {
+      type                       = "ingress"
+      from_port                  = 443
+      to_port                    = 443
+      protocol                   = "tcp"
+      description                = "Whitelist HTTPS traffic for elb"
+      source_security_group_id=var.elb_security_group
+    }
+  })
+}
+
 # eks cluster
 module "eks" {
-  source = "terraform-aws-modules/eks/aws"
-
-  # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/19.20.0
-  version = "19.20.0"
+  source = "../../../../../external/eks"
 
   cluster_name    = var.cluster_name
   cluster_version = try(var.cluster_version, null)
@@ -22,19 +69,17 @@ module "eks" {
   node_security_group_use_name_prefix       = false
   iam_role_use_name_prefix                  = false
   cluster_encryption_policy_use_name_prefix = false
-  cluster_security_group_additional_rules = {
-    node_whitelist = {
-      protocol                   = "-1"
-      from_port                  = 0
-      to_port                    = 0
-      type                       = "ingress"
-      source_node_security_group = true
-    }
-  }
+
+  # security groups
+  # cluster_security_group_additional_rules = {}
+  create_node_security_group = false
 
   #public and private access for cluster endpoint
   cluster_endpoint_public_access  = true
   cluster_endpoint_private_access = true
+
+  #logging
+  cluster_enabled_log_types = [ "audit", "api", "authenticator", "controllerManager", "scheduler"]
 
   #configuration of kms key  
   create_kms_key = false
@@ -48,14 +93,33 @@ module "eks" {
 
 }
 
-resource "aws_security_group_rule" "node_self_whitelist" {
-  type                     = "ingress"
-  protocol                 = "-1"
-  to_port                  = 0
-  from_port                = 0
-  source_security_group_id = module.eks.node_security_group_id
-  security_group_id        = module.eks.node_security_group_id
+resource "aws_security_group_rule" "cluster" {
+  for_each = { for k, v in local.elb_whitelist_rules : k => v  }
+
+  # Required
+  security_group_id = module.eks.cluster_primary_security_group_id
+  protocol          = each.value.protocol
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  type              = each.value.type
+
+  # Optional
+  description              = lookup(each.value, "description", null)
+  cidr_blocks              = lookup(each.value, "cidr_blocks", null)
+  source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
+
+
+# resource "aws_security_group_rule" "ingress_whitelisted_ips" {
+#   count = length(var.eks_ingress_whitelist_ips)
+
+#   type              = "ingress"
+#   from_port         = 0
+#   to_port           = 0
+#   protocol          = "-1"
+#   cidr_blocks       = [element(var.eks_ingress_whitelist_ips, count.index)]
+#   security_group_id = module.eks.cluster_primary_security_group_id
+# }
 
 #fetching kube config file from aws
 resource "null_resource" "cluster_config_pull" {

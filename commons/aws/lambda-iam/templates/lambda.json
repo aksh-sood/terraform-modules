@@ -1,0 +1,59 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "LambdaPolicy0",
+            "Effect": "Allow",
+            "Action": "kinesis:ListStreams",
+            "Resource": "*"
+        },
+        {
+            "Sid": "LambdaPolicy1",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListBucketVersions",
+                "sqs:DeleteMessage",
+                "sqs:ReceiveMessage",
+                "sqs:ListQueues",
+                "kinesis:GetShardIterator",
+                "kinesis:ListShards",
+                "kinesis:SubscribeToShard",
+                "kinesis:GetRecords",
+                "kinesis:DescribeStream",
+                "kinesis:DescribeStreamSummary",
+                "kinesis:ListStreams",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents",
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:AttachNetworkInterface"
+            ],
+            "Resource": [
+                "${s3_bucket_arn}/*",
+                "${s3_bucket_arn}",
+                "${sqs_queue_arn}",
+                "arn:aws:logs:${region}:${account_id}:log-group:*",
+                "arn:aws:logs:${region}:${account_id}:log-group:*:log-stream:*",
+                "arn:aws:kinesis:${region}:${account_id}:stream/*",
+                ""
+            ]
+        },
+        {
+            "Sid": "AWSXRayDaemonWriteAccess",
+            "Effect": "Allow",
+            "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets",
+                "xray:GetSamplingStatisticSummaries"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}

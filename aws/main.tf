@@ -127,6 +127,7 @@ module "eks" {
   kms_key_arn        = module.kms.key_arn
 
   region                    = var.region
+  vpc_cidr                  = var.vpc_cidr
   cluster_name              = var.environment
   cluster_version           = var.cluster_version
   eks_node_groups           = var.eks_node_groups
@@ -136,6 +137,7 @@ module "eks" {
   private_subnets_cidr      = var.private_subnet_cidrs
   additional_eks_addons     = var.additional_eks_addons
   enable_cluster_autoscaler = var.enable_cluster_autoscaler
+  eks_ingress_whitelist_ips = var.eks_ingress_whitelist_ips
 
   depends_on = [module.vpc]
 }

@@ -4,6 +4,16 @@ variable "eks_addons" {
   default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver"]
 }
 
+variable "eks_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to EKS (ingress)"
+  type        = list(string)
+  default     = []
+}
+
+variable "vpc_cidr" {
+  type = string
+}
+
 variable "node_groups" {
 
   default = [{

@@ -14,3 +14,4 @@ variable "siem_storage_s3_bucket" {}
 variable "enable_siem" {}
 variable "domain_name" {}
 variable "environment" {}
+variable "security_group" {}

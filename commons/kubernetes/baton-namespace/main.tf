@@ -36,6 +36,7 @@ module "baton_application" {
   image_tag        = each.value.image_tag
   volumes          = each.value.volumeMounts.volumes
   mounts           = each.value.volumeMounts.mounts
+  security_context = each.value.security_context
   env = merge(each.value.env, var.common_env,
     {
       "APP_ENVIRONMENT"        = var.customer,

@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_iam_role" "kinesis_role" {
   name               = "FX_kinesis_app_role_${var.name}_${var.region}"
   assume_role_policy = <<-EOF
@@ -19,11 +21,32 @@ EOF
   tags = var.tags
 }
 
+#Custom Policy for Kinesis
+resource "aws_iam_policy" "kinesis_policy" {
+  name = "FX-kinesis-policy_${var.name}_${var.region}"
+
+  policy = templatefile("${path.module}/templates/kinesis.json", {
+    region        = var.region,
+    account_id    = data.aws_caller_identity.current.account_id
+  })
+}
+
+locals {
+  managed_kinesis_policies_map = {
+    for policy_arn in var.kinesis_policies :
+    split("/", policy_arn)[length(split("/", policy_arn)) - 1] => policy_arn
+  }
+  kinesis_policies_map = merge(local.managed_kinesis_policies_map,
+    {
+      KinesisPermission     = aws_iam_policy.kinesis_policy.arn
+  })
+}
+
 resource "aws_iam_role_policy_attachment" "kinesis_role" {
-  for_each = var.kinesis_policies
+  for_each = { for k, v in local.kinesis_policies_map : k => v }
 
   role       = aws_iam_role.kinesis_role.name
-  policy_arn = "arn:aws:iam::aws:policy/${each.value}"
+  policy_arn = each.value
 }
 
 resource "aws_kinesis_analytics_application" "match-trade-kinesis-app" {

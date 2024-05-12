@@ -165,7 +165,14 @@ variable "enable_cluster_autoscaler" {
 }
 
 variable "cluster_autoscaler_version" {
+  description = "Version of cluster autoscaler to install"
+  type = string
   default = "v1.26.2"
+}
+
+variable "elb_security_group" {
+  description = "security group for load balancers"
+  type = string
 }
 
 variable "opensearch_password" {}

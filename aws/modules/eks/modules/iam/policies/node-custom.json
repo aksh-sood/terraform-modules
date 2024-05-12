@@ -5,16 +5,11 @@
     {
       "Effect": "Allow",
       "Action": [
-        "acm:*",
+        "acm:ListCertificates",
+        "acm:DescribeCertificate",
         "kinesis:PutRecord",
         "firehose:PutRecord",
         "apigateway:SetWebACL",
-        "apprunner:AssociateWebAcl",
-        "apprunner:DescribeWebAclForService",
-        "apprunner:DisassociateWebAcl",
-        "apprunner:ListAssociatedServicesForWebAcl",
-        "apprunner:ListServices",
-        "appsync:SetWebACL",
         "arc-zonal-shift:ListManagedResources",
         "arc-zonal-shift:ListZonalShifts",
         "autoscaling:*",
@@ -56,7 +51,6 @@
         "s3-object-lambda:*",
         "s3:*",
         "secretsmanager:DescribeSecret",
-        "secretsmanager:GetRandomPassword",
         "secretsmanager:GetResourcePolicy",
         "secretsmanager:GetSecretValue",
         "secretsmanager:ListSecrets",
@@ -127,8 +121,7 @@
             "ec2scheduled.amazonaws.com",
             "elasticloadbalancing.amazonaws.com",
             "spot.amazonaws.com",
-            "spotfleet.amazonaws.com",
-            "transitgateway.amazonaws.com"
+            "spotfleet.amazonaws.com"
           ]
         }
       },

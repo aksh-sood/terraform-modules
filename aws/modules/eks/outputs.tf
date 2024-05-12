@@ -26,3 +26,7 @@ output "grafana_role_arn" {
 output "primary_security_group_id" {
   value = module.cluster.primary_security_group_id
 }
+
+output "elb_security_group" {
+  value = aws_security_group.elb_sg.id
+}

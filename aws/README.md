@@ -163,7 +163,8 @@ terraform apply
 |siem_storage_s3_bucket      |S3 bucket name for siem alerts and logging |string |`"aes-siem-800161367015-log"`|
 |additional_cluster_policies |additional cluster policies for EKS cluster |map(string)|`{}`|
 |cluster_version |EKS cluster version |string| `"1.28"`|
-|additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]`|
+|additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]` |
+|eks_ingress_whitelist_ips|IPv4 CIDR range to whitelist to EKS security group| list(string)| `[]`|
 |eks_node_groups |EKS node configuration to provision in cluster|map(eks-node-group-config)|[EKS Node Group Config](#markdown-header-eks-node-group-config)|
 |acm_certificate_bucket |S3 bucket name where domain certificate data is stored|string|`"baton-domain-certificates"`|
 |acm_private_key| S3 object key for domain certificate private key |string |`"batonsystem.com/cloudflare/batonsystem.com.key"`|
@@ -322,6 +323,7 @@ The script takes 40-50 mins to complete a run after which the VPC, EKS ,RDS, ACM
 |efs_id                   |string        | EFS Volume ID for persistent storage                 |
 |acm_certificate_arn      |string        | ARN of domain certificate for istio ingress          |
 |grafana_role_arn         |string        | ARN of the Grafana role                              |
+|elb_security_group       |string        | Security group associated to be ALB                  |
 |opensearch_endpoint      |string        | The endpoint of the OpenSearch domain                |
 |opensearch_password      |string        | The password for the OpenSearch domain               |
 |opensearch_username      |string        | The username for the OpenSearch domain               |

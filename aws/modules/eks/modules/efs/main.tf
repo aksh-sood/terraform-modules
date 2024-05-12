@@ -1,8 +1,5 @@
 module "efs" {
-  source = "terraform-aws-modules/efs/aws"
-
-  # https://registry.terraform.io/modules/terraform-aws-modules/efs/aws/1.3.1
-  version = "1.3.1"
+  source = "../../../../../external/efs"
 
   name        = var.efs_name
   encrypted   = true
