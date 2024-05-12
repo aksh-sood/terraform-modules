@@ -222,6 +222,7 @@ variable "baton_application_namespaces" {
       name             = string
       url_prefix       = string
       target_port      = number
+      security_context = optional(bool, true)
       port             = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
@@ -250,6 +251,7 @@ variable "baton_application_namespaces" {
       services = [
         {
           name        = "directory-service"
+          security_context = false
           target_port = 8080
           url_prefix  = "/directory"
           image_tag   = "1.0.4"

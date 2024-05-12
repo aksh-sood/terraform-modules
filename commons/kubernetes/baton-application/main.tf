@@ -18,6 +18,7 @@ image_tag: ${var.image_tag}
 mounts: ${jsonencode(var.mounts)}
 volumes: ${jsonencode(var.volumes)}
 env: ${jsonencode(var.env)}
+security_context: ${var.security_context}
 EOT
   ]
 }

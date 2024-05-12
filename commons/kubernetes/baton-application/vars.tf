@@ -12,3 +12,4 @@ variable "domain_name" {}
 variable "docker_registry" {}
 variable "health_endpoint" {}
 variable "subdomain_suffix" {}
+variable "security_context" {}
