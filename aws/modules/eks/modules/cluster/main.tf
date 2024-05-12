@@ -3,11 +3,20 @@ data "http" "ip" {
 }
 
 locals {
-  elb_whitelist_rules = {
+
+eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
+      type                       = "ingress"
+      from_port                  = 0
+      to_port                    = 0
+      protocol                   = "-1"
+      description                = "whitelist traffic within VPC"
+      cidr_blocks                = [ip]
+    } }
+  elb_whitelist_rules = merge(local.eks_ingress_whitelist_ips,{
     vpc_whitelist = {
       type                       = "ingress"
-      from_port                  = "-1"
-      to_port                    = "-1"
+      from_port                  = 0
+      to_port                    = 0
       protocol                   = "-1"
       description                = "whitelist traffic within VPC"
       cidr_blocks                = [var.vpc_cidr]
@@ -44,7 +53,7 @@ locals {
       description                = "Whitelist HTTPS traffic for elb"
       source_security_group_id=var.elb_security_group
     }
-  }
+  })
 }
 
 # eks cluster
@@ -111,6 +120,17 @@ resource "aws_security_group_rule" "cluster" {
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
 
+
+# resource "aws_security_group_rule" "ingress_whitelisted_ips" {
+#   count = length(var.eks_ingress_whitelist_ips)
+
+#   type              = "ingress"
+#   from_port         = 0
+#   to_port           = 0
+#   protocol          = "-1"
+#   cidr_blocks       = [element(var.eks_ingress_whitelist_ips, count.index)]
+#   security_group_id = module.eks.cluster_primary_security_group_id
+# }
 
 #fetching kube config file from aws
 resource "null_resource" "cluster_config_pull" {

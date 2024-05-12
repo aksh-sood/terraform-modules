@@ -70,16 +70,18 @@ module "cluster" {
   source = "./modules/cluster"
 
   cluster_role_arn = module.iam.cluster_role_arn
+  elb_security_group = aws_security_group.elb_sg.id
 
   region             = var.region
   cluster_version    = var.cluster_version
   cluster_name       = var.cluster_name
   vpc_id             = var.vpc_id
+  vpc_cidr = var.vpc_cidr
   private_subnet_ids = var.private_subnet_ids
   public_subnet_ids  = var.public_subnet_ids
   kms_key_arn        = var.kms_key_arn
   eks_tags           = var.eks_tags
-  elb_security_group = aws_security_group.elb_sg.id
+  eks_ingress_whitelist_ips=var.eks_ingress_whitelist_ips
 
   depends_on = [module.iam]
 }

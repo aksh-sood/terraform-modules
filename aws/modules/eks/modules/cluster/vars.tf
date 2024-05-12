@@ -7,6 +7,12 @@ variable "vpc_cidr" {
   type = string
 }
 
+variable "eks_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to EKS (ingress)"
+  type        = list(string)
+  default     = []
+}
+
 variable "private_subnet_ids" {
   description = "list of private subnets where cluster and ndoes will reside"
   type        = list(string)

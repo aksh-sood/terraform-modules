@@ -38,6 +38,8 @@ acm_certificate_chain = "cloudflare/origin_ca_rsa_root.txt"
 
 acm_private_key = "cloudflare/batonsystems.com.key"
 
+eks_ingress_whitelist_ips = ["20.0.0.0/32"]
+
 create_eks = true
 
 enable_cluster_autoscaler = false
