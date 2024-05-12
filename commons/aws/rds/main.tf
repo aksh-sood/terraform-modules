@@ -39,9 +39,7 @@ resource "random_password" "password" {
 
 # Define RDS Aurora Cluster module
 module "rds_cluster" {
-  source = "terraform-aws-modules/rds-aurora/aws"
-  # https://registry.terraform.io/modules/terraform-aws-modules/rds-aurora/aws/8.5.0
-  version = "8.5.0"
+  source = "../../../external/rds"
 
   # General Configuration
   name                                  = var.name
