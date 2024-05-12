@@ -24,10 +24,7 @@ resource "null_resource" "siem_validation" {
 }
 
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-
-  # https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/5.2.0
-  version = "5.2.0"
+  source = "../../../external/vpc"
 
   azs  = slice(data.aws_availability_zones.this.names, 0, var.az_count)
   cidr = var.vpc_cidr
