@@ -58,10 +58,7 @@ eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
 
 # eks cluster
 module "eks" {
-  source = "terraform-aws-modules/eks/aws"
-
-  # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/19.20.0
-  version = "19.20.0"
+  source = "../../../../../external/eks"
 
   cluster_name    = var.cluster_name
   cluster_version = try(var.cluster_version, null)
