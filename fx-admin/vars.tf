@@ -46,7 +46,7 @@ variable "rds_parameter_group_family" {
 variable "rds_enable_performance_insights" {
   description = "Enable RDS Performance Insights"
   type        = bool
-  default     = false
+  default     = true
 }
 variable "rds_performance_insights_retention_period" {
   description = "Retention period for performance Insights"
@@ -75,7 +75,7 @@ variable "rds_ingress_whitelist" {
 variable "rds_enable_deletion_protection" {
   description = "Enable Cluster deletion protection"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "rds_enable_auto_minor_version_upgrade" {
@@ -168,8 +168,14 @@ variable "activemq_username" {
   default   = "admin"
 }
 
-variable "activemq_whitelist_ips" {
-  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ"
+variable "activemq_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ (ingress)"
+  type        = list(string)
+  default     = []
+}
+
+variable "activemq_egress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ (egress)"
   type        = list(string)
   default     = []
 }
@@ -216,6 +222,7 @@ variable "baton_application_namespaces" {
       name             = string
       url_prefix       = string
       target_port      = number
+      security_context = optional(bool, true)
       port             = optional(number, 8080)
       health_endpoint  = optional(string, "/health")
       subdomain_suffix = optional(string, "")
@@ -244,6 +251,7 @@ variable "baton_application_namespaces" {
       services = [
         {
           name        = "directory-service"
+          security_context = false
           target_port = 8080
           url_prefix  = "/directory"
           image_tag   = "1.0.4"
@@ -343,6 +351,7 @@ variable "cloudflare_api_token" {
 }
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
+  type = map(any)
   default     = {}
 }
 
@@ -357,7 +366,6 @@ variable "sftp_username" {
 }
 
 variable "sftp_password" {
-  description = "Password for sftp"
   type        = string
 }
 

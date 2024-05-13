@@ -1,3 +1,7 @@
+data "aws_vpc" "rds" {
+  id = var.vpc_id
+}
+
 locals {
   additional_security_group_ids = [
     for item in var.ingress_whitelist : item if can(regex("^sg-[a-fA-F0-9]{8,17}$", item))
@@ -35,9 +39,7 @@ resource "random_password" "password" {
 
 # Define RDS Aurora Cluster module
 module "rds_cluster" {
-  source = "terraform-aws-modules/rds-aurora/aws"
-  # https://registry.terraform.io/modules/terraform-aws-modules/rds-aurora/aws/8.5.0
-  version = "8.5.0"
+  source = "../../../external/rds"
 
   # General Configuration
   name                                  = var.name
@@ -150,11 +152,11 @@ resource "aws_security_group_rule" "eks_sg" {
   security_group_id        = module.rds_cluster.security_group_id
 }
 
-resource "aws_security_group_rule" "allow_all" {
+resource "aws_security_group_rule" "allow_egress_in_vpc" {
   type              = "egress"
   to_port           = 0
   protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
+  cidr_blocks       = [data.aws_vpc.rds.cidr_block]
   from_port         = 0
   security_group_id = module.rds_cluster.security_group_id
 }

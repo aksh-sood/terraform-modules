@@ -11,6 +11,7 @@ locals {
       GIT_REPO = var.config_repo_url
     }
     service = {
+      security_context = false
       name            = "config-server"
       env             = {}
       target_port     = 8888

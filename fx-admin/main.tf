@@ -42,6 +42,22 @@ module "cloudflare" {
 
 }
 
+# module "kms" {
+#   source = "terraform-aws-modules/kms/aws"
+#   # https://registry.terraform.io/modules/terraform-aws-modules/kms/aws/2.1.0
+#   version = "2.1.0"
+
+#   key_administrators = [
+#     data.aws_caller_identity.current.arn
+#   ]
+
+#   key_service_users                 = var.key_user_arns
+#   key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+#   aliases                           = ["${var.alias}-${var.environment}"]
+
+#   tags = var.cost_tags
+# }
+
 module "rabbitmq" {
   source = "../commons/aws/rabbitmq"
 
@@ -128,8 +144,10 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  name   = var.environment
-  region = var.region
+  name          = var.environment
+  region        = var.region
+  s3_bucket_arn = module.s3.bucket_arn
+  sqs_queue_arn = module.sqs.arn
 }
 
 module "sqs" {
@@ -176,7 +194,8 @@ module "activemq" {
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
   whitelist_security_groups  = var.eks_security_group
-  whitelist_ips              = var.activemq_whitelist_ips
+  ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
+  egress_whitelist_ips       = var.activemq_egress_whitelist_ips
 
   tags = var.cost_tags
 }

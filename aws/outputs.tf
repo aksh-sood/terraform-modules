@@ -28,6 +28,11 @@ output "eks_security_group" {
   value       = var.create_eks ? module.eks[0].primary_security_group_id : null
 }
 
+output "elb_security_group" {
+  description = "Security Group for Load balancers"
+  value = var.create_eks ? module.eks[0].elb_security_group : null
+}
+
 output "acm_certificate_arn" {
   description = "ARN of the domain certificate"
   value       = var.create_certificate ? module.domain_certificate[0].certificate_arn : null

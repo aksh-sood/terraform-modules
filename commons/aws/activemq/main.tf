@@ -14,28 +14,6 @@ resource "aws_security_group" "activemq_sg" {
   description = "Activemq Security group for ${var.name}"
   vpc_id      = var.vpc_id
 
-  # ingress {
-  #   from_port       = 61617
-  #   to_port         = 61617
-  #   protocol        = "tcp"
-  #   security_groups = var.whitelist_security_groups
-  # }
-
-  # ingress {
-  #   from_port       = 8162
-  #   to_port         = 8162
-  #   protocol        = "tcp"
-  #   security_groups = var.whitelist_security_groups
-  # }
-
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-
   tags = merge(var.tags, { Name = "${var.name}-activemq" })
 }
 
@@ -57,25 +35,47 @@ resource "aws_security_group_rule" "security_group_whitelist_8162" {
   security_group_id        = aws_security_group.activemq_sg.id
 }
 
-resource "aws_security_group_rule" "whitelisted_ips_port_61617" {
-  count = length(var.whitelist_ips)
+resource "aws_security_group_rule" "ingress_whitelisted_ips_port_61617" {
+  count = length(var.ingress_whitelist_ips)
 
   type              = "ingress"
   from_port         = 61617
   to_port           = 61617
   protocol          = "tcp"
-  cidr_blocks       = [element(var.whitelist_ips, count.index)]
+  cidr_blocks       = [element(var.ingress_whitelist_ips, count.index)]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
-resource "aws_security_group_rule" "whitelisted_ips_port_8162" {
-  count = length(var.whitelist_ips)
+resource "aws_security_group_rule" "ingress_whitelisted_ips_port_8162" {
+  count = length(var.ingress_whitelist_ips)
 
   type              = "ingress"
   from_port         = 8162
   to_port           = 8162
   protocol          = "tcp"
-  cidr_blocks       = [element(var.whitelist_ips, count.index)]
+  cidr_blocks       = [element(var.ingress_whitelist_ips, count.index)]
+  security_group_id = aws_security_group.activemq_sg.id
+}
+
+resource "aws_security_group_rule" "egress_whitelisted_ips_port_61617" {
+  count = length(var.egress_whitelist_ips)
+
+  type              = "egress"
+  from_port         = 61617
+  to_port           = 61617
+  protocol          = "tcp"
+  cidr_blocks       = [element(var.egress_whitelist_ips, count.index)]
+  security_group_id = aws_security_group.activemq_sg.id
+}
+
+resource "aws_security_group_rule" "egress_whitelisted_ips_port_8162" {
+  count = length(var.egress_whitelist_ips)
+
+  type              = "egress"
+  from_port         = 8162
+  to_port           = 8162
+  protocol          = "tcp"
+  cidr_blocks       = [element(var.egress_whitelist_ips, count.index)]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
@@ -100,6 +100,11 @@ resource "aws_mq_broker" "activemq" {
 
   configuration {
     id = aws_mq_configuration.mq_configuration.id
+  }
+
+  logs {
+    audit = true
+    general = true
   }
 
   engine_type                = "ActiveMQ"

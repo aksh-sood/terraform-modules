@@ -3,12 +3,10 @@ variable "cluster_policies" {
   description = "Policies for cluster"
   type        = list(string)
   default = [
-    "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-    , "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-    , "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
-    , "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-    , "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-    , "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+    "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
+    "arn:aws:iam::aws:policy/AmazonEKSServicePolicy",
+    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
   ]
 }
 

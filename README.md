@@ -77,6 +77,16 @@ The [commons](./commons/) folder is used a utility across multiple folders with 
 
 The [FX Admin](./fx-admin/) folder deals with the creation of resources strictly for the admin account which distributes the messages to other customer accounts .
 
+# The External Folder
+
+We are maintaining our own version of public modules in the [external](./external) folder due to security concerns. Below are sources of the modules for each folder and their versions:
+
+- [VPC - 5.2.0](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/5.2.0)
+- [RDS - 8.5.0](https://registry.terraform.io/modules/terraform-aws-modules/rds/aws/8.5.0)
+- [EFS - 1.3.1](https://registry.terraform.io/modules/terraform-aws-modules/efs/aws/1.3.1)
+- [EKS - 19.20.0](https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/19.20.0)
+- [KMS - 2.1.0](https://registry.terraform.io/modules/terraform-aws-modules/kms/aws/2.1.0)
+
 # Prerequisites
 
 The following technologies are used in local system while creating this script

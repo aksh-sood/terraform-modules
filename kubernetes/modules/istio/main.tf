@@ -116,6 +116,7 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
       "alb.ingress.kubernetes.io/healthcheck-path"     = "/healthz/ready"
       "alb.ingress.kubernetes.io/healthcheck-port"     = "traffic-port"
       "alb.ingress.kubernetes.io/certificate-arn"      = var.acm_certificate_arn
+      "alb.ingress.kubernetes.io/security-groups"      = var.security_group
       "alb.ingress.kubernetes.io/ssl-policy"           = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
       "alb.ingress.kubernetes.io/success-codes"        = "404"
       "alb.ingress.kubernetes.io/ssl-redirect"         = "443"

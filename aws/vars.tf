@@ -137,6 +137,12 @@ variable "cluster_version" {
   default     = "1.28"
 }
 
+variable "eks_ingress_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to EKS (ingress)"
+  type        = list(string)
+  default     = []
+}
+
 variable "additional_eks_addons" {
   description = "additional addons for EKS cluster"
   type        = list(string)

@@ -35,8 +35,7 @@ resource "aws_security_group" "rabbitmq" {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+    security_groups = var.whitelist_security_groups
   }
 
   tags = merge(var.tags, { Name = "${var.name}-rabbitmq" })
@@ -55,10 +54,15 @@ resource "aws_mq_broker" "rabbitmq" {
   publicly_accessible        = var.publicly_accessible
   subnet_ids                 = var.enable_cluster_mode ? var.subnet_ids : [var.subnet_ids[0]]
   security_groups            = [aws_security_group.rabbitmq.id]
+
   user {
     console_access = true
     username       = var.username
     password       = random_password.rabbitmq_password.result
+  }
+
+  logs {
+    general = true
   }
 
   tags = var.tags

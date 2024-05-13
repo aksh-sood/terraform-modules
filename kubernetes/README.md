@@ -144,6 +144,7 @@ terraform apply
 | istio_version                  | isito version to be installed                                       | string                                                      | `"1.20.0"`                                                                   |
 | slack_channel_name\*           | slack channnel name to recieve prometheus alerts                    | string                                                      |                                                                              |
 | slack_web_hook\*               | slack applicaiton webhook for prometheus alerts                     | string                                                      |                                                                              |
+| elb_security_group\* | security group id to associate to ALB | string | `-` |
 | pagerduty_key\*                | PagerDuty key for prometheus alerts                                 | string                                                      |                                                                              |
 | efs_id\*                       | EFS ID from aws script for persistent storage                       | string                                                      |                                                                              |
 | efs_addon_version              | Version of the efs driver                                           | string                                                      | `"2.2.0"`                                                                    |

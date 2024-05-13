@@ -30,17 +30,19 @@ create_certificate = true
 
 acm_certificate_arn = null
 
-acm_certificate_bucket = "baton-certificates"
+acm_certificate_bucket = "test-certificate-iaac"
 
 acm_certificate = "cloudflare/batonsystems.com.crt"
 
-acm_certificate_chain = "cloudflare/origin_ca_rsa_root.pem"
+acm_certificate_chain = "cloudflare/origin_ca_rsa_root.txt"
 
 acm_private_key = "cloudflare/batonsystems.com.key"
 
+eks_ingress_whitelist_ips = ["20.0.0.0/32"]
+
 create_eks = true
 
-enable_cluster_autoscaler = true
+enable_cluster_autoscaler = false
 
 enable_siem = false
 

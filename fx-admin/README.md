@@ -147,6 +147,8 @@ terraform apply
 | rds_enabled_cloudwatch_logs_exports       | Enabled CloudWatch Logs Exports for RDS                                                                    | list(string)                       | `["slowquery", "audit", "error"]`                                            |
 | rds_ca_cert_identifier                    | CA certificate identifier for RDS                                                                          | string                             | `-`                                                                          |
 | rds_backup_retention_period               | Backup retention period for RDS in days                                                                    | number                             | `7`                                                                          |
+| activemq_ingress_whitelist_ips | CIDR to whitelist to activeMQ security group on ingress | list(string) | `[]` |
+| activemq_egress_whitelist_ips | CIDR to whitelist to activeMQ security group on egress | list(string) | `[]` |
 | activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.15.16"`                                                                  |
 | activemq_storage_type                     | Preferred storage type for ActiveMQ                                                                        | String                             | `"efs"`                                                                      |
 | activemq_instance_type                    | ActiveMQ host's instance type                                                                              | String                             | `"mq.t2.micro"`                                                              |
@@ -160,7 +162,7 @@ terraform apply
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |
 | rabbitmq_username                         | Username of the user.                                                                                      | String                             | `master`                                                                     |
 | rabbitmq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window. | bool | `false` |
-|rabbitmq_virtual_host|Virtual host to create in rabbitmq|string|`/next_osttra`|
+|rabbitmq_virtual_host|Virtual host to create in rabbitmq|string|`/nex_osttra`|
 |rabbitmq_exchange|Exchange to create in rabbitmq |string|`trml_osttra`|
 | lambda_packages_s3_bucket                 | S3 bucket name for bucket storing binary files for lambdas                                                 | string                             | `"fx-dev-lambda-packages"`                                                   |
 | public_subnets\*                          | List of IDs of public subnets                                                                              | list(string)                       |                                                                              |

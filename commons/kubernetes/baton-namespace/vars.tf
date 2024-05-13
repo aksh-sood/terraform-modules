@@ -4,6 +4,7 @@ variable "services" {
     name             = string
     target_port      = number
     url_prefix       = string
+    security_context = optional(bool,true)
     env              = optional(map(string), {})
     health_endpoint  = optional(string, "/health")
     port             = optional(number, 8080)
