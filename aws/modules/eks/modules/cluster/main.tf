@@ -29,14 +29,6 @@ eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
       description                = "Whitelist IP of machine running the script"
       cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
     }
-    whitelist_executors_ip_22 = {
-      type                       = "ingress"
-      from_port                  = 22
-      to_port                    = 22
-      protocol                   = "tcp"
-      description                = "Whitelist IP of machine running the script"
-      cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
-    }
     elb_whitelist_80 = {
       type                       = "ingress"
       from_port                  = 80

@@ -144,8 +144,10 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  name   = var.environment
-  region = var.region
+  name          = var.environment
+  region        = var.region
+  s3_bucket_arn = module.s3.bucket_arn
+  sqs_queue_arn = module.sqs.arn
 }
 
 module "sqs" {

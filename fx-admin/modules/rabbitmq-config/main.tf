@@ -18,7 +18,7 @@ resource "kubernetes_job_v1" "data_import" {
           command = [
             "sh",
             "-c",
-            "apk update && apk add curl && curl -i -u ${var.rabbitmq_username}:${var.rabbitmq_password} --fail -X PUT ${var.rabbitmq_url}/api/vhosts/${local.vhost} && curl -i -u ${var.rabbitmq_username}:${var.rabbitmq_password} --fail -X PUT -H \"Content-Type:application/json\" -d '{\"type\":\"fanout\",\"durable\":\"true\",\"auto_delete\":\"false\"}' ${var.rabbitmq_url}/api/exchanges/%2F${local.vhost}/${var.exchange}"
+            "apk update && apk add curl && curl -i -u ${var.rabbitmq_username}:${var.rabbitmq_password} --fail -X PUT ${var.rabbitmq_url}/api/vhosts/${local.vhost} && curl -i -u ${var.rabbitmq_username}:${var.rabbitmq_password} --fail -X PUT -H \"Content-Type:application/json\" -d '{\"type\":\"fanout\",\"durable\":\"true\",\"auto_delete\":\"false\"}' ${var.rabbitmq_url}/api/exchanges/${local.vhost}/${var.exchange}"
           ]
         }
       }

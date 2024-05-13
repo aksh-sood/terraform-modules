@@ -47,7 +47,6 @@ resource "kubernetes_service_v1" "this" {
       name        = "ssh"
       port        = 22
       target_port = 22
-      node_port   = 30022
     }
 
   }
