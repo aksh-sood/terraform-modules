@@ -1,6 +1,6 @@
 region = "us-east-1"
 
-environment = "aksh"
+environment = "aksh3"
 
 vpc_cidr = "10.0.0.0/16"
 
@@ -38,7 +38,8 @@ acm_certificate_chain = "cloudflare/origin_ca_rsa_root.txt"
 
 acm_private_key = "cloudflare/batonsystems.com.key"
 
-eks_ingress_whitelist_ips = ["20.0.0.0/32"]
+mount_point_s3_bucket_name = "baton-directory-data-dump"
+# eks_ingress_whitelist_ips = ["20.0.0.0/32"]
 
 create_eks = true
 
@@ -72,8 +73,8 @@ eks_node_groups = {
 
     instance_types = ["m6a.large"]
 
-    min_size = 1
-    max_size = 1
+    min_size = 2
+    max_size = 2
 
     additional_security_groups = []
 

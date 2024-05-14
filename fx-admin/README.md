@@ -45,7 +45,7 @@ The following mode creates a kinesis firehose stream to write into S3 bucket tha
 
 #### [Data Import Job](./modules/data-import-job/)
 
-This module creates job that imports data into RDS which is required for initializing **directory-service** for FX Admin account. The [SQL dump file](./modules/data-import-job/directory-service.sql)  is set in a config map which is mounted to the job for execution.
+This module creates job that imports data into RDS which is required for initializing **directory-service** for FX Admin account. The SQL dump file  is mounted to EKS cluster for importing the data. Note : `directory_service_data_s3_bucket_name`,`directory_service_data_s3_bucket_path` are required attributes if data is being imported.
 
 #### [RabbitMQ Config](./modules/rabbitmq-config/)
 This module creates a Kubernetes job which configures RabbitMQ. A **vhost** and **exchange** is creates by this module which are required for data pipeline to work properly.
@@ -147,6 +147,9 @@ terraform apply
 | rds_enabled_cloudwatch_logs_exports       | Enabled CloudWatch Logs Exports for RDS                                                                    | list(string)                       | `["slowquery", "audit", "error"]`                                            |
 | rds_ca_cert_identifier                    | CA certificate identifier for RDS                                                                          | string                             | `-`                                                                          |
 | rds_backup_retention_period               | Backup retention period for RDS in days                                                                    | number                             | `7`                                                                          |
+| directory_service_data_s3_bucket_name| Name of the S3 bucket to mount to EKS| string | `null`|
+| directory_service_data_s3_bucket_path| File path for the sql dump file to import |string|`null`|
+| directory_service_data_s3_bucket_region|region of the S3 bucket|string|`"us-east-1"`|
 | activemq_ingress_whitelist_ips | CIDR to whitelist to activeMQ security group on ingress | list(string) | `[]` |
 | activemq_egress_whitelist_ips | CIDR to whitelist to activeMQ security group on egress | list(string) | `[]` |
 | activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.15.16"`                                                                  |

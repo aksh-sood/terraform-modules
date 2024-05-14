@@ -1,22 +1,22 @@
 region           = "us-east-1"
-k8s_cluster_name = "aksh"
+k8s_cluster_name = "aksh3"
 environment      = "fx-baton-test-aksh"
 vendor           = "baton"
 
-kms_key_arn =  "arn:aws:kms:us-east-1:130759691668:key/a724d116-1055-40d3-bdcd-4475811c0038"
+kms_key_arn =  "arn:aws:kms:us-east-1:130759691668:key/79a95e53-a30f-46cc-a7e6-d7386c2a384a"
 
-eks_security_group = "sg-0e5843820fd5a792f"
+eks_security_group = "sg-091a559d25242c6b3"
 public_subnet_ids = [
-  "subnet-014e6cc8dca4d3396",
-  "subnet-0538b2f56bc74d965",
-  "subnet-049755802b049b066",
+  "subnet-0dd6af8fa8d50d91a",
+  "subnet-0972119a20c8f6411",
+  "subnet-00bf9fa036a7fe135",
 ]
 private_subnet_ids = [
-  "subnet-056dd27ab8d29a801",
-  "subnet-0811230091ecfed5d",
-  "subnet-098fafb71852195b8",
+  "subnet-0c8a875d10a18c6a7",
+  "subnet-0bebfdb5261469bfa",
+  "subnet-06b7d5edf42363c92",
 ]
-vpc_id = "vpc-03a7a2a41f5e5124b"
+vpc_id = "vpc-0cd933dc6b186493e"
 
 activemq_engine_version             = "5.15.16"
 activemq_storage_type               = "efs"
@@ -25,9 +25,12 @@ activemq_apply_immediately          = true
 activemq_auto_minor_version_upgrade = false
 activemq_username                   = "admin"
 activemq_ingress_whitelist_ips      = ["223.187.113.120/32", "115.111.183.90/32"]
-activemq_egress_whitelist_ips       = ["223.187.113.120/32", "115.111.183.90/32"]
+# activemq_egress_whitelist_ips       = ["223.187.113.120/32", "115.111.183.90/32"]
 
 import_directory_service_db  = true
+directory_service_data_s3_bucket_name="baton-directory-data-dump"
+directory_service_data_s3_bucket_path="central/uat/aksh.sql"
+directory_service_data_s3_bucket_region="us-east-1"
 # baton_application_namespaces = []
 
 rds_mysql_version                         = "8.0"
@@ -71,8 +74,8 @@ additional_secrets = {}
 
 sftp_host     = "sftp.sftp"
 sftp_username = "myuser"
-sftp_password = "FkJ+DzUi9WPO9Fm7"
+sftp_password = "a3+jH3!DwLFYZrhz"
 
 create_dns_records   = false
 cloudflare_api_token = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
-loadbalancer_url     =  "k8s-istiosys-istioalb-55e6079a17-601583054.us-east-1.elb.amazonaws.com"
+loadbalancer_url     =  "k8s-istiosys-istioalb-fa9f9871c4-224469423.us-east-1.elb.amazonaws.com"
