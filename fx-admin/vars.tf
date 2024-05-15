@@ -208,6 +208,24 @@ variable "import_directory_service_db" {
   default     = true
 }
 
+variable "directory_service_data_s3_bucket_name" {
+  description = "name of the s3 bucket where directory service database dump is stored"
+  type = string
+  default = null
+}
+
+variable "directory_service_data_s3_bucket_region" {
+  description = "region of the s3 bucket where directory service database dump is stored"
+  type = string
+  default = "us-east-1"
+}
+
+variable "directory_service_data_s3_bucket_path" {
+  description = "prefix of the s3 bucket where directory service database dump is stored"
+  type = string
+  default = null
+}
+
 variable "baton_application_namespaces" {
 
   description = "List of namespaces and services and there required attributes"

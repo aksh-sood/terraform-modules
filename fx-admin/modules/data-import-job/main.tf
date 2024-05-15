@@ -1,14 +1,60 @@
-resource "kubernetes_config_map" "sql_dump" {
-  metadata {
-    name      = "directory-service-dump"
-    namespace = var.namespace
-  }
+terraform {
+  required_version = ">= 0.13"
 
-  data = {
-    "directory-service.sql" = "${templatefile("${path.module}/directory-service.sql", {
-      database = var.database_name
-    })}"
+  required_providers {
+    kubectl = {
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
+    }
   }
+}
+
+resource "kubernetes_manifest" "data_import" {
+  manifest = {
+    "apiVersion" = "v1"
+    "kind" = "PersistentVolume"
+    "metadata" = {
+      "name" = "directory-service-data-import"
+    }
+    "spec" = {
+      "accessModes" = [
+        "ReadOnlyMany"
+      ]
+      "capacity" = {
+        "storage" = "100Gi"
+      }
+      "csi" = {
+        "driver" = "s3.csi.aws.com"
+        "volumeAttributes" = {
+          "bucketName" = "${var.bucket_name}"
+        }
+        "volumeHandle" = "s3-csi-driver-volume"
+      }
+      "mountOptions" = [
+        "--prefix=${join("/", slice(split("/", var.bucket_path), 0, length(split("/", var.bucket_path)) - 1))}/",
+        "region ${var.bucket_region}",
+      ]
+    }
+  }
+}
+
+resource "kubectl_manifest" "pvc" {
+  yaml_body = <<YAML
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: directory-service-data-import
+  namespace: ${var.namespace}
+spec:
+  accessModes:
+    - ReadOnlyMany 
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Gi
+  volumeName: ${kubernetes_manifest.data_import.manifest.metadata.name}
+  YAML
 }
 
 resource "kubernetes_job_v1" "data_import" {
@@ -25,13 +71,8 @@ resource "kubernetes_job_v1" "data_import" {
         volume {
           name = "sql-script"
 
-          config_map {
-            name = kubernetes_config_map.sql_dump.metadata[0].name
-
-            items {
-              key  = "directory-service.sql"
-              path = "directory-service.sql"
-            }
+          persistent_volume_claim {
+            claim_name = "directory-service-data-import"
           }
         }
         container {
@@ -40,7 +81,7 @@ resource "kubernetes_job_v1" "data_import" {
           command = [
             "sh",
             "-c",
-            "apk update && apk add mysql-client && mysql -h $HOSTNAME -u $USERNAME -P 3306 -p$PASSWORD --force < /etc/config/directory-service.sql && echo 'IMPORT COMPLETE'"
+            "apk update && apk add mysql-client && echo 'Importing data' && mysql -h $HOSTNAME -u $USERNAME -P 3306 -p$PASSWORD --force < /directory-data/${split("/", var.bucket_path)[length(split("/", var.bucket_path)) - 1]} && echo 'IMPORT COMPLETE'"
           ]
           env {
             name  = "HOSTNAME"
@@ -60,7 +101,7 @@ resource "kubernetes_job_v1" "data_import" {
           }
           volume_mount {
             name       = "sql-script"
-            mount_path = "/etc/config/"
+            mount_path = "/directory-data"
           }
         }
       }
@@ -68,5 +109,4 @@ resource "kubernetes_job_v1" "data_import" {
     backoff_limit = 5
   }
   wait_for_completion = false
-  depends_on          = [kubernetes_config_map.sql_dump]
 }

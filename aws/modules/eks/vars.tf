@@ -1,7 +1,7 @@
 #aws eks addons
 variable "eks_addons" {
   type    = list(string)
-  default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver"]
+  default = ["vpc-cni", "coredns", "kube-proxy", "aws-ebs-csi-driver", "aws-efs-csi-driver","aws-mountpoint-s3-csi-driver"]
 }
 
 variable "eks_ingress_whitelist_ips" {
@@ -29,6 +29,11 @@ variable "node_groups" {
     }
 
   ]
+}
+
+variable "mount_point_s3_bucket_name" {
+  type = string
+  default = null
 }
 
 variable "region" {}

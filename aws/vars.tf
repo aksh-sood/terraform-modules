@@ -149,6 +149,12 @@ variable "additional_eks_addons" {
   default     = []
 }
 
+variable "mount_point_s3_bucket_name" {
+  description = "Name of the s3 bucket to mount to EKS"
+  type = string
+  default = null
+}
+
 variable "eks_node_groups" {
   description = "configuration of eks managed nodes groups"
   type = object({

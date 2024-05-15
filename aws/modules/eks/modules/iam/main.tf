@@ -71,6 +71,17 @@ resource "aws_iam_policy" "custom_node" {
   tags = var.tags
 }
 
+#The following policy does not allow delete permission over s3 objects
+resource "aws_iam_policy" "s3_access" {
+  count  = var.mount_point_s3_bucket_name!="" && var.mount_point_s3_bucket_name!=null?1:0
+
+  name        = "custom_s3_access_policy_${var.cluster_name}_${var.region}"
+  description = "S3 access policy for mounting s3 bucket to eks"
+  policy      = templatefile("${path.module}/policies/s3-mount-policy.json",{
+    s3_bucket_name = var.mount_point_s3_bucket_name
+  })
+}
+
 resource "aws_iam_policy" "additional_inline_node_policy" {
   count       = var.additional_node_inline_policy != null ? 1 : 0
   name_prefix = "custom_inline__node_policy_${var.cluster_name}_${var.region}"
@@ -92,6 +103,10 @@ locals {
     split("/", policy_arn)[length(split("/", policy_arn)) - 1] => policy_arn
   }
 
+  s3_access = var.mount_point_s3_bucket_name != "" && var.mount_point_s3_bucket_name != null ? {
+    S3access = aws_iam_policy.s3_access[0].arn
+  } : {}
+
   custom_inline = var.additional_node_inline_policy != null ? {
     CustomInline = aws_iam_policy.additional_inline_node_policy[0].arn
   } : {}
@@ -99,7 +114,7 @@ locals {
   node_policies_map = merge(local.managed_node_policies_map, {
     ELBPermission    = aws_iam_policy.elb_policy.arn
     CustomNodePolicy = aws_iam_policy.custom_node.arn
-  }, local.additional_managed_node_policies_map, local.custom_inline)
+  }, local.additional_managed_node_policies_map, local.s3_access,local.custom_inline)
 }
 
 resource "aws_iam_role" "node_role" {

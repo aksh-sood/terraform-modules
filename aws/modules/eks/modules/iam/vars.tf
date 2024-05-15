@@ -38,6 +38,7 @@ variable "additional_node_inline_policy" {
   default     = null
 }
 
+variable "mount_point_s3_bucket_name" {}
 variable "tags" {}
 variable "cluster_name" {}
 variable "region" {}

@@ -69,10 +69,11 @@ Responsible for installation of addons in cluster which are listed below.
     - vpc-cni
     - coredns
     - aws-efs-csi-driver
+    - aws-mountpoint-s3-csi-driver
     - kube-proxy
 
 4. [IAM](./aws/modules/eks/modules/iam)
-The IAM module is used to create the user managed policies and map them to cluster role and node role after creating it. The IAM folder also has one more sub directory called [policies](./aws/modules/eks/modules/iam/policies/) which has all the policies in json format for their creation. The same module also creates a role and attach policy to it for grafana assumed role within the eks cluster.
+The IAM module is used to create the user managed policies and map them to cluster role and node role after creating it. The IAM folder also has one more sub directory called [policies](./aws/modules/eks/modules/iam/policies/) which has all the policies in json format for their creation. The same module also creates a role and attach policy to it for grafana assumed role within the eks cluster. The s3 policy is only attached to nodes if `mount_point_s3_bucket_name` is not empty
 
 5. [EFS](./aws/modules/eks/modules/efs)
 The EFS module creates a EFS drive for persistent volume to be used in the EKS cluster with the required security group . The security group whitelists the incoming traffic from EKS primary security group in which the EKS nodes also resides for nodes to access the drive.
@@ -166,6 +167,7 @@ terraform apply
 |additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]` |
 |eks_ingress_whitelist_ips|IPv4 CIDR range to whitelist to EKS security group| list(string)| `[]`|
 |eks_node_groups |EKS node configuration to provision in cluster|map(eks-node-group-config)|[EKS Node Group Config](#markdown-header-eks-node-group-config)|
+|mount_point_s3_bucket_name| Bucket name to mount to EKS cluster | string| `null` |
 |acm_certificate_bucket |S3 bucket name where domain certificate data is stored|string|`"baton-domain-certificates"`|
 |acm_private_key| S3 object key for domain certificate private key |string |`"batonsystem.com/cloudflare/batonsystem.com.key"`|
 |acm_certificate | S3 object key for domain certificate body|string |`"batonsystem.com/cloudflare/batonsystem.com.crt"`|

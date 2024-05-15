@@ -20,10 +20,21 @@ resource "null_resource" "loadbalacer_url_validation" {
       condition = var.create_dns_records ? (
         var.loadbalancer_url != "" && var.loadbalancer_url != null
       ) : true
-      error_message = "Provide loadbalancer_urlor disable create_dns_records"
+      error_message = "Provide loadbalancer_url or disable create_dns_records"
     }
   }
+}
 
+resource "null_resource" "directory_service_data_import_validation" {
+  lifecycle {
+    precondition {
+      condition = var.import_directory_service_db ? (
+        var.directory_service_data_s3_bucket_name != "" && var.directory_service_data_s3_bucket_name != null &&
+        var.directory_service_data_s3_bucket_path != "" && var.directory_service_data_s3_bucket_path != null  
+      ) : true
+      error_message = "Provide directory_service_data_s3_bucket_name and directory_service_data_s3_bucket_prefix"
+    }
+  }
 }
 
 module "cloudflare" {
@@ -41,22 +52,6 @@ module "cloudflare" {
   }
 
 }
-
-# module "kms" {
-#   source = "terraform-aws-modules/kms/aws"
-#   # https://registry.terraform.io/modules/terraform-aws-modules/kms/aws/2.1.0
-#   version = "2.1.0"
-
-#   key_administrators = [
-#     data.aws_caller_identity.current.arn
-#   ]
-
-#   key_service_users                 = var.key_user_arns
-#   key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
-#   aliases                           = ["${var.alias}-${var.environment}"]
-
-#   tags = var.cost_tags
-# }
 
 module "rabbitmq" {
   source = "../commons/aws/rabbitmq"
@@ -322,7 +317,15 @@ module "directory_service_data_import" {
   rds_username   = module.rds_cluster.master_username
   rds_password   = module.rds_cluster.master_password
 
-  depends_on = [module.rds_cluster]
+  bucket_region = var.directory_service_data_s3_bucket_region
+  bucket_name   = var.directory_service_data_s3_bucket_name
+  bucket_path = var.directory_service_data_s3_bucket_path
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+
+  depends_on = [module.rds_cluster,null_resource.directory_service_data_import_validation]
 
 }
 

@@ -63,6 +63,7 @@ module "iam" {
   region                        = var.region
   additional_node_policies      = coalesce(var.eks_node_groups.additional_node_policies, [])
   additional_node_inline_policy = var.eks_node_groups.additional_node_inline_policy
+  mount_point_s3_bucket_name    = var.mount_point_s3_bucket_name
   tags                          = var.eks_tags
 }
 
