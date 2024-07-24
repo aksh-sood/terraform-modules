@@ -1,10 +1,16 @@
+variable "ingress_whitelist_ips" {
+  type = list(string)
+}
+
+variable "egress_whitelist_ips" {
+  type = list(string)
+}
+
 variable "name" {}
 variable "region" {}
 variable "vpc_id" {}
 variable "subnet_ids" {}
 variable "whitelist_security_groups" {}
-variable "ingress_whitelist_ips" {}
-variable "egress_whitelist_ips" {}
 variable "tags" {}
 variable "engine_version" {}
 variable "storage_type" {}

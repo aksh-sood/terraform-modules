@@ -15,3 +15,7 @@ output "console_url" {
 output "endpoint" {
   value = aws_mq_broker.rabbitmq.instances.0.endpoints.0
 }
+
+output "rabbitmq_sg" {
+  value = aws_security_group.rabbitmq.id
+}

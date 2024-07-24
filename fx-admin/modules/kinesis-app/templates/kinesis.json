@@ -2,17 +2,34 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "KinesisPolicy",
+            "Sid": "KinesisAppPolicy",
             "Effect": "Allow",
             "Action": [
-                "kinesis:PutRecord",
-                "kinesis:DescribeStream",
-                "kinesis:PutRecords",
-                "lambda:InvokeFunction",
-                "lambda:GetFunctionConfiguration"
+                "kinesis:DeregisterStreamConsumer",
+				"kinesis:DecreaseStreamRetentionPeriod",
+				"kinesis:UpdateStreamMode",
+				"kinesis:DisableEnhancedMonitoring",
+				"kinesis:PutRecords",
+				"kinesis:SplitShard",
+				"kinesis:CreateStream",
+				"kinesis:PutRecord",
+				"kinesis:IncreaseStreamRetentionPeriod",
+				"kinesis:RegisterStreamConsumer",
+				"kinesis:UpdateShardCount",
+				"kinesis:MergeShards",
+				"kinesis:ListTagsForStream",
+				"kinesis:GetRecords",
+				"kinesis:GetShardIterator",
+				"kinesis:SubscribeToShard",
+				"kinesis:DescribeStreamSummary",
+				"kinesis:DescribeStream",
+				"kinesis:DescribeLimits",
+				"kinesis:DescribeStreamConsumer",
+				"kinesis:GetResourcePolicy"
             ],
             "Resource": [
-                "arn:aws:kinesis:${region}:${account_id}:stream/*"
+                "${normalized_trades_arn}",
+                "${matched_trades_arn}"
             ]
         }
     ]

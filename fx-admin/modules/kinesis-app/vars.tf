@@ -1,9 +1,7 @@
 variable "kinesis_policies" {
   type = set(string)
   default = [
-    "arn:aws:iam::aws:policy/AmazonKinesisAnalyticsFullAccess",
-    "arn:aws:iam::aws:policy/AmazonKinesisFullAccess",
-    "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
+    "arn:aws:iam::aws:policy/AmazonKinesisAnalyticsFullAccess"
   ]
 }
 

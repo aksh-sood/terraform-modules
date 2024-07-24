@@ -1,9 +1,5 @@
 data "aws_caller_identity" "current" {}
 
-locals {
-  cnames = toset(["rabbitmq"])
-}
-
 resource "null_resource" "domain_validation" {
   lifecycle {
     precondition {
@@ -11,16 +7,15 @@ resource "null_resource" "domain_validation" {
       error_message = "Provide domain_name"
     }
   }
-
 }
 
 resource "null_resource" "loadbalacer_url_validation" {
   lifecycle {
     precondition {
       condition = var.create_dns_records ? (
-        var.loadbalancer_url != "" && var.loadbalancer_url != null
+        var.external_loadbalancer_url != "" && var.external_loadbalancer_url != null
       ) : true
-      error_message = "Provide loadbalancer_url or disable create_dns_records"
+      error_message = "Provide  external loadbalancer url or disable create_dns_records"
     }
   }
 }
@@ -30,27 +25,34 @@ resource "null_resource" "directory_service_data_import_validation" {
     precondition {
       condition = var.import_directory_service_db ? (
         var.directory_service_data_s3_bucket_name != "" && var.directory_service_data_s3_bucket_name != null &&
-        var.directory_service_data_s3_bucket_path != "" && var.directory_service_data_s3_bucket_path != null  
+        var.directory_service_data_s3_bucket_path != "" && var.directory_service_data_s3_bucket_path != null
       ) : true
       error_message = "Provide directory_service_data_s3_bucket_name and directory_service_data_s3_bucket_prefix"
     }
   }
 }
 
-module "cloudflare" {
+module "external_alb_cloudflare" {
   source = "../commons/utilities/cloudflare"
   count  = var.create_dns_records ? 1 : 0
 
-  loadbalancer_url = var.loadbalancer_url
+  loadbalancer_url = var.external_loadbalancer_url
 
-  cnames      = local.cnames
+  cnames      = local.external_elb_cnames
   name        = var.environment
   domain_name = var.domain_name
 
   providers = {
     cloudflare.this = cloudflare.this
   }
+}
 
+module "kms_sse" {
+  source = "./modules/kms"
+
+  name                    = var.environment
+  resources_key_user_arns = local.resources_key_user_arns
+  aws_account             = data.aws_caller_identity.current.account_id
 }
 
 module "rabbitmq" {
@@ -63,6 +65,7 @@ module "rabbitmq" {
   engine_version             = var.rabbitmq_engine_version
   enable_cluster_mode        = var.rabbitmq_enable_cluster_mode
   instance_type              = var.rabbitmq_instance_type
+  eks_security_group         = var.eks_security_group
   username                   = var.rabbitmq_username
   auto_minor_version_upgrade = var.rabbitmq_auto_minor_version_upgrade
   apply_immediately          = var.rabbitmq_apply_immediately
@@ -70,23 +73,52 @@ module "rabbitmq" {
   tags = var.cost_tags
 }
 
+data "external" "rabbitmq_private_ip" {
 
-module "rabbitmq_eks_config" {
-  source = "../commons/kubernetes/rabbitmq"
+  program = ["bash", "${path.module}/getRabbitmqPrivateIP.sh"]
 
-  name              = var.environment
-  domain_name       = var.domain_name
-  rabbitmq_endpoint = replace(module.rabbitmq.console_url, "https://", "")
+  query = {
+    "url" = replace(module.rabbitmq.console_url, "https://", "")
+  }
+
+  depends_on = [module.rabbitmq]
+}
+
+module "rabbitmq_nlb" {
+  source = "./modules/rabbitmq_nlb"
+
+  name                   = var.environment
+  vpc_id                 = var.vpc_id
+  subnet_ids             = var.public_subnet_ids
+  eks_security_group     = var.eks_security_group
+  whitelist_ips          = var.rabbitmq_lb_ingress_whitelist
+  public_certificate_arn = var.acm_certificate_arn
+  rabbitmq_private_ip    = element(local.reg_ip, length(local.reg_ip) - 1)
+  rabbitmq_sg            = module.rabbitmq.rabbitmq_sg
+
+  depends_on = [data.external.rabbitmq_private_ip]
+}
+
+module "nlb_cloudflare" {
+  source = "../commons/utilities/cloudflare"
+  count  = var.create_dns_records ? 1 : 0
+
+  loadbalancer_url = module.rabbitmq_nlb.url
+
+  cnames      = local.nlb_cnames
+  name        = var.environment
+  domain_name = var.domain_name
 
   providers = {
-    kubectl.this = kubectl.this
+    cloudflare.this = cloudflare.this
   }
 }
 
 module "s3_swift" {
   source = "../commons/aws/s3"
 
-  name = "${var.vendor}-${var.environment}-swift-messages"
+  name        = "${var.vendor}-${var.environment}-swift-messages"
+  kms_key_arn = module.kms_sse.arn
 
   tags = var.cost_tags
 }
@@ -94,7 +126,8 @@ module "s3_swift" {
 module "s3" {
   source = "../commons/aws/s3"
 
-  name = "${var.vendor}-${var.environment}"
+  name        = "${var.vendor}-${var.environment}"
+  kms_key_arn = module.kms_sse.arn
 
   tags = var.cost_tags
 }
@@ -102,10 +135,10 @@ module "s3" {
 module "kinesis_firehose" {
   source = "./modules/kinesis-firehose"
 
-  bucket_arn = module.s3.bucket_arn
-
-  name   = var.environment
-  region = var.region
+  bucket_arn  = module.s3.bucket_arn
+  kms_key_arn = module.kms_sse.arn
+  name        = var.environment
+  region      = var.region
 
   tags = var.cost_tags
 }
@@ -113,14 +146,17 @@ module "kinesis_firehose" {
 module "normalized_trml_kinesis_stream" {
   source = "../commons/aws/stream"
 
-  name = "${var.environment}-normalized-trml"
+  name        = "${var.environment}-normalized-trml"
+  kms_key_arn = module.kms_sse.arn
+
   tags = var.cost_tags
 }
 
 module "matched_trades_kinesis_stream" {
   source = "../commons/aws/stream"
 
-  name = "${var.environment}-matched-trades"
+  name        = "${var.environment}-matched-trades"
+  kms_key_arn = module.kms_sse.arn
 
   tags = var.cost_tags
 }
@@ -133,22 +169,26 @@ module "kinesis_app" {
 
   name   = var.environment
   region = var.region
-  tags   = var.cost_tags
+
+  tags = var.cost_tags
 }
 
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  name          = var.environment
-  region        = var.region
-  s3_bucket_arn = module.s3.bucket_arn
-  sqs_queue_arn = module.sqs.arn
+  name                         = var.environment
+  region                       = var.region
+  s3_bucket_arn                = module.s3.bucket_arn
+  sqs_queue_arn                = module.sqs.arn
+  matched_trades_stream_arn    = module.normalized_trml_kinesis_stream.stream_arn
+  normalized_trades_stream_arn = module.normalized_trml_kinesis_stream.stream_arn
 }
 
 module "sqs" {
   source = "../commons/aws/sqs"
 
   name = "${var.environment}-normalizer"
+
   tags = var.cost_tags
 }
 
@@ -180,7 +220,7 @@ module "activemq" {
   name                       = "${var.environment}-activemq"
   region                     = var.region
   vpc_id                     = var.vpc_id
-  subnet_ids                 = var.public_subnet_ids
+  subnet_ids                 = var.private_subnet_ids
   engine_version             = var.activemq_engine_version
   instance_type              = var.activemq_instance_type
   publicly_accessible        = var.activemq_publicly_accessible
@@ -191,16 +231,14 @@ module "activemq" {
   whitelist_security_groups  = var.eks_security_group
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
-
-  tags = var.cost_tags
+  tags                       = var.cost_tags
 }
 
 module "normalized_trml_lambda" {
   source = "../commons/aws/lambda"
 
-  stream_arn      = module.normalized_trml_kinesis_stream.stream_arn
-  lambda_role_arn = module.lambda_iam.lambda_role_arn
-
+  stream_arn                = module.normalized_trml_kinesis_stream.stream_arn
+  lambda_role_arn           = module.lambda_iam.lambda_role_arn
   name                      = "${var.environment}-normalized-trades"
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
@@ -208,6 +246,7 @@ module "normalized_trml_lambda" {
   security_group            = var.eks_security_group
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   subnet_ids                = var.private_subnet_ids
+
   environment_variables = {
     data_type           = "normalized_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
@@ -220,9 +259,8 @@ module "normalized_trml_lambda" {
 module "matched_trades_lambda" {
   source = "../commons/aws/lambda"
 
-  stream_arn      = module.matched_trades_kinesis_stream.stream_arn
-  lambda_role_arn = module.lambda_iam.lambda_role_arn
-
+  stream_arn                = module.matched_trades_kinesis_stream.stream_arn
+  lambda_role_arn           = module.lambda_iam.lambda_role_arn
   name                      = "${var.environment}-matched-trades"
   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
@@ -236,8 +274,8 @@ module "matched_trades_lambda" {
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
     activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
   }
-  tags = var.cost_tags
 
+  tags = var.cost_tags
 }
 
 module "rds_cluster" {
@@ -269,13 +307,15 @@ module "rds_cluster" {
   db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
   eks_sg                                = var.eks_security_group
   cost_tags                             = var.cost_tags
+  resources_key_arn                     = module.kms_sse.arn
 }
 
 module "secrets" {
   source = "../commons/aws/secrets"
 
   name        = var.environment
-  kms_key_arn = var.kms_key_arn
+  kms_key_arn = module.kms_sse.arn
+
   secrets = merge({
     database_writer_url   = module.rds_cluster.writer_endpoint,
     database_readonly_url = module.rds_cluster.reader_endpoint,
@@ -296,7 +336,7 @@ module "secrets" {
     sftp_host_baton       = var.sftp_host
     sftp_user_baton       = var.sftp_username
     sftp_password_baton   = var.sftp_password
-
+    domain_name           = var.domain_name
   }, var.additional_secrets)
 }
 
@@ -310,28 +350,23 @@ module "directory_service_data_import" {
   source = "./modules/data-import-job"
   count  = var.import_directory_service_db ? 1 : 0
 
-  namespace = kubernetes_namespace_v1.utility.metadata[0].name
-
+  namespace      = kubernetes_namespace_v1.utility.metadata[0].name
   database_name  = "${replace(var.environment, "-", "_")}_directory_service"
   rds_writer_url = module.rds_cluster.writer_endpoint
   rds_username   = module.rds_cluster.master_username
   rds_password   = module.rds_cluster.master_password
-
-  bucket_region = var.directory_service_data_s3_bucket_region
-  bucket_name   = var.directory_service_data_s3_bucket_name
-  bucket_path = var.directory_service_data_s3_bucket_path
+  bucket_region  = var.directory_service_data_s3_bucket_region
+  bucket_name    = var.directory_service_data_s3_bucket_name
+  bucket_path    = var.directory_service_data_s3_bucket_path
 
   providers = {
     kubectl.this = kubectl.this
   }
 
-  depends_on = [module.rds_cluster,null_resource.directory_service_data_import_validation]
-
+  depends_on = [module.rds_cluster, null_resource.directory_service_data_import_validation]
 }
-
 module "rabbitmq_config" {
-  source = "./modules/rabbitmq-config"
-
+  source    = "./modules/rabbitmq-config"
   namespace = kubernetes_namespace_v1.utility.metadata[0].name
 
   rabbitmq_url      = module.rabbitmq.console_url
@@ -342,8 +377,7 @@ module "rabbitmq_config" {
 }
 
 module "baton_application_namespace" {
-  source = "../commons/kubernetes/baton-namespace"
-
+  source   = "../commons/kubernetes/baton-namespace"
   for_each = { for ns in local.baton_application_namespaces : ns.namespace => ns }
 
   domain_name     = var.domain_name
@@ -359,4 +393,25 @@ module "baton_application_namespace" {
   }
 
   depends_on = [module.secrets, module.rabbitmq_config, module.directory_service_data_import]
+}
+
+module "basic_auth_application" {
+  source = "../commons/kubernetes/wasm-auth"
+
+  environment = var.environment
+  domain_name = var.domain_name
+
+  providers = {
+    kubectl.this = kubectl.this
+  }
+}
+
+module "transit_gateway" {
+  source = "../commons/aws/transit-gateway"
+
+  name           = "tgw-${var.environment}"
+  vpc_id         = var.vpc_id
+  subnet_ids     = var.private_subnet_ids
+  ram_principals = var.tgw_ram_principals
+  tags           = var.cost_tags
 }

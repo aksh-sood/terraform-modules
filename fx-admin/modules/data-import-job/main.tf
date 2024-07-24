@@ -13,7 +13,7 @@ terraform {
 resource "kubernetes_manifest" "data_import" {
   manifest = {
     "apiVersion" = "v1"
-    "kind" = "PersistentVolume"
+    "kind"       = "PersistentVolume"
     "metadata" = {
       "name" = "directory-service-data-import"
     }
@@ -40,6 +40,9 @@ resource "kubernetes_manifest" "data_import" {
 }
 
 resource "kubectl_manifest" "pvc" {
+
+  provider = kubectl.this
+
   yaml_body = <<YAML
 apiVersion: v1
 kind: PersistentVolumeClaim

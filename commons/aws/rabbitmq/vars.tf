@@ -2,6 +2,7 @@ variable "name" {}
 variable "vpc_id" {}
 variable "subnet_ids" {}
 variable "tags" {}
+variable "eks_security_group" {}
 variable "whitelist_security_groups" {}
 
 variable "storage_type" {

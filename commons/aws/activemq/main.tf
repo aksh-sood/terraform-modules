@@ -36,46 +36,46 @@ resource "aws_security_group_rule" "security_group_whitelist_8162" {
 }
 
 resource "aws_security_group_rule" "ingress_whitelisted_ips_port_61617" {
-  count = length(var.ingress_whitelist_ips)
+  for_each = toset(var.ingress_whitelist_ips)
 
   type              = "ingress"
   from_port         = 61617
   to_port           = 61617
   protocol          = "tcp"
-  cidr_blocks       = [element(var.ingress_whitelist_ips, count.index)]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
 resource "aws_security_group_rule" "ingress_whitelisted_ips_port_8162" {
-  count = length(var.ingress_whitelist_ips)
+  for_each = toset(var.ingress_whitelist_ips)
 
   type              = "ingress"
   from_port         = 8162
   to_port           = 8162
   protocol          = "tcp"
-  cidr_blocks       = [element(var.ingress_whitelist_ips, count.index)]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
 resource "aws_security_group_rule" "egress_whitelisted_ips_port_61617" {
-  count = length(var.egress_whitelist_ips)
+  for_each = toset(var.egress_whitelist_ips)
 
   type              = "egress"
   from_port         = 61617
   to_port           = 61617
   protocol          = "tcp"
-  cidr_blocks       = [element(var.egress_whitelist_ips, count.index)]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
 resource "aws_security_group_rule" "egress_whitelisted_ips_port_8162" {
-  count = length(var.egress_whitelist_ips)
+  for_each = toset(var.egress_whitelist_ips)
 
   type              = "egress"
   from_port         = 8162
   to_port           = 8162
   protocol          = "tcp"
-  cidr_blocks       = [element(var.egress_whitelist_ips, count.index)]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.activemq_sg.id
 }
 
@@ -103,7 +103,7 @@ resource "aws_mq_broker" "activemq" {
   }
 
   logs {
-    audit = true
+    audit   = true
     general = true
   }
 

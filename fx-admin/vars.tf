@@ -159,7 +159,7 @@ variable "activemq_auto_minor_version_upgrade" {
 
 variable "activemq_publicly_accessible" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "activemq_username" {
@@ -210,20 +210,20 @@ variable "import_directory_service_db" {
 
 variable "directory_service_data_s3_bucket_name" {
   description = "name of the s3 bucket where directory service database dump is stored"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "directory_service_data_s3_bucket_region" {
   description = "region of the s3 bucket where directory service database dump is stored"
-  type = string
-  default = "us-east-1"
+  type        = string
+  default     = "us-east-1"
 }
 
 variable "directory_service_data_s3_bucket_path" {
   description = "prefix of the s3 bucket where directory service database dump is stored"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "baton_application_namespaces" {
@@ -233,7 +233,7 @@ variable "baton_application_namespaces" {
     namespace       = string
     customer        = string
     enable_activemq = optional(bool, false)
-    docker_registry = optional(string, "150399859526.dkr.ecr.us-west-2.amazonaws.com")
+    docker_registry = optional(string, "381491919895.dkr.ecr.us-west-2.amazonaws.com")
     istio_injection = optional(bool, true)
     common_env      = optional(map(string), {})
     services = list(object({
@@ -262,35 +262,56 @@ variable "baton_application_namespaces" {
   }))
 
   default = [
-    {
+ {
       namespace       = "fx-baton-uat"
       customer        = "osttra"
       istio_injection = false
       services = [
         {
-          name        = "directory-service"
+          name             = "directory-service"
           security_context = false
-          target_port = 8080
-          url_prefix  = "/directory"
-          image_tag   = "1.0.4"
+          target_port      = 8080
+          url_prefix       = "/directory"
+          image_tag        = "1.0.10"
         },
         {
-          name        = "normalizer"
-          target_port = 8080
-          url_prefix  = "/normalizer"
-          image_tag   = "2.0.13"
+          name             = "normalizer"
+          security_context = false
+          target_port      = 8080
+          url_prefix       = "/normalizer"
+          image_tag        = "2.0.22"
         },
         {
           name        = "notaryservice"
           target_port = 8080
           url_prefix  = "/notary"
-          image_tag   = "2.0.4"
+          image_tag   = "2.0.7"
         },
         {
-          name        = "swiftservice"
-          target_port = 8080
-          url_prefix  = "/swift"
-          image_tag   = "2.0.2"
+          name             = "swiftservice"
+          security_context = false
+          target_port      = 8080
+          url_prefix       = "/swift"
+          image_tag        = "2.0.12"
+        },
+        {
+          name             = "datagenerator"
+          security_context = false
+          target_port      = 8080
+          port             = 8080
+          image_tag        = "2.0.428"
+          url_prefix       = ""
+          health_endpoint  = null
+        },
+        {
+          name             = "dashboard-trades"
+          security_context = false
+          subdomain_suffix = "-trades"
+          target_port      = 80
+          port             = 8080
+          image_tag        = "2.0.12"
+          url_prefix       = "/"
+          health_endpoint  = "/health"
         }
       ]
     }
@@ -359,18 +380,32 @@ variable "create_dns_records" {
   default = false
 }
 
-variable "loadbalancer_url" {
-  default = ""
-}
-
 variable "cloudflare_api_token" {
   description = "API token to access cloudflare"
   type        = string
 }
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
-  type = map(any)
+  type        = map(any)
   default     = {}
+}
+variable "tgw_ram_principals" {
+  type    = list(string)
+  default = []
+}
+
+variable "nlb_ingress_whitelist" {
+  type    = list(string)
+  default = []
+}
+
+variable "rabbitmq_lb_ingress_whitelist" {
+  description = "IP address over which rabbitmq nlb is restricted"
+  type        = list(string)
+}
+
+variable "acm_certificate_arn" {
+  description = "CA signed public certificate arn for Rabbitmq NLB"
 }
 
 variable "sftp_host" {
@@ -384,12 +419,16 @@ variable "sftp_username" {
 }
 
 variable "sftp_password" {
-  type        = string
+  type = string
+}
+
+variable "vendor" {
+  type = string
 }
 
 variable "vpc_id" {}
 variable "eks_security_group" {}
 variable "kms_key_arn" {}
-variable "vendor" {
-  type = string
-}
+variable "eks_node_role_arn" {}
+variable "eks_cluster_role_arn" {}
+variable "external_loadbalancer_url" {}

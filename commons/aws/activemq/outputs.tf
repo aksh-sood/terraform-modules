@@ -16,3 +16,8 @@ output "username" {
   value       = var.username
   sensitive   = true
 }
+
+output "console_url" {
+  description = "URL of the activeMQ instance created inside the EKS VPC"
+  value       = regex("https://([^:]+)", aws_mq_broker.activemq.instances.0.console_url)[0]
+}

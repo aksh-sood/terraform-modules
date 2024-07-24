@@ -159,6 +159,7 @@ terraform apply
 | activemq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | bool                               | `false`                                                                      |
 | activemq_publicly_accessible              | Specify whether the ActiveMQ instance should be publicly accessible                                        | bool                               | `true`                                                                       |
 | activemq_username                         | Username to authenticate into the ActiveMQ server                                                          | String                             | `"admin"`                                                                    |
+| tgw_ram_principals                         | List of accounts to which tgw needs to be shared                                                      | list(string)                             | `[]`                                                                    |
 | rabbitmq_engine_version                   | Version of the RabbitMQ broker engine                                                                      | String                             | `3.11.20`                                                                    |
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
 | rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
@@ -220,6 +221,7 @@ This object taked the paramters needed by a single service to run and are passed
 ### Volume Mounts
 
 Object parameters for adding mounts to  [Baton Services](#markdown-headers-baton-services). The objects `volume` and `mounts` configurations are typical to the kubernetes YAML configurations.
+
 | Name              | Description                                                                                                                            | Type        | Default  |
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 | volumes | Volume configuration for deployment files. Can accept any kind of valid volume configuration for different types of volumes but should be with k8's YAML standards | list(any) | `[]` |
@@ -228,6 +230,7 @@ Object parameters for adding mounts to  [Baton Services](#markdown-headers-baton
 ### Mounts
 
 Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume-mounts) . This object configuration is typical to the kubernetes YAML configurations.
+
 | Name              | Description                                                                                                                            | Type        | Default  |
 |:------------------|:---------------------------------------------------------------------------------------------------------------------------------------|:------------|:---------|
 |mountPath\*| Directory on container where to mount the file |string||
@@ -315,6 +318,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
 |rabbitmq_endpoint  | string |endpoint of rabbitMQ |
 |rabbitmq_username  | string |rabbitMQ Username credential|
 |rabbitmq_password  | string |rabbitMQ password credential|
+|rabbitmq_nlb_url   | string |rabbitMQ Network Loadbalancer URL|
 |rds_writer_endpoint| string |Writer endpoint of the RDS cluster|
 |rds_reader_endpoint| string |Reader endpoint of the RDS cluster|
 |rds_master_username| string |RDS master username credential|

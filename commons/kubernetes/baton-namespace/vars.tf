@@ -4,7 +4,7 @@ variable "services" {
     name             = string
     target_port      = number
     url_prefix       = string
-    security_context = optional(bool,true)
+    security_context = optional(bool, true)
     env              = optional(map(string), {})
     health_endpoint  = optional(string, "/health")
     port             = optional(number, 8080)
@@ -52,7 +52,7 @@ variable "domain_name" {
 
 variable "docker_registry" {
   type    = string
-  default = "150399859526.dkr.ecr.us-west-2.amazonaws.com"
+  default = "381491919895.dkr.ecr.us-west-2.amazonaws.com"
 }
 
 variable "istio_injection" {

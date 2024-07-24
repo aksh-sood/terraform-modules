@@ -46,6 +46,7 @@ resource "helm_release" "kube_prometheus_stack" {
         slack_channel_name        = var.slack_channel_name
         pagerduty_key             = var.pagerduty_key
         alert_manager_volume_size = var.alert_manager_volume_size
+        gchat_lambda_url          = var.gchat_lambda_url
       })
     })
   ]

@@ -26,8 +26,11 @@ resource "aws_iam_policy" "kinesis_policy" {
   name = "FX-kinesis-policy_${var.name}_${var.region}"
 
   policy = templatefile("${path.module}/templates/kinesis.json", {
-    region        = var.region,
-    account_id    = data.aws_caller_identity.current.account_id
+    region                = var.region,
+    account_id            = data.aws_caller_identity.current.account_id
+    matched_trades_arn    = var.matched_trades_arn
+    normalized_trades_arn = var.normalized_trades_arn
+
   })
 }
 
@@ -38,7 +41,7 @@ locals {
   }
   kinesis_policies_map = merge(local.managed_kinesis_policies_map,
     {
-      KinesisPermission     = aws_iam_policy.kinesis_policy.arn
+      KinesisPermission = aws_iam_policy.kinesis_policy.arn
   })
 }
 

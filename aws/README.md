@@ -167,6 +167,8 @@ terraform apply
 |additional_eks_addons |Additional addons for EKS cluster |list(string)| `[]` |
 |eks_ingress_whitelist_ips|IPv4 CIDR range to whitelist to EKS security group| list(string)| `[]`|
 |eks_node_groups |EKS node configuration to provision in cluster|map(eks-node-group-config)|[EKS Node Group Config](#markdown-header-eks-node-group-config)|
+|eks_public_access_ips|CIDRs to allow public access to EKS| string | `[]` |
+|alb_ingress_whitelist|CIDRs to allow for ALB access over prot 443 and 80| list(string)| `[]` |
 |mount_point_s3_bucket_name| Bucket name to mount to EKS cluster | string| `null` |
 |acm_certificate_bucket |S3 bucket name where domain certificate data is stored|string|`"baton-domain-certificates"`|
 |acm_private_key| S3 object key for domain certificate private key |string |`"batonsystem.com/cloudflare/batonsystem.com.key"`|
@@ -187,6 +189,7 @@ terraform apply
 | opensearch_master_username | The master username for the domain     | string |`master`|
 
 **Note: If `enable_siem` is `true` , `siem_s3_bucket` is required parameter for logging VPC traffic** 
+**Note: If `client_vpn_enable` is `false`, then the VPN's Security Group needs to be whitelisted manually to the Private Load Balancer's Security Group and vice versa, inorder to expose Grafana and OpenSearch privately.**
 
 #### EKS Node Group Config
 

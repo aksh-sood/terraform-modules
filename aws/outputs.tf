@@ -30,7 +30,17 @@ output "eks_security_group" {
 
 output "elb_security_group" {
   description = "Security Group for Load balancers"
-  value = var.create_eks ? module.eks[0].elb_security_group : null
+  value       = var.create_eks ? module.eks[0].elb_security_group : null
+}
+
+output "internal_alb_security_group" {
+  description = "Security group for Private Load Balancers"
+  value       = var.create_eks ? module.eks[0].internal_alb_security_group : null
+}
+
+output "vpn_security_group" {
+  description = "Security Group for VPN"
+  value       = var.enable_client_vpn ? module.client_vpn[0].security_group : null
 }
 
 output "acm_certificate_arn" {
@@ -55,4 +65,12 @@ output "opensearch_password" {
 
 output "opensearch_username" {
   value = var.create_eks ? module.opensearch[0].username : null
+}
+
+output "eks_node_role_arn" {
+  value = var.create_eks ? module.eks[0].node_role_arn : null
+}
+
+output "eks_cluster_role_arn" {
+  value = var.create_eks ? module.eks[0].cluster_role_arn : null
 }

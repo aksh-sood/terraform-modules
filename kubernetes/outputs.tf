@@ -22,9 +22,14 @@ output "grafana_developer_password" {
   sensitive   = true
 }
 
-output "loadbalancer_url" {
+output "external_loadbalancer_url" {
   description = "Hostname for the istio ingress created"
-  value       = module.istio.loadbalancer_url
+  value       = module.istio.external_loadbalancer_url
+}
+
+output "internal_loadbalancer_url" {
+  description = "Hostname for the private istio ingress created"
+  value       = module.istio.internal_loadbalancer_url
 }
 
 output "jaeger_username" {
@@ -68,4 +73,14 @@ output "sftp_username" {
 output "sftp_host" {
   description = "SFTP hostname"
   value       = var.enable_sftp ? module.sftp[0].host : null
+}
+
+variable "cost_tags" {
+  description = "Customer Cost and Environment tags for all the resources "
+  type        = map(string)
+  default = {
+    env-type    = "test"
+    customer    = "internal"
+    cost-center = "overhead"
+  }
 }

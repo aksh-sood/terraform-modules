@@ -31,7 +31,7 @@ module "cloudflare" {
   source = "../commons/utilities/cloudflare"
   count  = var.create_dns_records ? 1 : 0
 
-  loadbalancer_url = module.istio.loadbalancer_url
+  loadbalancer_url = module.istio.internal_loadbalancer_url
 
   cnames      = local.cnames
   name        = var.environment
@@ -63,19 +63,31 @@ resource "kubernetes_storage_class_v1" "efs" {
 module "istio" {
   source = "./modules/istio"
 
-  enable_siem            = var.enable_siem
-  environment            = var.environment
-  domain_name            = var.domain_name
-  acm_certificate_arn    = var.acm_certificate_arn
-  istio_version          = var.istio_version
-  siem_storage_s3_bucket = var.siem_storage_s3_bucket
-  security_group         = var.elb_security_group
+  enable_siem                 = var.enable_siem
+  environment                 = var.environment
+  domain_name                 = var.domain_name
+  acm_certificate_arn         = var.acm_certificate_arn
+  istio_version               = var.istio_version
+  siem_storage_s3_bucket      = var.siem_storage_s3_bucket
+  security_group              = var.elb_security_group
+  internal_alb_security_group = var.internal_alb_security_group
 
   providers = {
     kubectl.this = kubectl.this
   }
 
   depends_on = [module.addons]
+}
+
+module "gchat_lambda" {
+  source = "../commons/aws/gchat-lambda"
+  count  = var.gchat_webhook != null ? 1 : 0
+
+  name                      = "${var.environment}-gchat-lambda"
+  gchat_webhook_url         = var.gchat_webhook
+  lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
+  package_key               = "gchat-lambda.zip"
+  tags                      = var.cost_tags
 }
 
 module "monitoring" {
@@ -94,6 +106,7 @@ module "monitoring" {
   alert_manager_volume_size     = var.alert_manager_volume_size
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
+  gchat_lambda_url              = var.gchat_webhook != null ? module.gchat_lambda[0].url : ""
 
   providers = {
     kubectl.this = kubectl.this

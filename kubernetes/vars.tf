@@ -166,15 +166,30 @@ variable "enable_cluster_autoscaler" {
 
 variable "cluster_autoscaler_version" {
   description = "Version of cluster autoscaler to install"
-  type = string
-  default = "v1.26.2"
+  type        = string
+  default     = "v1.26.2"
 }
 
 variable "elb_security_group" {
   description = "security group for load balancers"
-  type = string
+  type        = string
+}
+
+variable "internal_alb_security_group" {
+  description = "value"
+  type        = string
 }
 
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}
+
+variable "gchat_webhook" {
+  default = null
+  type    = string
+}
+variable "lambda_packages_s3_bucket" {
+  description = "S3 bucket name with JAR packages for lambda functions"
+  type        = string
+  default     = "fx-dev-lambda-packages"
+}

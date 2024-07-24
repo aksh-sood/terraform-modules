@@ -73,10 +73,9 @@ resource "aws_launch_template" "this" {
     }
   }
 
-  # TODO: Turned off IMDSv2 as applications will break
-  # metadata_options {
-  #   http_tokens = "required"
-  # }
+  metadata_options {
+    http_tokens = "required"
+  }
 
   key_name      = var.ssh_key
   ebs_optimized = true

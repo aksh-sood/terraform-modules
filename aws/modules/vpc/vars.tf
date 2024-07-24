@@ -68,17 +68,16 @@ variable "public_acl_egress_rules" {
 variable "common_acl_ingress_rules" {
   description = "base ingress rules for both private and public NACl's"
   type        = list(map(string))
-  default = [
-    {
-      rule_number     = 105
-      rule_action     = "deny"
-      from_port       = 22
-      to_port         = 22
-      protocol        = "tcp"
-      ipv6_cidr_block = "::/0"
+  default = [{
+    rule_number     = 403
+    rule_action     = "deny"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    ipv6_cidr_block = "::/0"
     },
     {
-      rule_number = 104
+      rule_number = 402
       rule_action = "deny"
       from_port   = 22
       to_port     = 22
@@ -86,7 +85,7 @@ variable "common_acl_ingress_rules" {
       cidr_block  = "0.0.0.0/0"
     },
     {
-      rule_number     = 103
+      rule_number     = 401
       rule_action     = "deny"
       from_port       = 3389
       to_port         = 3389
@@ -94,7 +93,7 @@ variable "common_acl_ingress_rules" {
       ipv6_cidr_block = "::/0"
     },
     {
-      rule_number = 102
+      rule_number = 400
       rule_action = "deny"
       from_port   = 3389
       to_port     = 3389
@@ -102,21 +101,73 @@ variable "common_acl_ingress_rules" {
       cidr_block  = "0.0.0.0/0"
     },
     {
-      rule_number = 101
+      rule_number     = 107
+      rule_action     = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_number = 106
       rule_action = "allow"
       from_port   = 0
       to_port     = 0
-      protocol    = "-1"
+      protocol    = "icmp"
+      cidr_block  = "0.0.0.0/0"
+      icmp_code   = 0
+      icmp_type   = 8
+    },
+    {
+      rule_number     = 105
+      rule_action     = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+      icmp_code       = 0
+      icmp_type       = 8
+    },
+    {
+      rule_number = 104
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "icmp"
+      cidr_block  = "0.0.0.0/0"
+    },
+    {
+      rule_number = 103
+      rule_action = "allow"
+      from_port   = 20
+      to_port     = 65535
+      protocol    = "udp"
+      cidr_block  = "0.0.0.0/0"
+    },
+    {
+      rule_number     = 102
+      rule_action     = "allow"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "udp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_number = 101
+      rule_action = "allow"
+      from_port   = 20
+      to_port     = 65535
+      protocol    = "tcp"
       cidr_block  = "0.0.0.0/0"
     },
     {
       rule_number     = 100
       rule_action     = "allow"
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "tcp"
       ipv6_cidr_block = "::/0"
-    },
+    }
   ]
 }
 
@@ -127,19 +178,71 @@ variable "common_acl_egress_rules" {
     {
       rule_number = 100
       rule_action = "allow"
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
+      from_port   = 20
+      to_port     = 65535
+      protocol    = "tcp"
       cidr_block  = "0.0.0.0/0"
     },
     {
       rule_number     = 101
       rule_action     = "allow"
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "tcp"
       ipv6_cidr_block = "::/0"
     },
+    {
+      rule_number = 102
+      rule_action = "allow"
+      from_port   = 20
+      to_port     = 65535
+      protocol    = "udp"
+      cidr_block  = "0.0.0.0/0"
+    },
+    {
+      rule_number     = 103
+      rule_action     = "allow"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "udp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_number = 104
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "icmp"
+      cidr_block  = "0.0.0.0/0"
+    },
+    {
+      rule_number     = 105
+      rule_action     = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_number = 106
+      rule_action = "allow"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "icmp"
+      cidr_block  = "0.0.0.0/0"
+      icmp_code   = 0
+      icmp_type   = 8
+    },
+    {
+      rule_number     = 107
+      rule_action     = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+      icmp_code       = 0
+      icmp_type       = 8
+    }
   ]
 }
 
@@ -156,7 +259,7 @@ variable "default_acl_ingress_rules" {
   type        = list(map(string))
   default = [
     {
-      rule_no         = 105
+      rule_no         = 403
       action          = "deny"
       from_port       = 22
       to_port         = 22
@@ -164,7 +267,7 @@ variable "default_acl_ingress_rules" {
       ipv6_cidr_block = "::/0"
     },
     {
-      rule_no    = 104
+      rule_no    = 402
       action     = "deny"
       from_port  = 22
       to_port    = 22
@@ -172,7 +275,7 @@ variable "default_acl_ingress_rules" {
       cidr_block = "0.0.0.0/0"
     },
     {
-      rule_no         = 103
+      rule_no         = 401
       action          = "deny"
       from_port       = 3389
       to_port         = 3389
@@ -180,7 +283,7 @@ variable "default_acl_ingress_rules" {
       ipv6_cidr_block = "::/0"
     },
     {
-      rule_no    = 102
+      rule_no    = 400
       action     = "deny"
       from_port  = 3389
       to_port    = 3389
@@ -188,21 +291,73 @@ variable "default_acl_ingress_rules" {
       cidr_block = "0.0.0.0/0"
     },
     {
-      rule_no    = 101
+      rule_no         = 107
+      action          = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+      icmp_code       = 0
+      icmp_type       = 8
+    },
+    {
+      rule_no    = 106
       action     = "allow"
       from_port  = 0
       to_port    = 0
-      protocol   = "-1"
+      protocol   = "icmp"
+      cidr_block = "0.0.0.0/0"
+      icmp_code  = 0
+      icmp_type  = 8
+    },
+    {
+      rule_no         = 105
+      action          = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_no    = 104
+      action     = "allow"
+      from_port  = 0
+      to_port    = 0
+      protocol   = "icmp"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      rule_no    = 103
+      action     = "allow"
+      from_port  = 20
+      to_port    = 65535
+      protocol   = "udp"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      rule_no         = 102
+      action          = "allow"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "udp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_no    = 101
+      action     = "allow"
+      from_port  = 20
+      to_port    = 65535
+      protocol   = "tcp"
       cidr_block = "0.0.0.0/0"
     },
     {
       rule_no         = 100
       action          = "allow"
-      from_port       = 0
-      to_port         = 0
-      protocol        = "-1"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "tcp"
       ipv6_cidr_block = "::/0"
-    },
+    }
   ]
 }
 
@@ -213,18 +368,72 @@ variable "default_acl_egress_rules" {
     {
       rule_no    = 100
       action     = "allow"
-      from_port  = 0
-      to_port    = 0
-      protocol   = "-1"
+      from_port  = 20
+      to_port    = 65535
+      protocol   = "tcp"
       cidr_block = "0.0.0.0/0"
     },
     {
       rule_no         = 101
       action          = "allow"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "tcp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_no    = 102
+      action     = "allow"
+      from_port  = 20
+      to_port    = 65535
+      protocol   = "udp"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      rule_no         = 103
+      action          = "allow"
+      from_port       = 20
+      to_port         = 65535
+      protocol        = "udp"
+      ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_no    = 104
+      action     = "allow"
+      from_port  = 0
+      to_port    = 0
+      protocol   = "icmp"
+      cidr_block = "0.0.0.0/0"
+    },
+    {
+      rule_no         = 105
+      action          = "allow"
       from_port       = 0
       to_port         = 0
-      protocol        = "-1"
+      protocol        = "icmp"
       ipv6_cidr_block = "::/0"
+    },
+    {
+      rule_no    = 106
+      action     = "allow"
+      from_port  = 0
+      to_port    = 0
+      protocol   = "icmp"
+      cidr_block = "0.0.0.0/0"
+      icmp_code  = 0
+      icmp_type  = 8
+
+    },
+    {
+      rule_no         = 107
+      action          = "allow"
+      from_port       = 0
+      to_port         = 0
+      protocol        = "icmp"
+      ipv6_cidr_block = "::/0"
+      icmp_code       = 0
+      icmp_type       = 8
+
     }
   ]
 }

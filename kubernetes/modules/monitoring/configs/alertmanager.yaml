@@ -15,16 +15,28 @@
       - receiver: "empty"
         match:
           alertname: Watchdog
+        continue: true
+      - receiver: 'gchat'
+        match:
+          severity: warning
+        continue: true
       - receiver: 'slack'
         match:
           severity: warning
-        continue: false
+        continue: true
       - receiver: 'pagerduty'
         match:
           severity: critical
-        continue: false
+        continue: true
     receivers:
       - name: "empty"
+      - name: gchat
+        webhook_configs:
+        - send_resolved: true
+          http_config:
+            follow_redirects: true
+          url: ${gchat_lambda_url}
+          max_alerts: 0
       - name: default
         slack_configs:
         - send_resolved: false

@@ -23,6 +23,11 @@ variable "public_subnet_ids" {
   type        = list(string)
 }
 
+variable "eks_public_access_ips" {
+  description = "CIDRs to allow public access to eks"
+  type        = list(string)
+}
+
 variable "kms_key_arn" {}
 variable "elb_security_group" {}
 variable "cluster_role_arn" {}
@@ -32,3 +37,8 @@ variable "eks_tags" {}
 variable "region" {}
 variable "cluster_version" {}
 variable "cluster_name" {}
+variable "eks_public_access" {
+  description = "EKS Control Plane Public Access. Default true"
+  type        = bool
+  default     = false
+}

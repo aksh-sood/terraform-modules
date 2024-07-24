@@ -1,49 +1,49 @@
 data "http" "ip" {
-  url = "https://ifconfig.me/ip"
+  url = "https://ipinfo.io/ip"
 }
 
 locals {
 
-eks_ingress_whitelist_ips = {for ip in var.eks_ingress_whitelist_ips: ip => {
-      type                       = "ingress"
-      from_port                  = 0
-      to_port                    = 0
-      protocol                   = "-1"
-      description                = "whitelist traffic within VPC"
-      cidr_blocks                = [ip]
-    } }
-  elb_whitelist_rules = merge(local.eks_ingress_whitelist_ips,{
+  eks_ingress_whitelist_ips = { for ip in var.eks_ingress_whitelist_ips : ip => {
+    type        = "ingress"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "whitelisted ips provided by the user"
+    cidr_blocks = [ip]
+  } }
+  elb_whitelist_rules = merge(local.eks_ingress_whitelist_ips, {
     vpc_ingress_whitelist = {
-      type                       = "ingress"
-      from_port                  = 0
-      to_port                    = 0
-      protocol                   = "-1"
-      description                = "whitelist traffic within VPC"
-      cidr_blocks                = [var.vpc_cidr]
+      type        = "ingress"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      description = "whitelist traffic within VPC"
+      cidr_blocks = [var.vpc_cidr]
     }
     whitelist_executors_ip_443 = {
-      type                       = "ingress"
-      from_port                  = 443
-      to_port                    = 443
-      protocol                   = "tcp"
-      description                = "Whitelist IP of machine running the script"
+      type        = "ingress"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      description = "Whitelist IP of machine running the script"
       cidr_blocks = ["${chomp(data.http.ip.response_body)}/32"]
     }
     elb_whitelist_80 = {
-      type                       = "ingress"
-      from_port                  = 80
-      to_port                    = 80
-      protocol                   = "tcp"
-      description                = "Whitelist HTTP traffic for elb"
-      source_security_group_id=var.elb_security_group
+      type                     = "ingress"
+      from_port                = 80
+      to_port                  = 80
+      protocol                 = "tcp"
+      description              = "Whitelist HTTP traffic for elb"
+      source_security_group_id = var.elb_security_group
     }
     elb_whitelist_443 = {
-      type                       = "ingress"
-      from_port                  = 443
-      to_port                    = 443
-      protocol                   = "tcp"
-      description                = "Whitelist HTTPS traffic for elb"
-      source_security_group_id=var.elb_security_group
+      type                     = "ingress"
+      from_port                = 443
+      to_port                  = 443
+      protocol                 = "tcp"
+      description              = "Whitelist HTTPS traffic for elb"
+      source_security_group_id = var.elb_security_group
     }
   })
 }
@@ -62,7 +62,7 @@ module "eks" {
 
   #VPC configuration
   vpc_id     = var.vpc_id
-  subnet_ids = concat(var.private_subnet_ids, var.public_subnet_ids)
+  subnet_ids = var.eks_public_access ? concat(var.private_subnet_ids, var.public_subnet_ids) : var.private_subnet_ids
 
   #prefix configuration
   cluster_security_group_use_name_prefix    = false
@@ -71,15 +71,15 @@ module "eks" {
   cluster_encryption_policy_use_name_prefix = false
 
   # security groups
-  # cluster_security_group_additional_rules = {}
   create_node_security_group = false
 
   #public and private access for cluster endpoint
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_private_access = true
+  cluster_endpoint_public_access       = var.eks_public_access
+  cluster_endpoint_public_access_cidrs = var.eks_public_access ? concat(["${chomp(data.http.ip.response_body)}/32"], var.eks_public_access_ips) : []
+  cluster_endpoint_private_access      = true
 
   #logging
-  cluster_enabled_log_types = [ "audit", "api", "authenticator", "controllerManager", "scheduler"]
+  cluster_enabled_log_types = ["audit", "api", "authenticator", "controllerManager", "scheduler"]
 
   #configuration of kms key  
   create_kms_key = false
@@ -94,7 +94,7 @@ module "eks" {
 }
 
 resource "aws_security_group_rule" "cluster" {
-  for_each = { for k, v in local.elb_whitelist_rules : k => v  }
+  for_each = { for k, v in local.elb_whitelist_rules : k => v }
 
   # Required
   security_group_id = module.eks.cluster_primary_security_group_id

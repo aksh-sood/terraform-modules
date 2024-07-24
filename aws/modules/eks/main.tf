@@ -12,7 +12,7 @@ locals {
   }
 }
 
-resource "aws_security_group" "elb_sg"  {
+resource "aws_security_group" "elb_sg" {
   name        = "ELB-${var.cluster_name}-${var.region}"
   description = "ELB Security group for ${var.cluster_name}"
   vpc_id      = var.vpc_id
@@ -21,21 +21,25 @@ resource "aws_security_group" "elb_sg"  {
 }
 
 resource "aws_security_group_rule" "ingress_security_group_whitelist_80" {
-  type                     = "ingress"
-  from_port                = 80
-  to_port                  = 80
-  protocol                 = "tcp"
-  cidr_blocks              = ["0.0.0.0/0"]
-  security_group_id        = aws_security_group.elb_sg.id
+  for_each = toset(var.alb_ingress_whitelist)
+
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = [each.key]
+  security_group_id = aws_security_group.elb_sg.id
 }
 
 resource "aws_security_group_rule" "ingress_security_group_whitelist_443" {
-  type                     = "ingress"
-  from_port                = 443
-  to_port                  = 443
-  protocol                 = "tcp"
-  cidr_blocks              = ["0.0.0.0/0"]
-  security_group_id        = aws_security_group.elb_sg.id
+  for_each = toset(var.alb_ingress_whitelist)
+
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [each.key]
+  security_group_id = aws_security_group.elb_sg.id
 }
 
 resource "aws_security_group_rule" "egress_security_group_whitelist_80" {
@@ -56,6 +60,46 @@ resource "aws_security_group_rule" "egress_security_group_whitelist_443" {
   security_group_id        = aws_security_group.elb_sg.id
 }
 
+resource "aws_security_group" "internal_alb_sg" {
+  name        = "Internal-ALB-${var.cluster_name}-${var.region}"
+  description = "Internal ALB Security group for ${var.cluster_name}"
+  vpc_id      = var.vpc_id
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = -1
+    security_groups = [module.cluster.primary_security_group_id]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  tags = merge(var.eks_tags, { Name = "${var.cluster_name}-elb" })
+}
+
+resource "aws_security_group_rule" "internal_alb_to_vpn_sg_whitelisting" {
+  count                    = var.enable_client_vpn ? 1 : 0
+  type                     = "ingress"
+  from_port                = "0"
+  to_port                  = "0"
+  protocol                 = "-1"
+  security_group_id        = aws_security_group.internal_alb_sg.id
+  source_security_group_id = var.vpn_security_group
+
+}
+resource "aws_security_group_rule" "eks_to_internal_alb_whitelisting" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  security_group_id        = module.cluster.primary_security_group_id
+  source_security_group_id = aws_security_group.internal_alb_sg.id
+}
+
+
 module "iam" {
   source = "./modules/iam"
 
@@ -70,19 +114,21 @@ module "iam" {
 module "cluster" {
   source = "./modules/cluster"
 
-  cluster_role_arn = module.iam.cluster_role_arn
+  cluster_role_arn   = module.iam.cluster_role_arn
   elb_security_group = aws_security_group.elb_sg.id
 
-  region             = var.region
-  cluster_version    = var.cluster_version
-  cluster_name       = var.cluster_name
-  vpc_id             = var.vpc_id
-  vpc_cidr = var.vpc_cidr
-  private_subnet_ids = var.private_subnet_ids
-  public_subnet_ids  = var.public_subnet_ids
-  kms_key_arn        = var.kms_key_arn
-  eks_tags           = var.eks_tags
-  eks_ingress_whitelist_ips=var.eks_ingress_whitelist_ips
+  region                    = var.region
+  cluster_version           = var.cluster_version
+  cluster_name              = var.cluster_name
+  vpc_id                    = var.vpc_id
+  vpc_cidr                  = var.vpc_cidr
+  private_subnet_ids        = var.private_subnet_ids
+  public_subnet_ids         = var.public_subnet_ids
+  kms_key_arn               = var.kms_key_arn
+  eks_tags                  = var.eks_tags
+  eks_ingress_whitelist_ips = var.eks_ingress_whitelist_ips
+  eks_public_access         = var.eks_public_access
+  eks_public_access_ips     = var.eks_public_access_ips
 
   depends_on = [module.iam]
 }

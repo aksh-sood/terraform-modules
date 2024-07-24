@@ -122,3 +122,7 @@ variable "whitelist_eks" {
   type    = bool
   default = false
 }
+
+variable "resources_key_arn" {
+  description = "KMS CMK Arn for SSE Encryption"
+}

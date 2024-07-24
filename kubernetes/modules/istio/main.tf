@@ -104,6 +104,7 @@ resource "helm_release" "istio_ingress" {
   depends_on = [helm_release.istiod]
 }
 
+#PUBLIC ALB
 resource "kubernetes_ingress_v1" "alb_ingress" {
   wait_for_load_balancer = true
   metadata {
@@ -119,6 +120,75 @@ resource "kubernetes_ingress_v1" "alb_ingress" {
       "alb.ingress.kubernetes.io/security-groups"      = var.security_group
       "alb.ingress.kubernetes.io/ssl-policy"           = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
       "alb.ingress.kubernetes.io/success-codes"        = "404"
+      "alb.ingress.kubernetes.io/ssl-redirect"         = "443"
+      "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
+      "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\":80},{\"HTTPS\":443}]"
+      # The flow logging for the ELB cannot work if the native region of the bucket does not match that is the ELB
+      "alb.ingress.kubernetes.io/load-balancer-attributes" = var.enable_siem ? join("", [var.alb_base_attributes, ",access_logs.s3.enabled=true,access_logs.s3.bucket=${var.siem_storage_s3_bucket}"]) : var.alb_base_attributes
+    }
+  }
+
+  spec {
+    ingress_class_name = "alb"
+    rule {
+      http {
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "ssl-redirect"
+              port {
+                name = "use-annotation"
+              }
+            }
+          }
+
+        }
+
+        path {
+          path      = "/"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = "istio-ingressgateway"
+              port {
+                number = 443
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.enable_siem ? (var.siem_storage_s3_bucket != "" && var.siem_storage_s3_bucket != null) : true
+      error_message = "Provided siem_storage_s3_bucket or disable enable_siem"
+    }
+  }
+
+  depends_on = [helm_release.istio_ingress]
+}
+
+#PRIVATE ALB
+resource "kubernetes_ingress_v1" "internal_alb_ingress" {
+  wait_for_load_balancer = true
+  metadata {
+    name      = "internal-istio-alb"
+    namespace = "istio-system"
+    annotations = {
+      "kubernetes.io/ingress.class"                    = "alb"
+      "alb.ingress.kubernetes.io/scheme"               = "internal"
+      "alb.ingress.kubernetes.io/target-type"          = "ip"
+      "alb.ingress.kubernetes.io/healthcheck-path"     = "/healthz/ready"
+      "alb.ingress.kubernetes.io/healthcheck-port"     = "traffic-port"
+      "alb.ingress.kubernetes.io/certificate-arn"      = var.acm_certificate_arn
+      "alb.ingress.kubernetes.io/security-groups"      = var.internal_alb_security_group
+      "alb.ingress.kubernetes.io/ssl-policy"           = "ELBSecurityPolicy-FS-1-2-Res-2020-10"
+      "alb.ingress.kubernetes.io/success-codes"        = "404,200"
       "alb.ingress.kubernetes.io/ssl-redirect"         = "443"
       "alb.ingress.kubernetes.io/actions.ssl-redirect" = "{\"Type\": \"redirect\", \"RedirectConfig\": { \"Protocol\": \"HTTPS\", \"Port\": \"443\", \"StatusCode\": \"HTTP_301\"}}"
       "alb.ingress.kubernetes.io/listen-ports"         = "[{\"HTTP\":80},{\"HTTPS\":443}]"

@@ -143,6 +143,12 @@ variable "eks_ingress_whitelist_ips" {
   default     = []
 }
 
+variable "eks_public_access" {
+  description = "EKS Control Plane Public Access. Default true"
+  type        = bool
+  default     = false
+}
+
 variable "additional_eks_addons" {
   description = "additional addons for EKS cluster"
   type        = list(string)
@@ -151,8 +157,20 @@ variable "additional_eks_addons" {
 
 variable "mount_point_s3_bucket_name" {
   description = "Name of the s3 bucket to mount to EKS"
-  type = string
-  default = null
+  type        = string
+  default     = null
+}
+
+variable "eks_public_access_ips" {
+  description = "CIDRs to allow public access to eks"
+  type        = list(string)
+  default     = []
+}
+
+variable "alb_ingress_whitelist" {
+  description = "CIDRs to allow ingress on 80 and 443 for alb"
+  type        = list(string)
+  default     = []
 }
 
 variable "eks_node_groups" {

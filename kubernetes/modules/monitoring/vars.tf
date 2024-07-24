@@ -16,3 +16,6 @@ variable "environment" {}
 variable "domain_name" {}
 variable "isito_dependency" {}
 variable "configure_grafana" {}
+variable "gchat_lambda_url" {
+  default = ""
+}

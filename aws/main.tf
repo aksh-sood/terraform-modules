@@ -126,20 +126,25 @@ module "eks" {
   public_subnet_ids  = module.vpc.public_subnets
   kms_key_arn        = module.kms.key_arn
 
-  region                    = var.region
-  vpc_cidr                  = var.vpc_cidr
-  cluster_name              = var.environment
-  cluster_version           = var.cluster_version
-  eks_node_groups           = var.eks_node_groups
-  siem_storage_s3_bucket    = var.siem_storage_s3_bucket
-  private_subnet_cidrs      = var.private_subnet_cidrs
-  private_subnets_cidr      = var.private_subnet_cidrs
-  additional_eks_addons     = var.additional_eks_addons
-  enable_cluster_autoscaler = var.enable_cluster_autoscaler
-  eks_ingress_whitelist_ips = var.eks_ingress_whitelist_ips
+  region                     = var.region
+  vpc_cidr                   = var.vpc_cidr
+  cluster_name               = var.environment
+  cluster_version            = var.cluster_version
+  eks_node_groups            = var.eks_node_groups
+  siem_storage_s3_bucket     = var.siem_storage_s3_bucket
+  private_subnet_cidrs       = var.private_subnet_cidrs
+  private_subnets_cidr       = var.private_subnet_cidrs
+  alb_ingress_whitelist      = var.alb_ingress_whitelist
+  additional_eks_addons      = var.additional_eks_addons
+  enable_cluster_autoscaler  = var.enable_cluster_autoscaler
+  eks_ingress_whitelist_ips  = var.eks_ingress_whitelist_ips
+  eks_public_access          = var.eks_public_access
+  eks_public_access_ips      = var.eks_public_access ? var.eks_public_access_ips : []
   mount_point_s3_bucket_name = var.mount_point_s3_bucket_name
+  enable_client_vpn          = var.enable_client_vpn
+  vpn_security_group         = var.enable_client_vpn ? module.client_vpn[0].security_group : null
 
-  eks_tags                  = var.cost_tags
+  eks_tags = var.cost_tags
 
   depends_on = [module.vpc]
 }

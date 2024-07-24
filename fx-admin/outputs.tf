@@ -26,6 +26,10 @@ output "rabbitmq_endpoint" {
   value = module.rabbitmq.endpoint
 }
 
+output "rabbitmq_nlb_url" {
+  value = module.rabbitmq_nlb.url
+}
+
 output "rds_writer_endpoint" {
   value       = module.rds_cluster.writer_endpoint
   description = "Writer endpoint of the RDS cluster"
@@ -48,5 +52,10 @@ output "rds_master_username" {
 output "activemq_credentials" {
   description = "ActiveMQ Credentials for EKS deployments"
   value       = [for ns in module.baton_application_namespace : ns.activemq_credentials if ns.activemq_credentials != null]
+  sensitive   = true
+}
+
+output "app_password" {
+  value = module.basic_auth_application.app_password
   sensitive   = true
 }

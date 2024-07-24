@@ -10,6 +10,9 @@ terraform {
   }
 }
 
+locals {
+  cnames = toset([for c in var.cnames : c != "" ? "-${c}" : c])
+}
 
 data "cloudflare_zone" "this" {
 
@@ -19,11 +22,11 @@ data "cloudflare_zone" "this" {
 }
 
 resource "cloudflare_record" "cnames" {
-  for_each = var.cnames
+  for_each = local.cnames
 
   provider = cloudflare.this
 
-  name    = "${var.name}-${each.key}"
+  name    = "${var.name}${each.key}"
   zone_id = data.cloudflare_zone.this.id
   type    = "CNAME"
   proxied = true

@@ -16,3 +16,7 @@ output "master_password" {
 output "master_username" {
   value = var.master_username
 }
+
+output "sns_topic_arn" {
+  value = aws_sns_topic.rds.arn
+}

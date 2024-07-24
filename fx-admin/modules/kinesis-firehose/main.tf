@@ -48,6 +48,12 @@ resource "aws_kinesis_firehose_delivery_stream" "trm_delivery_firehose_stream" {
     role_arn   = aws_iam_role.firehose_role.arn
     bucket_arn = var.bucket_arn
   }
+
+  server_side_encryption {
+    enabled  = true
+    key_type = "CUSTOMER_MANAGED_CMK"
+    key_arn  = var.kms_key_arn
+  }
 }
 
 #TODO: Add SSE
@@ -58,6 +64,12 @@ resource "aws_kinesis_firehose_delivery_stream" "failed_trml_firehose_stream" {
   extended_s3_configuration {
     role_arn   = aws_iam_role.firehose_role.arn
     bucket_arn = var.bucket_arn
+  }
+
+  server_side_encryption {
+    enabled  = true
+    key_type = "CUSTOMER_MANAGED_CMK"
+    key_arn  = var.kms_key_arn
   }
 }
 

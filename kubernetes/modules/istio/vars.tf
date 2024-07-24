@@ -15,3 +15,4 @@ variable "enable_siem" {}
 variable "domain_name" {}
 variable "environment" {}
 variable "security_group" {}
+variable "internal_alb_security_group" {}

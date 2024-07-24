@@ -30,3 +30,7 @@ output "primary_security_group_id" {
 output "elb_security_group" {
   value = aws_security_group.elb_sg.id
 }
+
+output "internal_alb_security_group" {
+  value = aws_security_group.internal_alb_sg.id
+}

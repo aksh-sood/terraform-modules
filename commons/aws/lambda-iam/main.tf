@@ -22,24 +22,26 @@ resource "aws_iam_role" "lambda_role" {
 locals {
   managed_lambda_policies_map = {
     for policy_arn in var.lambda_role_policies :
-    split("/", policy_arn)[length(split("/", policy_arn)) - 1] => policy_arn
+    policy_arn => "arn:aws:iam::aws:policy/${policy_arn}"
   }
   lambda_policies_map = merge(local.managed_lambda_policies_map,
     {
-      # LambdaPermission = aws_iam_policy.lambda_policy.arn
+      LambdaPermission = aws_iam_policy.lambda_policy.arn
   })
 }
 
-# resource "aws_iam_policy" "lambda_policy" {
-#   name = "FX-lambda-policy_${var.name}_${var.region}"
+resource "aws_iam_policy" "lambda_policy" {
+  name = "FX-lambda-policy_${var.name}_${var.region}"
 
-#   policy = templatefile("${path.module}/templates/lambda.json", {
-#     region        = var.region,
-#     account_id    = data.aws_caller_identity.current.account_id
-#     s3_bucket_arn = var.s3_bucket_arn
-#     sqs_queue_arn = var.sqs_queue_arn
-#   })
-# }
+  policy = templatefile("${path.module}/templates/lambda.json", {
+    region                       = var.region,
+    account_id                   = data.aws_caller_identity.current.account_id
+    s3_bucket_arn                = var.s3_bucket_arn
+    sqs_queue_arn                = var.sqs_queue_arn
+    matched_trades_stream_arn    = var.matched_trades_stream_arn
+    normalized_trades_stream_arn = var.normalized_trades_stream_arn
+  })
+}
 
 resource "aws_iam_role_policy_attachment" "lambda_role" {
   for_each = { for k, v in local.lambda_policies_map : k => v }
