@@ -48,11 +48,18 @@ module "external_alb_cloudflare" {
 }
 
 module "kms_sse" {
-  source = "./modules/kms"
+  source = "../../../external/kms"
 
-  name                    = var.environment
-  resources_key_user_arns = local.resources_key_user_arns
-  aws_account             = data.aws_caller_identity.current.account_id
+  key_administrators = [
+    data.aws_caller_identity.current.arn
+  ]
+
+  key_users                         = local.resources_key_user_arns
+  key_service_users                 = local.resources_key_user_arns
+  key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+  aliases                           = ["resource-${var.environment}"]
+
+  tags = var.cost_tags
 }
 
 module "rabbitmq" {
