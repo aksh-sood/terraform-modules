@@ -178,10 +178,12 @@ terraform apply
 | cnames | Set of CNAME suffixed for subdomain |set(string)  |`[]` | 
 | cloudflare_api_token\* | API token for configuring cloudflare provider |  string | |
 | kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
+| user_secrets                      | AWS secret name containing the secrets to be appended                                                                        | string                             |`null`|   
 | additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |
 | sftp_host\* | Hostname for baton SFTP server | string | |
 | sftp_user\* | Username for baton SFTP server| string | 
 | sftp_password\* |  Password for baton SFTP server | string |  baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+
 
 ### Baton Application Namespaces
 

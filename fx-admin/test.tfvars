@@ -67,6 +67,7 @@ rabbitmq_exchange                   = "trml_osttra"
 
 domain_name = "batonsystems.com"
 
+user_secrets       = ""
 additional_secrets = {}
 
 sftp_host     = "sftp.sftp"

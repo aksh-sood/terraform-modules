@@ -138,6 +138,12 @@ variable "lambda_packages_s3_bucket" {
   default     = "fx-dev-lambda-packages"
 }
 
+variable "user_secrets" {
+  description = "AWS secret name containing the secrets to be appended"
+  type        = string
+  default     = ""
+}
+
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
   type        = map(any)

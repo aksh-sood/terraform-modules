@@ -263,7 +263,7 @@ variable "baton_application_namespaces" {
   }))
 
   default = [
- {
+    {
       namespace       = "fx-baton-uat"
       customer        = "osttra"
       istio_injection = false
@@ -387,11 +387,18 @@ variable "cloudflare_api_token" {
   type        = string
 }
 
+variable "user_secrets" {
+  description = "AWS secret name containing the secrets to be appended"
+  type        = string
+  default     = ""
+}
+
 variable "additional_secrets" {
   description = "additional map of secrets to be saved in secrets manager"
   type        = map(any)
   default     = {}
 }
+
 variable "tgw_ram_principals" {
   type    = list(string)
   default = []

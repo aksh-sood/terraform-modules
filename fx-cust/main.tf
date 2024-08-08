@@ -78,8 +78,8 @@ module "activemq" {
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
   whitelist_security_groups  = var.eks_security_group
-  
-  tags                       = var.cost_tags
+
+  tags = var.cost_tags
 }
 
 module "lambda_iam" {
@@ -142,7 +142,7 @@ module "transfer_messages_lambda" {
 module "rds_cluster" {
   source = "../commons/aws/rds"
 
-  sns_kms_key_arn                       = module.kms_sse.arn
+  sns_kms_key_arn = module.kms_sse.arn
 
   whitelist_eks                         = true
   kms_key_id                            = var.kms_key_arn
@@ -170,7 +170,7 @@ module "rds_cluster" {
   db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
   eks_sg                                = var.eks_security_group
 
-  cost_tags                             = var.cost_tags
+  cost_tags = var.cost_tags
 }
 
 module "kms_sse" {
@@ -234,6 +234,10 @@ module "cognito" {
   }
 }
 
+data "aws_secretsmanager_secret_version" "user_secrets" {
+  secret_id = var.user_secrets
+}
+
 module "secrets" {
   source = "../commons/aws/secrets"
 
@@ -252,8 +256,8 @@ module "secrets" {
     # aws.cognito.user.pool.id = module.cognito.id
     # aws.cognito.app.client.id = 
     # aws.cognito.app.secret = 
-    aws_account           = data.aws_caller_identity.current.account_id
-    aws_region            = var.region
-    domain_name           = var.domain_name
-  }, var.additional_secrets)
+    aws_account = data.aws_caller_identity.current.account_id
+    aws_region  = var.region
+    domain_name = var.domain_name
+  }, local.user_secrets, var.additional_secrets)
 }

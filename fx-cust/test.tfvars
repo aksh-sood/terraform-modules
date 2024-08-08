@@ -55,4 +55,6 @@ environment                  = "aksh"
 kms_key_arn                  = "arn:aws:kms:us-east-1:130759691668:key/9007a482-ad7c-4b47-95c8-9a14720a3e0d"
 vendor                       = "baton"
 baton_application_namespaces = []
+user_secrets                 = ""
 additional_secrets           = {}
+

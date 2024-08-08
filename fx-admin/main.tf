@@ -144,9 +144,9 @@ module "kinesis_firehose" {
 
   bucket_arn  = module.s3.bucket_arn
   kms_key_arn = module.kms_sse.arn
-  
-  name        = var.environment
-  region      = var.region
+
+  name   = var.environment
+  region = var.region
 
   tags = var.cost_tags
 }
@@ -184,12 +184,12 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
-  s3_bucket_arn                = module.s3.bucket_arn
-  sqs_queue_arn                = module.sqs.arn
-  streams_arn                  = [module.normalized_trml_kinesis_stream.stream_arn,module.normalized_trml_kinesis_stream.stream_arn]
+  s3_bucket_arn = module.s3.bucket_arn
+  sqs_queue_arn = module.sqs.arn
+  streams_arn   = [module.normalized_trml_kinesis_stream.stream_arn, module.normalized_trml_kinesis_stream.stream_arn]
 
-  name                         = var.environment
-  region                       = var.region
+  name   = var.environment
+  region = var.region
 }
 
 module "sqs" {
@@ -239,8 +239,8 @@ module "activemq" {
   whitelist_security_groups  = var.eks_security_group
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
-  
-  tags                       = var.cost_tags
+
+  tags = var.cost_tags
 }
 
 module "normalized_trml_lambda" {
@@ -290,7 +290,7 @@ module "matched_trades_lambda" {
 module "rds_cluster" {
   source = "../commons/aws/rds"
 
-  sns_kms_key_arn                       = module.kms_sse.arn
+  sns_kms_key_arn = module.kms_sse.arn
 
   whitelist_eks                         = true
   kms_key_id                            = var.kms_key_arn
@@ -320,6 +320,11 @@ module "rds_cluster" {
   cost_tags                             = var.cost_tags
 }
 
+
+data "aws_secretsmanager_secret_version" "user_secrets" {
+  secret_id = var.user_secrets
+}
+
 module "secrets" {
   source = "../commons/aws/secrets"
 
@@ -347,7 +352,7 @@ module "secrets" {
     sftp_user_baton       = var.sftp_username
     sftp_password_baton   = var.sftp_password
     domain_name           = var.domain_name
-  }, var.additional_secrets)
+  }, local.user_secrets, var.additional_secrets)
 }
 
 resource "kubernetes_namespace_v1" "utility" {
@@ -364,11 +369,11 @@ module "directory_service_data_import" {
   rds_writer_url = module.rds_cluster.writer_endpoint
   rds_username   = module.rds_cluster.master_username
   rds_password   = module.rds_cluster.master_password
-  
-  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
-  bucket_region  = var.directory_service_data_s3_bucket_region
-  bucket_name    = var.directory_service_data_s3_bucket_name
-  bucket_path    = var.directory_service_data_s3_bucket_path
+
+  database_name = "${replace(var.environment, "-", "_")}_directory_service"
+  bucket_region = var.directory_service_data_s3_bucket_region
+  bucket_name   = var.directory_service_data_s3_bucket_name
+  bucket_path   = var.directory_service_data_s3_bucket_path
 
   providers = {
     kubectl.this = kubectl.this
@@ -378,7 +383,7 @@ module "directory_service_data_import" {
 }
 
 module "rabbitmq_config" {
-  source    = "./modules/rabbitmq-config"
+  source = "./modules/rabbitmq-config"
 
   namespace = kubernetes_namespace_v1.utility.metadata[0].name
 
@@ -386,8 +391,8 @@ module "rabbitmq_config" {
   rabbitmq_username = module.rabbitmq.username
   rabbitmq_password = module.rabbitmq.password
 
-  vhost             = var.rabbitmq_virtual_host
-  exchange          = var.rabbitmq_exchange
+  vhost    = var.rabbitmq_virtual_host
+  exchange = var.rabbitmq_exchange
 }
 
 module "baton_application_namespace" {

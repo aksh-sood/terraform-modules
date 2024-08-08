@@ -16,4 +16,6 @@ locals {
   jq_ip = data.external.rabbitmq_private_ip.result
 
   reg_ip = regex("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})", local.jq_ip.ip)
+
+  user_secrets = jsondecode(data.aws_secretsmanager_secret_version.user_secrets.secret_string)
 }
