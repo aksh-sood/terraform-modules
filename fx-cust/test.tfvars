@@ -43,12 +43,12 @@ public_subnet_ids = [
   "subnet-0cc1fbd7e194abe00",
   "subnet-061403e1a209a55ad",
 ]
-domain_name                  = "batonsystem.com"
-callback_prefix              = []
-logout_prefix                = []
-activemq_username            = "admin"
-activemq_url                 = "something.com"
-activemq_password            = "somt124"
+domain_name       = "batonsystem.com"
+callback_prefix   = []
+logout_prefix     = []
+activemq_username = "admin"
+# activemq_url                 = "something.com"
+# activemq_password            = "somt124"
 vpc_id                       = "vpc-0cc38a97d70cfc976"
 eks_security_group           = "sg-0cafe24f3d44830ab"
 environment                  = "aksh"

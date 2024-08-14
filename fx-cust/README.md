@@ -134,7 +134,7 @@ terraform apply
 |callback_prefix|prefix for callback urls for Cognito App Integrations|list(string)|`null`|
 |logout_prefix|prefix for logout urls for Cognito App Integrations|list(string)|`null`|
 | baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
-| user_secrets                      | AWS secret name containing the secrets to be appended                                                                        | string                             |`null`|   
+| user_secrets                      | AWS secret name containing the secrets to be appended                                                                        | string                             |`""`|   
 | additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |                                                  
 
 

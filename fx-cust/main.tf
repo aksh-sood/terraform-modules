@@ -235,6 +235,7 @@ module "cognito" {
 }
 
 data "aws_secretsmanager_secret_version" "user_secrets" {
+  count     = length(var.user_secrets) > 0 ? 1 : 0
   secret_id = var.user_secrets
 }
 

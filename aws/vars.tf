@@ -168,7 +168,7 @@ variable "eks_public_access_ips" {
 }
 
 variable "alb_ingress_whitelist" {
-  description = "CIDRs to allow ingress on 80 and 443 for alb"
+  description = "CIDRs to allow ingress on 80 and 443 for public alb"
   type        = list(string)
   default     = []
 }

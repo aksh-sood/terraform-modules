@@ -64,7 +64,7 @@ rabbitmq_username                   = "master"
 rabbitmq_enable_cluster_mode        = false
 rabbitmq_virtual_host               = "/nex_osttra"
 rabbitmq_exchange                   = "trml_osttra"
-rabbitmq_whitelist_ips              = []
+rabbitmq_whitelist_ips              = ["115.111.183.90/32", "14.140.239.6/32"]
 
 domain_name = "batonsystems.com"
 

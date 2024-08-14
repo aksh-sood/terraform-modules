@@ -371,7 +371,6 @@ variable "rabbitmq_whitelist_ips" {
   type        = list(string)
   default     = []
 
-
 }
 
 variable "environment" {
@@ -408,11 +407,6 @@ variable "additional_secrets" {
 }
 
 variable "tgw_ram_principals" {
-  type    = list(string)
-  default = []
-}
-
-variable "nlb_ingress_whitelist" {
   type    = list(string)
   default = []
 }

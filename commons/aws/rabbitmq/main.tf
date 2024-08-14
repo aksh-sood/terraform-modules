@@ -1,3 +1,6 @@
+data "aws_vpc" "this" {
+  id = var.vpc_id
+}
 resource "random_password" "rabbitmq_password" {
   length      = 16
   special     = false
@@ -24,11 +27,27 @@ resource "aws_security_group" "rabbitmq" {
   }
 
   ingress {
-    description     = ""
+    description     = "Web console access"
     from_port       = 443
     to_port         = 443
     protocol        = "tcp"
     security_groups = var.whitelist_security_groups
+  }
+
+  ingress {
+    description = "Whitelisting entire cidr block of the VPC"
+    from_port   = 5671
+    to_port     = 5671
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.this.cidr_block]
+  }
+
+  ingress {
+    description = "Whitelisting entire cidr block of the VPC"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [data.aws_vpc.this.cidr_block]
   }
 
   egress {
@@ -51,6 +70,18 @@ resource "aws_security_group_rule" "ingress_whitelisted_ips_port_5671" {
   cidr_blocks       = [each.key]
   security_group_id = aws_security_group.rabbitmq.id
 }
+
+resource "aws_security_group_rule" "ingress_whitelisted_ips_port_443" {
+  for_each = toset(var.rabbitmq_whitelist_ips)
+
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [each.key]
+  security_group_id = aws_security_group.rabbitmq.id
+}
+
 
 resource "aws_mq_broker" "rabbitmq" {
   broker_name = "${var.name}-rabbitmq"

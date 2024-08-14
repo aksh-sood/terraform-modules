@@ -8,6 +8,7 @@ resource "aws_security_group" "nlb" {
   vpc_id      = var.vpc_id
 
   ingress {
+    description = "whitelisting custom ips"
     from_port   = 5671
     to_port     = 5671
     protocol    = "tcp"

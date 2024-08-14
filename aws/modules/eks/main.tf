@@ -70,6 +70,7 @@ resource "aws_security_group" "internal_alb_sg" {
     protocol        = -1
     security_groups = [module.cluster.primary_security_group_id]
   }
+
   egress {
     from_port   = 0
     to_port     = 0
