@@ -73,6 +73,7 @@ module "rabbitmq" {
   enable_cluster_mode        = var.rabbitmq_enable_cluster_mode
   instance_type              = var.rabbitmq_instance_type
   eks_security_group         = var.eks_security_group
+  rabbitmq_whitelist_ips     = var.rabbitmq_whitelist_ips
   username                   = var.rabbitmq_username
   auto_minor_version_upgrade = var.rabbitmq_auto_minor_version_upgrade
   apply_immediately          = var.rabbitmq_apply_immediately

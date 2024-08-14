@@ -41,6 +41,17 @@ resource "aws_security_group" "rabbitmq" {
   tags = merge(var.tags, { Name = "${var.name}-rabbitmq" })
 }
 
+resource "aws_security_group_rule" "ingress_whitelisted_ips_port_5671" {
+  for_each = toset(var.rabbitmq_whitelist_ips)
+
+  type              = "ingress"
+  from_port         = 5671
+  to_port           = 5671
+  protocol          = "tcp"
+  cidr_blocks       = [each.key]
+  security_group_id = aws_security_group.rabbitmq.id
+}
+
 resource "aws_mq_broker" "rabbitmq" {
   broker_name = "${var.name}-rabbitmq"
 

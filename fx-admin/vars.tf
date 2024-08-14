@@ -366,6 +366,14 @@ variable "rabbitmq_exchange" {
   default     = "trml_osttra"
 }
 
+variable "rabbitmq_whitelist_ips" {
+  description = "List of IPv4 CIDR blocks to whitelist to RabbitMQ (ingress)"
+  type        = list(string)
+  default     = []
+
+
+}
+
 variable "environment" {
   description = "Name of the fx admin environment to be setup"
   type        = string

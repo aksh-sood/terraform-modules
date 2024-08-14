@@ -4,6 +4,7 @@ variable "subnet_ids" {}
 variable "tags" {}
 variable "eks_security_group" {}
 variable "whitelist_security_groups" {}
+variable "rabbitmq_whitelist_ips" {}
 
 variable "storage_type" {
   description = "For `engine_type` RabbitMQ, only ebs is supported"
