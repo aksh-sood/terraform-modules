@@ -406,7 +406,21 @@ variable "additional_secrets" {
   default     = {}
 }
 
-variable "tgw_ram_principals" {
+variable "tgw_shared_accounts" {
+  type    = list(string)
+  default = []
+}
+
+variable "tgw_region_routes" {
+  type = map(list(string))
+  default = {
+    "us-east-1"      = [],
+    "us-west-2"      = [],
+    "ap-southeast-1" = []
+  }
+}
+
+variable "nlb_ingress_whitelist" {
   type    = list(string)
   default = []
 }

@@ -17,7 +17,18 @@ grafana:
     enabled: true
     storageClassName: "efs"
     accessModes:
-    - ReadWriteMany
+      - ReadWriteMany
     size: ${grafana_volume_size}
   initChownData:
     enabled: false
+additionalScrapeConfigs:
+  - job_name: node-exporter-prometheus-node-exporter
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        regex: "node-exporter-prometheus-node-exporter"
+        action: keep
+  - job_name: "kube-state-metrics"
+    static_configs:
+      - targets: ["kube-state-metrics.kube-system.svc.cluster.local:8080"]

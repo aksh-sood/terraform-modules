@@ -52,6 +52,38 @@ resource "helm_release" "kube_prometheus_stack" {
   ]
 }
 
+resource "helm_release" "prometheus-node-exporter" {
+  depends_on = [helm_release.kube_prometheus_stack]
+  name       = "node-exporter"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "prometheus-node-exporter"
+  namespace  = "monitoring"
+  values = [
+    templatefile("${path.module}/configs/nodeExporter.yaml", {
+      image_version = var.node_exporter_version
+    })
+  ]
+  cleanup_on_fail = true
+
+}
+
+
+resource "helm_release" "kube-state-metrics" {
+  depends_on = [helm_release.kube_prometheus_stack]
+  name       = "kube-state-metrics"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-state-metrics"
+  namespace  = "monitoring"
+  values = [
+    templatefile("${path.module}/configs/kubeStateMetrics.yaml", {
+      image_version = var.kube_state_metrics_version
+    })
+  ]
+  atomic          = true
+  cleanup_on_fail = true
+
+}
+
 resource "kubectl_manifest" "monitoring_gateway" {
 
   provider = kubectl.this
@@ -76,7 +108,7 @@ spec:
       protocol: HTTP
 YAML
 
-  depends_on = [helm_release.kube_prometheus_stack]
+  # depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "kubectl_manifest" "kube_stack_virtualservices" {

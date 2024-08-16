@@ -47,6 +47,18 @@ variable "kube_prometheus_stack_version" {
   default     = "49.2.0"
 }
 
+variable "node_exporter_version" {
+  description = "Node exporter version for helm chart"
+  type        = string
+  default     = "1.7.0"
+}
+
+variable "kube_state_metrics_version" {
+  description = "Kube state metrics version for helm chart"
+  type        = string
+  default     = "1.7.0"
+}
+
 variable "efs_id" {
   description = "EFS ID for persistent volume in EKS cluster"
   type        = string
@@ -204,3 +216,8 @@ variable "gchat_webhook" {
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}
+variable "create_s3_bucket_for_curator" {
+  type = bool
+}
+variable "delete_indices_from_es" {}
+variable "curator_docker_image_arn" {}

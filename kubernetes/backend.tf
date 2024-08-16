@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "automation-state-terraform"
-    key    = "k8/terraform-state"
+    bucket = "automate-terraform-state-durga"
+    key    = "durga/k8"
     region = "us-east-1"
   }
 }

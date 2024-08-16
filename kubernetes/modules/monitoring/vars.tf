@@ -19,3 +19,5 @@ variable "configure_grafana" {}
 variable "gchat_lambda_url" {
   default = ""
 }
+variable "node_exporter_version" {}
+variable "kube_state_metrics_version" {}

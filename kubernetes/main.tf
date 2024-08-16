@@ -100,13 +100,15 @@ module "monitoring" {
   domain_name                   = var.domain_name
   slack_channel_name            = var.slack_channel_name
   kube_prometheus_stack_version = var.kube_prometheus_stack_version
+  node_exporter_version         = var.node_exporter_version
+  kube_state_metrics_version    = var.kube_state_metrics_version
   slack_web_hook                = var.slack_web_hook
   pagerduty_key                 = var.pagerduty_key
   custom_alerts                 = var.custom_alerts
   alert_manager_volume_size     = var.alert_manager_volume_size
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
-  gchat_lambda_url              = var.gchat_webhook != null ? module.gchat_lambda[0].url : ""
+  gchat_lambda_url              = ""
 
   providers = {
     kubectl.this = kubectl.this
@@ -117,17 +119,21 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
 
-  environment         = var.environment
-  opensearch_endpoint = var.opensearch_endpoint
-  opensearch_password = var.opensearch_password
-  opensearch_username = var.opensearch_username
-  domain_name         = var.domain_name
+  environment                  = var.environment
+  opensearch_endpoint          = var.opensearch_endpoint
+  opensearch_password          = var.opensearch_password
+  opensearch_username          = var.opensearch_username
+  create_s3_bucket_for_curator = var.create_s3_bucket_for_curator
+  docker_image_arn             = var.curator_docker_image_arn
+  delete_indices_from_es       = var.delete_indices_from_es
+  domain_name                  = var.domain_name
+  region                       = var.region
 
   providers = {
     kubectl.this = kubectl.this
   }
 
-  depends_on = [module.istio]
+  # depends_on = [module.istio]
 }
 
 module "jaeger" {

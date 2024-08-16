@@ -77,6 +77,6 @@ output "sftp_host" {
 
 output "app_password" {
   description = "Basic Auth password for metrics endpoint of the application"
-  value     = module.istio.app_password
-  sensitive = true
+  value       = module.istio.app_password
+  sensitive   = true
 }

@@ -6,49 +6,70 @@ resource "aws_security_group" "nlb" {
   name        = "${var.name}-rabbitmq-nlb"
   description = "Security Group for Network Load Balancer for RabbitMQ"
   vpc_id      = var.vpc_id
+}
 
-  ingress {
-    description = "whitelisting custom ips"
-    from_port   = 5671
-    to_port     = 5671
-    protocol    = "tcp"
-    cidr_blocks = var.whitelist_ips
-  }
+resource "aws_security_group_rule" "whitelisting_custom_ips_to_5671" {
+  to_port           = "5671"
+  from_port         = "5671"
+  type              = "ingress"
+  protocol          = "tcp"
+  cidr_blocks       = [var.whitelist_ips, data.aws_vpc.this.cidr_block]
+  security_group_id = aws_security_group.nlb.id
+}
 
-  ingress {
-    from_port   = 5671
-    to_port     = 5671
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.this.cidr_block]
-  }
+resource "aws_security_group_rule" "whitelisting_vpc_to_5671" {
+  to_port           = "5671"
+  from_port         = "5671"
+  type              = "ingress"
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.this.cidr_block]
+  security_group_id = aws_security_group.nlb.id
+}
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.this.cidr_block]
-  }
 
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [var.rabbitmq_sg]
-  }
+resource "aws_security_group_rule" "whitelisting_custom_ips_to_443" {
+  to_port           = "443"
+  from_port         = "443"
+  type              = "ingress"
+  protocol          = "tcp"
+  cidr_blocks       = [var.whitelist_ips]
+  security_group_id = aws_security_group.nlb.id
+}
 
-  ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [var.eks_security_group]
-  }
+resource "aws_security_group_rule" "whitelisting_vpc_to_443" {
+  to_port           = "443"
+  from_port         = "443"
+  type              = "ingress"
+  protocol          = "tcp"
+  cidr_blocks       = [data.aws_vpc.this.cidr_block]
+  security_group_id = aws_security_group.nlb.id
+}
 
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [var.rabbitmq_sg]
-  }
+resource "aws_security_group_rule" "whitelisting_rabbitmq" {
+  to_port           = "0"
+  from_port         = "0"
+  type              = "ingress"
+  protocol          = "-1"
+  cidr_blocks       = [var.rabbitmq_sg]
+  security_group_id = aws_security_group.nlb.id
+}
+
+resource "aws_security_group_rule" "whitelisting_eks" {
+  to_port           = "0"
+  from_port         = "0"
+  type              = "ingress"
+  protocol          = "-1"
+  cidr_blocks       = [var.eks_security_group]
+  security_group_id = aws_security_group.nlb.id
+}
+
+resource "aws_security_group_rule" "whitelisting_eks" {
+  to_port           = "0"
+  from_port         = "0"
+  type              = "egress"
+  protocol          = "-1"
+  cidr_blocks       = [var.rabbitmq_sg]
+  security_group_id = aws_security_group.nlb.id
 }
 
 resource "aws_security_group_rule" "whitelist_nlb_to_rabbitmq" {

@@ -419,9 +419,10 @@ module "baton_application_namespace" {
 module "transit_gateway" {
   source = "../commons/aws/transit-gateway"
 
-  name           = "tgw-${var.environment}"
-  vpc_id         = var.vpc_id
-  subnet_ids     = var.private_subnet_ids
-  ram_principals = var.tgw_ram_principals
-  tags           = var.cost_tags
+  central_vpc_id         = var.vpc_id
+  central_vpc_subnet_ids = var.private_subnet_ids
+  shared_accounts        = var.tgw_shared_accounts
+  cost_tags              = var.cost_tags
+  region_routes          = var.tgw_region_routes
 }
+

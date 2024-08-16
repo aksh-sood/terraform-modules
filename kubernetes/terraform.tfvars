@@ -1,0 +1,35 @@
+lbc_addon_version          = "1.6.0"
+istio_version              = "1.20.0"
+slack_web_hook             = "https://hooks.slack.com/services/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"
+slack_channel_name         = "terraform-test-alerts"
+node_exporter_version      = "1.7.0"
+kube_state_metrics_version = "2.1.1"
+siem_storage_s3_bucket     = "eks-auto-vpc-flow-logs-durga"
+
+environment                        = "durga"
+pagerduty_key                      = "8d81b91f50e54dc09a2400fbeb019c84"
+custom_alerts                      = []
+opensearch_endpoint                = "vpc-durga-zk7qamsikixubikoklrbodvbvu.us-east-1.es.amazonaws.com"
+opensearch_username                = "master"
+opensearch_password                = "U4?f!3zCu0026gQIjLDB"
+curator_docker_image_arn           = "150399859526.dkr.ecr.us-west-2.amazonaws.com/baton/utilities/curator:1.1.7"
+delete_indices_from_es             = 15
+create_s3_bucket_for_curator       = true
+domain_name                        = "batonsystems.com"
+grafana_role_arn                   = "arn:aws:iam::058264127150:role/grafana_durga_us-east-1"
+acm_certificate_arn                = "arn:aws:acm:us-east-1:058264127150:certificate/b5f37f8c-6238-4194-a4c6-aa8f70709e25"
+efs_id                             = "fs-079480f61163c0a7f"
+cloudflare_api_token               = "jPvl-qF3HMK1VkY2s6JK7tLx3PeN3uVsbwJDerLl"
+enable_cluster_autoscaler          = false
+create_dns_records                 = false
+enable_siem                        = false
+enable_config_server               = true
+bitbucket_key_secrets_manager_name = "config-server-key"
+config_repo_url                    = "git@bitbucket.org:ubixi/config-repo.git"
+config_server_image_tag            = 56
+enable_sftp                        = true
+sftp_namespace                     = "sftp"
+sftp_username                      = "myuser"
+elb_security_group                 = "sg-0263ee3e9283ad4c9"
+internal_alb_security_group        = "sg-00273e3fbb7d69be4"
+
