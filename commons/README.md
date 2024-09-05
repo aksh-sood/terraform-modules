@@ -78,7 +78,7 @@ This module provisions a single ACTIVEMQ Broker and security group for it .
 
 | Name                       | Description                                                                                               | Type   | Default         |
 |:---------------------------|:----------------------------------------------------------------------------------------------------------|:-------|:----------------|
-| engine_version             | Version of ActiveMQ engine                                                                                | String | `"5.15.16"`     |
+| engine_version             | Version of ActiveMQ engine                                                                                | String | `"5.17.6"`     |
 | storage_type               | Preferred storage type for ActiveMQ                                                                       | String | `"efs"`         |
 | instance_type              | ActiveMQ host's instance type                                                                             | String | `"mq.t2.micro"` |
 | apply_immediately          | Specifies whether any broker modifications are applied immediately, or during the next maintenance window | bool   | `true`          |

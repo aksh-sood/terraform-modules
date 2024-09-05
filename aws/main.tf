@@ -110,21 +110,32 @@ module "kms" {
 
   key_user_arns = local.key_user_arns
 
+  region      = var.region
   environment = var.environment
   kms_tags    = var.cost_tags
 
   depends_on = [aws_ebs_encryption_by_default.default_encrypt]
 }
 
+#This Bucket is created to store the private SSH key for accessing different instances
+module "secrets_bucket" {
+  source      = "../commons/aws/s3"
+  count       = var.create_eks ? 1 : 0
+  kms_key_arn = module.kms.key_arn
+  name        = "${var.vendor}-${var.environment}-${var.region}-keys"
+  tags        = var.cost_tags
+}
+
 module "eks" {
   source = "./modules/eks"
   count  = var.create_eks ? 1 : 0
 
-  vpc_id             = module.vpc.id
-  azs                = module.vpc.azs
-  private_subnet_ids = module.vpc.private_subnets
-  public_subnet_ids  = module.vpc.public_subnets
-  kms_key_arn        = module.kms.key_arn
+  vpc_id                         = module.vpc.id
+  azs                            = module.vpc.azs
+  private_subnet_ids             = module.vpc.private_subnets
+  public_subnet_ids              = module.vpc.public_subnets
+  kms_key_arn                    = module.kms.key_arn
+  secrets_key_bucket_bucket_name = module.secrets_bucket[0].id
 
   region                     = var.region
   vpc_cidr                   = var.vpc_cidr

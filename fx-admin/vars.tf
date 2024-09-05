@@ -1,6 +1,38 @@
 variable "region" {
   type    = string
+  default = "us-east-1"
+}
+
+variable "dr_region" {
+  type    = string
   default = "us-west-2"
+}
+
+variable "environment" {
+  description = "Name of the fx admin environment to be setup"
+  type        = string
+  default     = "test"
+}
+
+variable "is_dr" {
+  type    = bool
+  default = false
+}
+
+variable "is_prod" {
+  type    = bool
+  default = false
+}
+
+variable "setup_dr" {
+  type    = bool
+  default = false
+}
+
+variable "dr_kms_key_arn" {
+  description = "KMS key ARN in DR for FX ADMIN resources"
+  type        = string
+  default     = null
 }
 
 variable "cost_tags" {
@@ -13,138 +45,112 @@ variable "cost_tags" {
   }
 }
 
-variable "rds_mysql_version" {
-  description = "mysql version for rds aurora"
-  type        = string
-  default     = "5.7"
+variable "dr_tags" {
+  description = "Customer Cost and Environment tags for all the DR resources.Merged with `cost_tags` attribute"
+  type        = map(string)
+  default     = {}
 }
 
-variable "rds_instance_type" {
-  description = "RDS Instance Type"
-  type        = string
-  default     = "db.t4g.large"
+variable "create_rds" {
+  type    = bool
+  default = true
 }
 
-variable "rds_master_username" {
-  description = "Master Username for RDS"
-  type        = string
-  default     = "master"
+variable "rds_config" {
+  description = "parameters to configure RDS cluster"
+  type = object({
+    performance_insights_retention_period = number
+    preferred_backup_window               = string
+    backup_retention_period               = number
+    enable_deletion_protection            = optional(bool, true)
+    mysql_version                         = optional(string, "8.0")
+    instance_type                         = optional(string, "db.t4g.large")
+    master_username                       = optional(string, "master")
+    parameter_group_family                = optional(string, "aurora-mysql8.0")
+    enable_performance_insights           = optional(bool, true)
+    enable_event_notifications            = optional(bool, false)
+    reader_instance_type                  = optional(string, "db.t4g.large")
+    ingress_whitelist                     = optional(list(string), [])
+    enable_auto_minor_version_upgrade     = optional(bool, false)
+    publicly_accessible                   = optional(bool, false)
+    enabled_cloudwatch_logs_exports       = optional(list(string), ["slowquery", "audit", "error"])
+    ca_cert_identifier                    = optional(string, "rds-ca-rsa2048-g1")
+    snapshot_identifier                   = optional(string, null)
+    create_rds_reader                     = optional(bool, false)
+    apply_immediately                     = optional(bool, false)
+    db_cluster_parameter_group_parameters = optional(list(map(string)), [
+      {
+        name         = "log_bin_trust_function_creators"
+        value        = 1
+        apply_method = "pending-reboot"
+        }, {
+        name         = "binlog_format"
+        value        = "MIXED"
+        apply_method = "pending-reboot"
+        }, {
+        name         = "long_query_time"
+        value        = "10"
+        apply_method = "immediate"
+      }
+    ])
+    db_parameter_group_parameters = optional(list(map(string)), [
+      {
+        name         = "log_bin_trust_function_creators"
+        value        = 1
+        apply_method = "pending-reboot"
+        }, {
+        name         = "long_query_time"
+        value        = "10"
+        apply_method = "immediate"
+      }
+    ])
+  })
+  default = {
+    performance_insights_retention_period = 7
+    preferred_backup_window               = "07:00-09:00"
+    backup_retention_period               = 7
+  }
 }
 
-variable "create_rds_reader" {
-  description = "Enable reader for RDS"
-  type        = bool
-  default     = false
-}
-
-variable "rds_parameter_group_family" {
-  description = "Parameter group Family name. Will be applied to both parameter group and db cluster parameter group"
-  type        = string
-  default     = "aurora-mysql5.7"
-}
-
-variable "rds_enable_performance_insights" {
-  description = "Enable RDS Performance Insights"
-  type        = bool
-  default     = true
-}
-variable "rds_performance_insights_retention_period" {
-  description = "Retention period for performance Insights"
-  type        = number
-  default     = 7
-}
-
-variable "rds_enable_event_notifications" {
-  description = "Enable RDS Event Notifications. Notifications through SNS"
-  type        = bool
-  default     = true
-}
-
-variable "rds_reader_instance_type" {
-  description = "Instance Type for RDS Reader"
-  type        = string
-  default     = "db.t4g.large"
-}
-
-variable "rds_ingress_whitelist" {
-  description = "List Containing SGs or CIDRs to be whitelisted by RDS SG"
-  type        = list(string)
-  default     = []
-}
-
-variable "rds_enable_deletion_protection" {
-  description = "Enable Cluster deletion protection"
-  type        = bool
-  default     = true
-}
-
-variable "rds_enable_auto_minor_version_upgrade" {
-  description = "Enable Auto Minor Version Upgrade"
-  type        = bool
-  default     = false
-}
-
-variable "rds_db_cluster_parameter_group_parameters" {
-  description = "Cluster Parameter Group Parameters"
-  type        = list(map(string))
-  default     = []
-}
-
-variable "rds_preferred_backup_window" {
-  description = "Preffered RDS Backup Window. Time in UTC"
-  type        = string
-  default     = "07:00-09:00"
-}
-
-variable "rds_publicly_accessible" {
-  description = "Determines whether instances are publicly accessible. Default false"
-  type        = bool
-  default     = false
-}
-
-variable "rds_db_parameter_group_parameters" {
-  description = "A list of DB parameters to apply. Note that parameters may differ from a family to an other"
-  type        = list(map(string))
-  default = [
-    {
-      name         = "long_query_time"
-      value        = "10"
-      apply_method = "immediate"
-    }
-  ]
-}
-
-variable "rds_enabled_cloudwatch_logs_exports" {
-  description = "Set of log types to export to cloudwatch. If omitted, no logs will be exported. The following log types are supported: audit, error, general, slowquery, postgresql"
-  type        = list(string)
-  default     = ["slowquery", "audit", "error"]
-}
-
-variable "rds_ca_cert_identifier" {
-  description = "	The identifier of the CA certificate for the DB instance"
-  type        = string
-  default     = "rds-ca-2019"
-}
-
-variable "rds_backup_retention_period" {
-  description = "The days to retain backups for"
-  type        = number
-  default     = 7
+variable "crr_rds_config" {
+  description = "Parameters to configure RDS cluster"
+  type = object({
+    backup_retention_period         = number
+    eks_security_group              = string
+    kms_key_id                      = string
+    subnet_ids                      = list(string)
+    deletion_protection             = optional(bool, true)
+    parameter_group_family          = optional(string, "aurora-mysql8.0")
+    engine_version                  = optional(string, "8.0.mysql_aurora.3.05.2")
+    instance_type                   = optional(string, "db.t4g.large")
+    enabled_cloudwatch_logs_exports = optional(list(string), ["slowquery", "audit", "error"])
+    db_parameter_group_parameters = optional(list(map(string)), [
+      {
+        name         = "log_bin_trust_function_creators"
+        value        = 1
+        apply_method = "pending-reboot"
+        }, {
+        name         = "binlog_format"
+        value        = "MIXED"
+        apply_method = "pending-reboot"
+        }, {
+        name         = "long_query_time"
+        value        = "10"
+        apply_method = "immediate"
+      }
+    ])
+  })
+  default = null
 }
 
 variable "activemq_engine_version" {
   type    = string
-  default = "5.15.16"
-}
-
-variable "activemq_storage_type" {
-  type    = string
-  default = "efs"
+  default = "5.18"
 }
 
 variable "activemq_instance_type" {
   type    = string
-  default = "mq.t2.micro"
+  default = "mq.m5.large"
 }
 
 variable "activemq_apply_immediately" {
@@ -178,6 +184,26 @@ variable "activemq_egress_whitelist_ips" {
   description = "List of IPv4 CIDR blocks to whitelist to ActiveMQ (egress)"
   type        = list(string)
   default     = []
+}
+
+variable "sftp_ingress_whitelist" {
+  description = "List of IPv4 CIDR blocks to whitelist to SFTP HOST (ingress)"
+  type        = list(string)
+  default     = []
+}
+
+variable "sftp_ami_id" {
+  type = string
+}
+
+variable "sftp_disable_api_stop" {
+  type    = bool
+  default = true
+}
+
+variable "sftp_disable_api_termination" {
+  type    = bool
+  default = true
 }
 
 variable "lambda_packages_s3_bucket" {
@@ -227,26 +253,35 @@ variable "directory_service_data_s3_bucket_path" {
   default     = null
 }
 
-variable "baton_application_namespaces" {
+variable "prod_namespace" {
+  description = "Acts a validator for prod deployment to append custom commands to swift service"
+  type        = string
+  default     = "fx-baton-prod"
+}
 
+variable "baton_application_namespaces" {
   description = "List of namespaces and services and there required attributes"
-  type = list(object({
-    namespace       = string
-    customer        = string
-    enable_activemq = optional(bool, false)
-    docker_registry = optional(string, "381491919895.dkr.ecr.us-west-2.amazonaws.com")
-    istio_injection = optional(bool, true)
-    common_env      = optional(map(string), {})
-    services = list(object({
-      name             = string
-      url_prefix       = string
-      target_port      = number
-      security_context = optional(bool, true)
-      port             = optional(number, 8080)
-      health_endpoint  = optional(string, "/health")
-      subdomain_suffix = optional(string, "")
-      env              = optional(map(string), {})
-      image_tag        = optional(string, "latest")
+  type = map(object({
+    customer                 = string
+    enable_activemq          = optional(bool, false)
+    docker_registry          = optional(string, "381491919895.dkr.ecr.us-west-2.amazonaws.com")
+    istio_injection          = optional(bool, true)
+    common_env               = optional(map(string), {})
+    env_config_map           = optional(map(any), {})
+    env_config_map_file_path = optional(map(string), {})
+    services = map(object({
+      url_prefix           = string
+      target_port          = number
+      config_map           = optional(map(any), {})
+      config_map_file_path = optional(map(string), {})
+      replicas             = optional(number, 1)
+      command              = optional(list(string), null)
+      security_context     = optional(bool, true)
+      port                 = optional(number, 8080)
+      health_endpoint      = optional(string, "/health")
+      subdomain_suffix     = optional(string, "")
+      env                  = optional(map(string), {})
+      image_tag            = optional(string, "latest")
       volumeMounts = optional(object({
         volumes = list(any)
         mounts = list(object({
@@ -262,41 +297,36 @@ variable "baton_application_namespaces" {
     }))
   }))
 
-  default = [
-    {
-      namespace       = "fx-baton-uat"
+  default = {
+    "fx-baton-uat" = {
       customer        = "osttra"
       istio_injection = false
-      services = [
-        {
-          name             = "directory-service"
+      services = {
+        "directory-service" = {
           security_context = false
           target_port      = 8080
           url_prefix       = "/directory"
-          image_tag        = "1.0.10"
+          image_tag        = "1.0.15"
         },
-        {
-          name             = "normalizer"
+        "normalizer" = {
           security_context = false
           target_port      = 8080
           url_prefix       = "/normalizer"
-          image_tag        = "2.0.22"
+          image_tag        = "2.0.33"
         },
-        {
-          name        = "notaryservice"
-          target_port = 8080
-          url_prefix  = "/notary"
-          image_tag   = "2.0.7"
+        "notaryservice" = {
+          security_context = false
+          target_port      = 8080
+          url_prefix       = "/notary"
+          image_tag        = "2.0.12"
         },
-        {
-          name             = "swiftservice"
+        "swiftservice" = {
           security_context = false
           target_port      = 8080
           url_prefix       = "/swift"
-          image_tag        = "2.0.12"
+          image_tag        = "2.0.18"
         },
-        {
-          name             = "datagenerator"
+        "datagenerator" = {
           security_context = false
           target_port      = 8080
           port             = 8080
@@ -304,26 +334,24 @@ variable "baton_application_namespaces" {
           url_prefix       = ""
           health_endpoint  = null
         },
-        {
-          name             = "dashboard-trades"
+        "dashboard-trades" = {
           security_context = false
           subdomain_suffix = "-trades"
           target_port      = 80
           port             = 8080
           image_tag        = "2.0.12"
-          url_prefix       = "/"
+          url_prefix       = ""
           health_endpoint  = "/health"
         }
-      ]
+      }
     }
-  ]
+  }
 }
-
 
 variable "rabbitmq_engine_version" {
   description = "Version of the RabbitMQ broker engine"
   type        = string
-  default     = "3.11.20"
+  default     = "3.13"
 }
 
 variable "rabbitmq_enable_cluster_mode" {
@@ -335,13 +363,13 @@ variable "rabbitmq_enable_cluster_mode" {
 variable "rabbitmq_instance_type" {
   description = "Broker's instance type"
   type        = string
-  default     = "mq.t3.micro"
+  default     = "mq.m5.large"
 }
 
 variable "rabbitmq_auto_minor_version_upgrade" {
   description = "Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available. Default is `false`"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "rabbitmq_username" {
@@ -370,13 +398,6 @@ variable "rabbitmq_whitelist_ips" {
   description = "List of IPv4 CIDR blocks to whitelist to RabbitMQ (ingress)"
   type        = list(string)
   default     = []
-
-}
-
-variable "environment" {
-  description = "Name of the fx admin environment to be setup"
-  type        = string
-  default     = "test"
 }
 
 variable "k8s_cluster_name" {
@@ -394,7 +415,7 @@ variable "cloudflare_api_token" {
   type        = string
 }
 
-variable "user_secrets" {
+variable "env_secrets" {
   description = "AWS secret name containing the secrets to be appended"
   type        = string
   default     = ""
@@ -416,9 +437,74 @@ variable "tgw_region_routes" {
   default = {
     "us-east-1"      = [],
     "us-west-2"      = [],
-    "ap-southeast-1" = []
+    "ap-southeast-1" = [],
+    "eu-west-1"      = []
   }
 }
+
+
+variable "opensearch_admin_username" {
+  description = "Admin username for OpenSearch"
+  type        = string
+}
+
+variable "opensearch_admin_password" {
+  description = "Admin password for OpenSearch"
+  type        = string
+  sensitive   = true
+}
+
+variable "opensearch_host_url" {
+  description = "Host URL for OpenSearch cluster (must include https://)"
+  type        = string
+  validation {
+    condition     = can(regex("^https://", var.opensearch_host_url))
+    error_message = "The opensearch_host_url must start with https://"
+  }
+}
+
+variable "opensearch_version" {
+  description = "Version of OpenSearch to Connect to"
+  type        = string
+  default     = "2.11"
+}
+
+variable "opensearch_alert_slack_webhook_url" {
+  description = "Slack webhook URL for OpenSearch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "opensearch_alert_gchat_webhook_url" {
+  description = "Google Chat webhook URL for OpenSearch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "opensearch_alert_gchat_high_priority_webhook_url" {
+  description = "Google Chat high priority webhook URL for OpenSearch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "opensearch_alert_pagerduty_integration_key" {
+  description = "PagerDuty integration key for OpenSearch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "opensearch_alert_ses_email_account_id" {
+  description = "SES email account ID for OpenSearch alerts"
+  type        = string
+  default     = ""
+}
+
+variable "opensearch_alert_ses_email_recipients" {
+  description = "SES email recipients for OpenSearch alerts"
+  type        = list(string)
+  default     = []
+}
+
 
 variable "nlb_ingress_whitelist" {
   type    = list(string)
@@ -432,6 +518,18 @@ variable "rabbitmq_lb_ingress_whitelist" {
 
 variable "acm_certificate_arn" {
   description = "CA signed public certificate arn for Rabbitmq NLB"
+  type        = string
+}
+
+variable "keys_s3_bucket" {
+  description = "Bucket name to store the private SSh keys in"
+  type        = string
+}
+
+variable "triana_sftp_host_endpoint" {
+  description = "IP or URL of the TRIANA SFTP server for SWIFT messages"
+  type        = string
+  default     = null
 }
 
 variable "sftp_host" {
@@ -450,6 +548,16 @@ variable "sftp_password" {
 
 variable "vendor" {
   type = string
+}
+
+variable "dr_central_vpc_subnet_ids" {
+  type    = list(string)
+  default = null
+}
+
+variable "dr_central_vpc_id" {
+  type    = string
+  default = null
 }
 
 variable "vpc_id" {}

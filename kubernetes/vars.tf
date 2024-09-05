@@ -213,11 +213,12 @@ variable "gchat_webhook" {
   type    = string
 }
 
-variable "opensearch_password" {}
-variable "opensearch_username" {}
-variable "opensearch_endpoint" {}
 variable "create_s3_bucket_for_curator" {
   type = bool
 }
+
 variable "delete_indices_from_es" {}
 variable "curator_docker_image_arn" {}
+variable "opensearch_password" {}
+variable "opensearch_username" {}
+variable "opensearch_endpoint" {}

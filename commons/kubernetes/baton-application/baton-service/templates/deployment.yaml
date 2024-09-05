@@ -7,7 +7,7 @@ metadata:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       application: {{ .Release.Name }}
@@ -21,6 +21,8 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
+          command:
+            {{- toYaml .Values.command | nindent 12 }}
           {{- if ( .Values.security_context ) }}
           securityContext:
             allowPrivilegeEscalation: false

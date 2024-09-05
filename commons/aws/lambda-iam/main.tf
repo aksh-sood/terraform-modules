@@ -34,11 +34,11 @@ resource "aws_iam_policy" "lambda_policy" {
   name = "FX-lambda-policy_${var.name}_${var.region}"
 
   policy = templatefile("${path.module}/templates/lambda.json", {
-    region                       = var.region,
-    account_id                   = data.aws_caller_identity.current.account_id
-    s3_bucket_arn                = var.s3_bucket_arn
-    sqs_queue_arn                = var.sqs_queue_arn
-    streams_arn                  = join(",", formatlist("\"%s\"", var.streams_arn))
+    region        = var.region,
+    account_id    = data.aws_caller_identity.current.account_id
+    s3_bucket_arn = var.s3_bucket_arn
+    sqs_queue_arn = var.sqs_queue_arn
+    streams_arn   = join(",", formatlist("\"%s\"", var.streams_arn))
   })
 }
 

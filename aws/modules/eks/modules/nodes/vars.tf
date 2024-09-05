@@ -16,3 +16,4 @@ variable "labels" {}
 variable "tags" {}
 variable "block_device_mappings" {}
 variable "ssh_key" {}
+variable "cluster_version" {}

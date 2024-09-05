@@ -142,22 +142,32 @@ resource "tls_private_key" "ssh_key" {
 
 resource "aws_key_pair" "generated_key" {
 
-  public_key = tls_private_key.ssh_key.public_key_openssh
+  public_key = trimspace(tls_private_key.ssh_key.public_key_openssh)
 
   key_name = "${var.cluster_name}-eks-nodes"
   tags     = var.eks_tags
 
   provisioner "local-exec" {
-    command = "echo '${tls_private_key.ssh_key.private_key_pem}' > $HOME/${var.cluster_name}-eks-nodes.pem"
+    command = "echo '${trimspace(tls_private_key.ssh_key.private_key_pem)}' > ${pathexpand("~/${var.cluster_name}-eks-nodes.pem")}"
   }
+}
+
+#This resources saves the private key to access EKS nodes
+resource "aws_s3_object" "eks_nodes_private_key" {
+  bucket = var.secrets_key_bucket_bucket_name
+  key    = "${var.cluster_name}-eks-nodes.pem"
+  source = pathexpand("~/${var.cluster_name}-eks-nodes.pem")
+
+  depends_on = [aws_key_pair.generated_key]
 }
 
 module "eks_node" {
   source   = "./modules/nodes"
   for_each = { for k, v in local.node_groups_map : k => v }
 
-  primary_security_group_id = module.cluster.primary_security_group_id
   node_role_arn             = module.iam.node_role_arn
+  primary_security_group_id = module.cluster.primary_security_group_id
+  cluster_version           = module.cluster.version
   ssh_key                   = aws_key_pair.generated_key.key_name
 
   cluster_name = var.cluster_name

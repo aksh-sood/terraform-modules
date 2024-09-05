@@ -16,5 +16,5 @@ spec:
       route:
         - destination:
             port:
-              number: {{ .Values.port}}
+              number: 8080
             host: {{ .Release.Name }}

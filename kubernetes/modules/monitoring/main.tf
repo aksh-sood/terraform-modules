@@ -143,8 +143,8 @@ module "grafana_config" {
   grafana_password = random_password.password.result
   vs_dependency    = kubectl_manifest.kube_stack_virtualservices
 
-  configure_grafana = var.configure_grafana
   environment       = var.environment
   domain_name       = var.domain_name
   grafana_role_arn  = var.grafana_role_arn
+  configure_grafana = var.configure_grafana
 }

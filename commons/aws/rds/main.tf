@@ -42,33 +42,39 @@ module "rds_cluster" {
   source = "../../../external/rds"
 
   # General Configuration
-  name                                  = var.name
-  engine                                = "aurora-mysql"
-  engine_version                        = var.mysql_version
-  instance_class                        = var.rds_instance_type
-  master_username                       = var.master_username
-  manage_master_user_password           = false
-  master_password                       = random_password.password.result
-  deletion_protection                   = var.enable_deletion_protection
-  kms_key_id                            = var.kms_key_id
-  auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
-  preferred_backup_window               = var.preferred_backup_window
-  backup_retention_period               = var.backup_retention_period
-  performance_insights_enabled          = var.enable_performance_insights
-  performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
-  publicly_accessible                   = var.publicly_accessible
-  storage_encrypted                     = true
-  ca_cert_identifier                    = var.ca_cert_identifier
-  create_db_subnet_group                = true
-  db_subnet_group_name                  = "${var.name}-db-subnet-group"
-  subnets                               = var.subnets
+  name                                        = var.name
+  engine                                      = "aurora-mysql"
+  engine_version                              = var.mysql_version
+  instance_class                              = var.rds_instance_type
+  master_username                             = var.master_username
+  manage_master_user_password                 = false
+  master_password                             = random_password.password.result
+  deletion_protection                         = var.enable_deletion_protection
+  kms_key_id                                  = var.kms_key_id
+  auto_minor_version_upgrade                  = var.enable_auto_minor_version_upgrade
+  preferred_backup_window                     = var.preferred_backup_window
+  backup_retention_period                     = var.backup_retention_period
+  performance_insights_enabled                = var.enable_performance_insights
+  performance_insights_retention_period       = var.enable_performance_insights ? var.performance_insights_retention_period : null
+  publicly_accessible                         = var.publicly_accessible
+  snapshot_identifier                         = var.snapshot_identifier
+  storage_encrypted                           = true
+  ca_cert_identifier                          = var.ca_cert_identifier
+  create_db_subnet_group                      = true
+  db_subnet_group_name                        = "${var.name}-db-subnet-group"
+  subnets                                     = var.subnets
+  allow_major_version_upgrade                 = true
+  db_cluster_db_instance_parameter_group_name = "${var.name}-rds-db-parameter-group"
+  apply_immediately                           = var.apply_immediately
 
-  create_cloudwatch_log_group     = true
-  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
-  create_db_parameter_group       = true
-  db_parameter_group_family       = var.parameter_group_family
-  db_parameter_group_description  = "${var.name}-RDS Cluster Parameter Group"
-  db_parameter_group_parameters   = var.db_parameter_group_parameters
+  db_parameter_group_name            = "${var.name}-rds-db-parameter-group"
+  db_parameter_group_use_name_prefix = false
+  db_parameter_group_family          = var.parameter_group_family
+  db_parameter_group_description     = "${var.name}-RDS Cluster Parameter Group"
+  db_parameter_group_parameters      = var.db_parameter_group_parameters
+  create_cloudwatch_log_group        = true
+  enabled_cloudwatch_logs_exports    = var.enabled_cloudwatch_logs_exports
+  create_db_parameter_group          = true
 
 
   # Add a custom DB cluster parameter group
@@ -95,7 +101,7 @@ module "rds_cluster" {
   security_group_rules           = local.security_group_rules
 
   # Tags
-  tags = merge(var.cost_tags, {
+  tags = merge(var.tags, {
     Name = "${var.name}-RDS"
   })
 
@@ -107,7 +113,7 @@ module "rds_cluster" {
 # Event Notification for RDS
 resource "aws_sns_topic" "rds" {
   name              = "rds-cluster-events"
-  kms_master_key_id = var.sns_kms_key_arn
+  kms_master_key_id = var.resources_key_arn
 }
 
 locals {
@@ -179,7 +185,7 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
 
-  tags = merge(var.cost_tags, {
+  tags = merge(var.tags, {
     Name      = "${var.name}-RDS"
     Terraform = "true"
   })

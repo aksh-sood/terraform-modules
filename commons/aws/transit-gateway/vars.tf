@@ -42,6 +42,17 @@ variable "region_routes" {
   default = {
     "us-east-1"      = [],
     "us-west-2"      = [],
-    "ap-southeast-1" = []
+    "ap-southeast-1" = [],
+    "eu-west-1"      = []
   }
+}
+
+variable "dr_central_vpc_id" {
+  type        = string
+  description = "ID of the DR central VPC"
+}
+
+variable "dr_central_vpc_subnet_ids" {
+  type        = list(string)
+  description = "List of subnet CIDRs in the DR central VPC"
 }

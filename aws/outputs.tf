@@ -74,3 +74,7 @@ output "eks_node_role_arn" {
 output "eks_cluster_role_arn" {
   value = var.create_eks ? module.eks[0].cluster_role_arn : null
 }
+
+output "keys_s3_bucket" {
+  value = var.create_eks ? module.secrets_bucket[0].id : null
+}

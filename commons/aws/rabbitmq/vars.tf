@@ -1,11 +1,3 @@
-variable "name" {}
-variable "vpc_id" {}
-variable "subnet_ids" {}
-variable "tags" {}
-variable "eks_security_group" {}
-variable "whitelist_security_groups" {}
-variable "rabbitmq_whitelist_ips" {}
-
 variable "storage_type" {
   description = "For `engine_type` RabbitMQ, only ebs is supported"
   type        = string
@@ -53,3 +45,15 @@ variable "apply_immediately" {
   type        = bool
   default     = false
 }
+
+variable "subnet_ids" {
+  type = list(string)
+}
+
+variable "name" {}
+variable "vpc_id" {}
+variable "tags" {}
+variable "eks_security_group" {}
+variable "whitelist_security_groups" {}
+variable "rabbitmq_whitelist_ips" {}
+variable "deployment_mode" {}

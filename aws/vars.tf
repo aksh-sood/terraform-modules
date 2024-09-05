@@ -88,7 +88,7 @@ variable "siem_storage_s3_bucket" {
 variable "create_certificate" {
   description = "Whether to create an AWS ACM certificate or not.If true variables starting with acm area required"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "acm_certificate_arn" {
@@ -134,7 +134,7 @@ variable "enable_cluster_autoscaler" {
 variable "cluster_version" {
   description = "eks cluster verison"
   type        = string
-  default     = "1.28"
+  default     = "1.30"
 }
 
 variable "eks_ingress_whitelist_ips" {
@@ -369,3 +369,5 @@ variable "opensearch_engine_version" {
   default     = "OpenSearch_2.11"
   type        = string
 }
+
+variable "vendor" {}

@@ -12,3 +12,8 @@ variable "image_tag" {
   description = "Version of the config-server to deploy"
   type        = number
 }
+
+variable "region" {
+  description = "AWS region where secrets are located"
+  type        = string
+}

@@ -28,7 +28,7 @@ module "config_server_deployment" {
   istio_injection = local.config_server.istio_injection
   customer        = local.config_server.customer
   common_env      = local.config_server.common_env
-  services        = [local.config_server.service]
+  services        = local.config_server.service
 
   providers = {
     kubectl.this = kubectl.this

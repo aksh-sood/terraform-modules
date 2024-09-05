@@ -24,7 +24,7 @@ resource "aws_lambda_function" "this" {
 }
 
 resource "aws_iam_role" "lambda_execution_role" {
-  name = "LambdaExecutionRole"
+  name = "LambdaExecutionRole-${var.region}-${var.environment}"
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -40,7 +40,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 }
 
 resource "aws_iam_policy" "lambda_execution_policy" {
-  name        = "LambdaExecutionPolicy"
+  name        = "LambdaExecutionPolicy-${var.region}-${var.environment}"
   description = "Allows Lambda to send logs to CloudWatch and access S3 bucket"
   policy = jsonencode({
     "Version" : "2012-10-17",

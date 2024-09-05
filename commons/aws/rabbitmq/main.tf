@@ -90,11 +90,11 @@ resource "aws_mq_broker" "rabbitmq" {
   engine_version             = var.engine_version
   storage_type               = var.storage_type
   host_instance_type         = var.instance_type
-  deployment_mode            = var.enable_cluster_mode ? "CLUSTER_MULTI_AZ" : "SINGLE_INSTANCE"
+  deployment_mode            = var.deployment_mode
   apply_immediately          = var.apply_immediately
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
   publicly_accessible        = var.publicly_accessible
-  subnet_ids                 = var.enable_cluster_mode ? var.subnet_ids : [var.subnet_ids[0]]
+  subnet_ids                 = var.subnet_ids
   security_groups            = [aws_security_group.rabbitmq.id]
 
   user {
@@ -108,4 +108,9 @@ resource "aws_mq_broker" "rabbitmq" {
   }
 
   tags = var.tags
+
+  lifecycle {
+    ignore_changes = [engine_version]
+  }
+
 }

@@ -69,3 +69,4 @@ variable "additional_eks_addons" {}
 variable "enable_cluster_autoscaler" {}
 variable "vpn_security_group" {}
 variable "enable_client_vpn" {}
+variable "secrets_key_bucket_bucket_name" {}

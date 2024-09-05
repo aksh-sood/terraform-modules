@@ -111,8 +111,6 @@ variable "ingress_whitelist" {
   type        = list(string)
 }
 
-variable "cost_tags" {}
-
 variable "eks_sg" {
   type    = string
   default = null
@@ -123,6 +121,20 @@ variable "whitelist_eks" {
   default = false
 }
 
-variable "sns_kms_key_arn" {
-  description = "KMS ARN for SSE Encryption on SNS"
+variable "resources_key_arn" {
+  description = "KMS CMK Arn for SSE Encryption"
+  type        = string
 }
+
+variable "snapshot_identifier" {
+  description = "Identifier for snapshot to restore"
+  type        = string
+  default     = null
+}
+
+variable "apply_immediately" {
+  type    = bool
+  default = false
+}
+
+variable "tags" {}

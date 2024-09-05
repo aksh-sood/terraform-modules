@@ -83,7 +83,9 @@ module "gchat_lambda" {
   source = "../commons/aws/gchat-lambda"
   count  = var.gchat_webhook != null ? 1 : 0
 
-  name                      = "${var.environment}-gchat-lambda"
+  name                      = var.environment
+  environment               = var.environment
+  region                    = var.region
   gchat_webhook_url         = var.gchat_webhook
   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
   package_key               = "gchat-lambda.zip"
@@ -154,9 +156,10 @@ module "config_server" {
   source = "./modules/config-server"
   count  = var.enable_config_server ? 1 : 0
 
-  secret_name     = var.bitbucket_key_secrets_manager_name
+  region          = var.region
   config_repo_url = var.config_repo_url
   image_tag       = var.config_server_image_tag
+  secret_name     = var.bitbucket_key_secrets_manager_name
 
   providers = {
     kubectl.this = kubectl.this

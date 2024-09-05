@@ -2,10 +2,13 @@ variable "env" {}
 variable "name" {}
 variable "port" {}
 variable "mounts" {}
+variable "command" {}
 variable "volumes" {}
 variable "customer" {}
-variable "namespace" {}
+variable "replicas" {}
 variable "image_tag" {}
+variable "namespace" {}
+variable "config_map" {}
 variable "url_prefix" {}
 variable "target_port" {}
 variable "domain_name" {}
@@ -13,3 +16,4 @@ variable "docker_registry" {}
 variable "health_endpoint" {}
 variable "subdomain_suffix" {}
 variable "security_context" {}
+variable "config_map_file_path" {}

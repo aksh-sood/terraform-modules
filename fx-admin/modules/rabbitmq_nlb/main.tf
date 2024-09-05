@@ -13,7 +13,7 @@ resource "aws_security_group_rule" "whitelisting_custom_ips_to_5671" {
   from_port         = "5671"
   type              = "ingress"
   protocol          = "tcp"
-  cidr_blocks       = [var.whitelist_ips, data.aws_vpc.this.cidr_block]
+  cidr_blocks       = var.whitelist_ips
   security_group_id = aws_security_group.nlb.id
 }
 

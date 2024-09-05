@@ -1,5 +1,10 @@
 data "aws_caller_identity" "current" {}
 
+data "aws_secretsmanager_secret_version" "env_secrets" {
+  count     = var.env_secrets != "" && var.env_secrets != null ? 1 : 0
+  secret_id = var.env_secrets
+}
+
 resource "null_resource" "domain_validation" {
   lifecycle {
     precondition {
@@ -32,6 +37,70 @@ resource "null_resource" "directory_service_data_import_validation" {
   }
 }
 
+resource "null_resource" "rds_validation" {
+  lifecycle {
+    precondition {
+      condition = var.is_dr ? (
+        !var.create_rds
+      ) : true
+      error_message = "is_dr and create_rds cannot be true at the same time"
+    }
+  }
+}
+
+resource "null_resource" "rds_data_source_validation" {
+  lifecycle {
+    precondition {
+      condition = var.import_directory_service_db ? (
+        var.rds_config.snapshot_identifier == null || var.rds_config.snapshot_identifier == ""
+
+      ) : true
+      error_message = "import_directory_service_db cannot be true if rds_config.snapshot_identifier is provided"
+    }
+  }
+}
+
+resource "null_resource" "rds_dr_validation" {
+  lifecycle {
+    precondition {
+      condition = var.setup_dr ? (
+        var.crr_rds_config != {} && var.dr_region != "" &&
+        var.crr_rds_config != null && var.dr_region != null
+      ) : true
+      error_message = "Provide correct value for crr_rds_config, dr_region"
+    }
+  }
+}
+
+resource "null_resource" "s3_dr_validation" {
+  lifecycle {
+    precondition {
+      condition = var.setup_dr ? (
+        var.dr_kms_key_arn != "" && var.dr_kms_key_arn != null
+      ) : true
+      error_message = "Provide correct value for dr_kms_key_arn"
+    }
+  }
+}
+
+module "sftp_host" {
+  source = "../commons/aws/sftp-host"
+  count  = var.is_prod ? 1 : 0
+
+  vpc_id                  = var.vpc_id
+  region                  = var.region
+  subnet_id               = var.public_subnet_ids[0]
+  keys_s3_bucket          = var.keys_s3_bucket
+  eks_security_group      = var.eks_security_group
+  ingress_whitelist       = var.sftp_ingress_whitelist
+  ami_id                  = var.sftp_ami_id
+  kms_key_id              = var.kms_key_arn
+  disable_api_stop        = var.sftp_disable_api_stop
+  disable_api_termination = var.sftp_disable_api_termination
+
+  tags = var.cost_tags
+}
+
 module "external_alb_cloudflare" {
   source = "../commons/utilities/cloudflare"
   count  = var.create_dns_records ? 1 : 0
@@ -48,7 +117,7 @@ module "external_alb_cloudflare" {
 }
 
 module "kms_sse" {
-  source = "../../../external/kms"
+  source = "../external/kms"
 
   key_administrators = [
     data.aws_caller_identity.current.arn
@@ -57,7 +126,7 @@ module "kms_sse" {
   key_users                         = local.resources_key_user_arns
   key_service_users                 = local.resources_key_user_arns
   key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
-  aliases                           = ["resource-${var.environment}"]
+  aliases                           = ["resource-${var.environment}-${var.region}"]
 
   tags = var.cost_tags
 }
@@ -67,7 +136,7 @@ module "rabbitmq" {
 
   name                       = var.environment
   vpc_id                     = var.vpc_id
-  subnet_ids                 = var.private_subnet_ids
+  subnet_ids                 = var.is_prod ? var.private_subnet_ids : [var.private_subnet_ids[0]]
   whitelist_security_groups  = [var.eks_security_group]
   engine_version             = var.rabbitmq_engine_version
   enable_cluster_mode        = var.rabbitmq_enable_cluster_mode
@@ -77,6 +146,7 @@ module "rabbitmq" {
   username                   = var.rabbitmq_username
   auto_minor_version_upgrade = var.rabbitmq_auto_minor_version_upgrade
   apply_immediately          = var.rabbitmq_apply_immediately
+  deployment_mode            = var.is_prod ? "CLUSTER_MULTI_AZ" : "SINGLE_INSTANCE"
 
   tags = var.cost_tags
 }
@@ -125,29 +195,65 @@ module "nlb_cloudflare" {
 module "s3_swift" {
   source = "../commons/aws/s3"
 
-  name        = "${var.vendor}-${var.environment}-swift-messages"
-  kms_key_arn = module.kms_sse.arn
+  name        = !var.is_dr ? "${var.vendor}-${var.environment}-swift-messages" : "${var.vendor}-${var.environment}-swift-messages-dr"
+  kms_key_arn = module.kms_sse.key_arn
 
   tags = var.cost_tags
+}
+
+module "swift_s3_crr" {
+  source = "../commons/aws/s3-crr"
+
+  count = var.setup_dr && !var.is_dr ? 1 : 0
+
+  name                  = "${var.environment}-swift"
+  primary_bucket_name   = module.s3_swift.id
+  primary_kms_key       = module.kms_sse.key_arn
+  secondary_bucket_name = "${var.vendor}-${var.environment}-swift-messages-dr"
+  secondary_kms_key     = var.dr_kms_key_arn
+
+  providers = {
+    aws.dr = aws.dr
+  }
+
+  depends_on = [null_resource.s3_dr_validation]
 }
 
 module "s3" {
   source = "../commons/aws/s3"
 
-  name        = "${var.vendor}-${var.environment}"
-  kms_key_arn = module.kms_sse.arn
+  name        = !var.is_dr ? "${var.vendor}-${var.environment}" : "${var.vendor}-${var.environment}-dr"
+  kms_key_arn = module.kms_sse.key_arn
 
   tags = var.cost_tags
+}
+
+module "s3_crr" {
+  source = "../commons/aws/s3-crr"
+
+  count = var.setup_dr && !var.is_dr ? 1 : 0
+
+  name                  = var.environment
+  primary_bucket_name   = module.s3.id
+  primary_kms_key       = module.kms_sse.key_arn
+  secondary_bucket_name = "${var.vendor}-${var.environment}-dr"
+  secondary_kms_key     = var.dr_kms_key_arn
+
+  providers = {
+    aws.dr = aws.dr
+  }
+
+  depends_on = [null_resource.s3_dr_validation]
 }
 
 module "kinesis_firehose" {
   source = "./modules/kinesis-firehose"
 
   bucket_arn  = module.s3.bucket_arn
-  kms_key_arn = module.kms_sse.arn
-
-  name   = var.environment
-  region = var.region
+  kms_key_arn = module.kms_sse.key_arn
+  
+  name        = var.environment
+  region      = var.region
 
   tags = var.cost_tags
 }
@@ -156,7 +262,7 @@ module "normalized_trml_kinesis_stream" {
   source = "../commons/aws/stream"
 
   name        = "${var.environment}-normalized-trml"
-  kms_key_arn = module.kms_sse.arn
+  kms_key_arn = module.kms_sse.key_arn
 
   tags = var.cost_tags
 }
@@ -165,7 +271,7 @@ module "matched_trades_kinesis_stream" {
   source = "../commons/aws/stream"
 
   name        = "${var.environment}-matched-trades"
-  kms_key_arn = module.kms_sse.arn
+  kms_key_arn = module.kms_sse.key_arn
 
   tags = var.cost_tags
 }
@@ -226,22 +332,21 @@ module "s3_writer_lambda" {
 module "activemq" {
   source = "../commons/aws/activemq"
 
-  name                       = "${var.environment}-activemq"
+  name                       = var.environment
   region                     = var.region
   vpc_id                     = var.vpc_id
-  subnet_ids                 = var.private_subnet_ids
+  subnet_ids                 = var.is_prod ? [var.private_subnet_ids[0], var.private_subnet_ids[1]] : [var.private_subnet_ids[0]]
   engine_version             = var.activemq_engine_version
   instance_type              = var.activemq_instance_type
   publicly_accessible        = var.activemq_publicly_accessible
   apply_immediately          = var.activemq_apply_immediately
-  storage_type               = var.activemq_storage_type
   username                   = var.activemq_username
   auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
   whitelist_security_groups  = var.eks_security_group
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
-
-  tags = var.cost_tags
+  deployment_mode            = var.is_prod ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
+  tags                       = var.cost_tags
 }
 
 module "normalized_trml_lambda" {
@@ -290,54 +395,82 @@ module "matched_trades_lambda" {
 
 module "rds_cluster" {
   source = "../commons/aws/rds"
-
-  sns_kms_key_arn = module.kms_sse.arn
+  count = (!var.is_dr && var.create_rds) ? 1 : 0
 
   whitelist_eks                         = true
   kms_key_id                            = var.kms_key_arn
   subnets                               = var.private_subnet_ids
   vpc_id                                = var.vpc_id
   name                                  = var.environment
-  mysql_version                         = var.rds_mysql_version
-  rds_instance_type                     = var.rds_instance_type
-  master_username                       = var.rds_master_username
-  create_rds_reader                     = var.create_rds_reader
-  ingress_whitelist                     = var.rds_ingress_whitelist
-  enable_performance_insights           = var.rds_enable_performance_insights
-  performance_insights_retention_period = var.rds_performance_insights_retention_period
-  enable_rds_event_notifications        = var.rds_enable_event_notifications
-  enable_deletion_protection            = var.rds_enable_deletion_protection
-  enable_auto_minor_version_upgrade     = var.rds_enable_auto_minor_version_upgrade
-  preferred_backup_window               = var.rds_preferred_backup_window
-  backup_retention_period               = var.rds_backup_retention_period
-  publicly_accessible                   = var.rds_publicly_accessible
-  ca_cert_identifier                    = var.rds_ca_cert_identifier
-  enabled_cloudwatch_logs_exports       = var.rds_enabled_cloudwatch_logs_exports
-  reader_instance_type                  = var.rds_reader_instance_type
-  parameter_group_family                = var.rds_parameter_group_family
-  db_cluster_parameter_group_parameters = var.rds_db_cluster_parameter_group_parameters
-  db_parameter_group_parameters         = var.rds_db_parameter_group_parameters
+  mysql_version                         = var.rds_config.mysql_version
+  rds_instance_type                     = var.rds_config.instance_type
+  master_username                       = var.rds_config.master_username
+  create_rds_reader                     = var.rds_config.create_rds_reader
+  ingress_whitelist                     = var.rds_config.ingress_whitelist
+  enable_performance_insights           = var.rds_config.enable_performance_insights
+  performance_insights_retention_period = var.rds_config.performance_insights_retention_period
+  enable_rds_event_notifications        = var.rds_config.enable_event_notifications
+  enable_deletion_protection            = var.rds_config.enable_deletion_protection
+  enable_auto_minor_version_upgrade     = var.rds_config.enable_auto_minor_version_upgrade
+  preferred_backup_window               = var.rds_config.preferred_backup_window
+  backup_retention_period               = var.rds_config.backup_retention_period
+  publicly_accessible                   = var.rds_config.publicly_accessible
+  ca_cert_identifier                    = var.rds_config.ca_cert_identifier
+  enabled_cloudwatch_logs_exports       = var.rds_config.enabled_cloudwatch_logs_exports
+  reader_instance_type                  = var.rds_config.reader_instance_type
+  parameter_group_family                = var.rds_config.parameter_group_family
+  db_parameter_group_parameters         = var.rds_config.db_parameter_group_parameters
+  db_cluster_parameter_group_parameters = var.rds_config.db_cluster_parameter_group_parameters
+  snapshot_identifier                   = var.rds_config.snapshot_identifier
+  apply_immediately                     = var.rds_config.apply_immediately
   eks_sg                                = var.eks_security_group
-  cost_tags                             = var.cost_tags
+  resources_key_arn                     = module.kms_sse.key_arn
+
+  tags = var.cost_tags
+
+  depends_on = [null_resource.rds_validation, null_resource.rds_data_source_validation]
 }
 
 
-data "aws_secretsmanager_secret_version" "user_secrets" {
-  count     = length(var.user_secrets) > 0 ? 1 : 0
-  secret_id = var.user_secrets
+module "rds_crr" {
+  source = "../commons/aws/rds-crr"
+  count = var.setup_dr && (!var.is_dr && var.create_rds) ? 1 : 0
+
+  name                            = "${var.environment}-dr"
+  region                          = var.region
+  primary_rds_cluster_arn         = module.rds_cluster[0].cluster_arn
+  vpc_id                          = var.dr_central_vpc_id
+  dr_eks_security_group           = var.crr_rds_config.eks_security_group
+  subnet_ids                      = var.crr_rds_config.subnet_ids
+  kms_key_id                      = var.crr_rds_config.kms_key_id
+  deletion_protection             = var.crr_rds_config.deletion_protection
+  db_parameter_group_parameters   = var.crr_rds_config.db_parameter_group_parameters
+  engine_version                  = var.crr_rds_config.engine_version
+  backup_retention_period         = var.crr_rds_config.backup_retention_period
+  instance_class                  = var.crr_rds_config.instance_type
+  parameter_group_family          = var.crr_rds_config.parameter_group_family
+  enabled_cloudwatch_logs_exports = var.crr_rds_config.enabled_cloudwatch_logs_exports
+  tags                            = merge(var.cost_tags, var.dr_tags)
+
+  providers = {
+    aws.dr = aws.dr
+  }
+
+  depends_on = [null_resource.rds_dr_validation, module.rds_cluster]
+
 }
 
 module "secrets" {
   source = "../commons/aws/secrets"
 
   name        = var.environment
-  kms_key_arn = module.kms_sse.arn
+  kms_key_arn = module.kms_sse.key_arn
 
   secrets = merge({
-    database_writer_url   = module.rds_cluster.writer_endpoint,
-    database_readonly_url = module.rds_cluster.reader_endpoint,
-    database_username     = module.rds_cluster.master_username,
-    database_password     = module.rds_cluster.master_password,
+    database_writer_url   = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].writer_endpoint : "",
+    database_readonly_url = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].reader_endpoint : "",
+    database_username     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_username : "",
+    database_password     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_password : "",
     activemq_url_1        = module.activemq.url,
     activemq_url_2        = module.activemq.url,
     activemq_username     = module.activemq.username,
@@ -354,7 +487,7 @@ module "secrets" {
     sftp_user_baton       = var.sftp_username
     sftp_password_baton   = var.sftp_password
     domain_name           = var.domain_name
-  }, local.user_secrets, var.additional_secrets)
+  }, local.env_secrets, var.additional_secrets)
 }
 
 resource "kubernetes_namespace_v1" "utility" {
@@ -368,14 +501,13 @@ module "directory_service_data_import" {
   count  = var.import_directory_service_db ? 1 : 0
 
   namespace      = kubernetes_namespace_v1.utility.metadata[0].name
-  rds_writer_url = module.rds_cluster.writer_endpoint
-  rds_username   = module.rds_cluster.master_username
-  rds_password   = module.rds_cluster.master_password
-
-  database_name = "${replace(var.environment, "-", "_")}_directory_service"
-  bucket_region = var.directory_service_data_s3_bucket_region
-  bucket_name   = var.directory_service_data_s3_bucket_name
-  bucket_path   = var.directory_service_data_s3_bucket_path
+  database_name  = "${replace(var.environment, "-", "_")}_directory_service"
+  rds_writer_url = module.rds_cluster[0].writer_endpoint
+  rds_username   = module.rds_cluster[0].master_username
+  rds_password   = module.rds_cluster[0].master_password
+  bucket_region  = var.directory_service_data_s3_bucket_region
+  bucket_name    = var.directory_service_data_s3_bucket_name
+  bucket_path    = var.directory_service_data_s3_bucket_path
 
   providers = {
     kubectl.this = kubectl.this
@@ -399,16 +531,18 @@ module "rabbitmq_config" {
 
 module "baton_application_namespace" {
   source   = "../commons/kubernetes/baton-namespace"
-  for_each = { for ns in local.baton_application_namespaces : ns.namespace => ns }
+  for_each = { for k, v in local.baton_application_namespaces : k => v }
 
-  domain_name     = var.domain_name
-  namespace       = each.value.namespace
-  customer        = each.value.customer
-  docker_registry = each.value.docker_registry
-  istio_injection = each.value.istio_injection
-  services        = each.value.services
-  enable_activemq = each.value.enable_activemq
-
+  is_dr                    = var.is_dr
+  domain_name              = var.domain_name
+  namespace                = each.key
+  customer                 = each.value.customer
+  env_config_map           = each.value.env_config_map
+  env_config_map_file_path = each.value.env_config_map_file_path
+  docker_registry          = each.value.docker_registry
+  istio_injection          = each.value.istio_injection
+  services                 = each.value.services
+  enable_activemq          = each.value.enable_activemq
   providers = {
     kubectl.this = kubectl.this
   }
@@ -416,13 +550,39 @@ module "baton_application_namespace" {
   depends_on = [module.secrets, module.rabbitmq_config, module.directory_service_data_import]
 }
 
+module "opensearch_monitors" {
+  source                          = "./modules/opensearch-alerting"
+
+  slack_webhook_url               = var.opensearch_alert_slack_webhook_url
+  gchat_webhook_url               = var.opensearch_alert_gchat_webhook_url
+  gchat_high_priority_webhook_url = var.opensearch_alert_gchat_high_priority_webhook_url
+  pagerduty_integration_key       = var.opensearch_alert_pagerduty_integration_key
+  ses_email_account_id            = var.opensearch_alert_ses_email_account_id
+  ses_email_recipients            = var.opensearch_alert_ses_email_recipients
+
+  providers = {
+    opensearch.this = opensearch.this
+  }
+}
+
 module "transit_gateway" {
   source = "../commons/aws/transit-gateway"
+  count  = !var.is_dr ? 1 : 0
 
-  central_vpc_id         = var.vpc_id
-  central_vpc_subnet_ids = var.private_subnet_ids
-  shared_accounts        = var.tgw_shared_accounts
-  cost_tags              = var.cost_tags
-  region_routes          = var.tgw_region_routes
+  central_vpc_id            = var.vpc_id
+  central_vpc_subnet_ids    = var.private_subnet_ids
+  shared_accounts           = var.tgw_shared_accounts
+  cost_tags                 = var.cost_tags
+  region_routes             = var.tgw_region_routes
+  dr_central_vpc_id         = var.dr_central_vpc_id
+  dr_central_vpc_subnet_ids = var.dr_central_vpc_subnet_ids
+
+  providers = {
+    aws.us-east-1      = aws.us-east-1
+    aws.us-west-2      = aws.us-west-2
+    aws.ap-southeast-1 = aws.ap-southeast-1
+    aws.eu-west-1      = aws.eu-west-1
+
+  }
 }
 

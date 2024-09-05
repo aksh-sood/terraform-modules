@@ -3,3 +3,5 @@ variable "package_key" {}
 variable "name" {}
 variable "tags" {}
 variable "gchat_webhook_url" {}
+variable "environment" {}
+variable "region" {}

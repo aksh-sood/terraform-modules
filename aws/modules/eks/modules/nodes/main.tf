@@ -1,8 +1,14 @@
+data "aws_ssm_parameter" "eks_ami_release_version" {
+  name = "/aws/service/eks/optimized-ami/${var.cluster_version}/amazon-linux-2/recommended/release_version"
+}
+
 resource "aws_eks_node_group" "managed_nodes" {
 
-  cluster_name  = var.cluster_name
-  node_role_arn = var.node_role_arn
-  subnet_ids    = var.subnet_ids
+  cluster_name    = var.cluster_name
+  node_role_arn   = var.node_role_arn
+  subnet_ids      = var.subnet_ids
+  version         = var.cluster_version
+  release_version = nonsensitive(data.aws_ssm_parameter.eks_ami_release_version.value)
 
   scaling_config {
     min_size     = var.min_size

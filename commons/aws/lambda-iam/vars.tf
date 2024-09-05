@@ -10,7 +10,7 @@ variable "lambda_role_policies" {
 
 variable "streams_arn" {
   description = "List of stream ARNs for lambda to access"
-  type = list(string)
+  type        = list(string)
 }
 
 variable "name" {}

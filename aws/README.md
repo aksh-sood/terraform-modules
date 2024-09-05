@@ -46,7 +46,7 @@ The certificate module creates a domain certificate in the AWS Certificate Manag
 
 ##### [KMS](./aws/modules/kms/)
 
-The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as `generic-cmk-{environment}` .
+The KMS module creates a KMS key are that is used for default EBS encryption and node EBS volume encryption with alias as `generic-cmk-{environment}-{region}` .
 
 ##### [VPN-ENDPOINT](./aws/modules/vpn-endpoint/)
 

@@ -123,36 +123,22 @@ terraform apply
 | Name                                      | Description                                                                                                | Type                               | Default                                                                      |
 |:------------------------------------------|:-----------------------------------------------------------------------------------------------------------|:-----------------------------------|:-----------------------------------------------------------------------------|
 | region                                    | AWS region to configure provider and provision the resources                                               | string                             | `"us-east-1"`                                                                |
+|dr_region | AWS region for DR setup | string| `us-west-2` |
+|setup_dr| Whether to setup DR replcation for not(works only if run on the primary infra side) | bool| `false`|  
+|is_dr| Whether the currently being infrastrcture is for DR purpose or not | bool | `false` |
+| dr_kms_key_arn | KMS key ARN for the FX ADMIN resources in the DR region(required if `setup_dr` is true)(Has the following alias `resource-{environment}-{region}`)| string | `null` |
+| create_rds | Wheather to create RDS cluster or not (conflicts with `is_dr`)| bool | `true`|
 | k8s_cluster_name | EKS cluster name in which the applicaitons should run | string|`"test"`|
 | environment                               | Environment for which the resources are being provisioned                                                  | string                             | `"test"`                                                                     |
 | cost_tags                                 | Tags associated with specifc customer and environment                                                      | map(string)                        | `{ env-type = "test" customer = "internal" cost-center = "overhead"}`        |
+| dr_tags                                 | Tags associated for RDS CRR resources   | map(string)                        | `{}`        |
 | vendor\*                                  | Name of the vendor hosting applications                                                                    | string                             |                                                                              |
-| rds_mysql_version                         | MySQL version for RDS Aurora                                                                               | string                             | `-`                                                                          |
-| rds_instance_type                         | RDS Instance Type                                                                                          | string                             | `-`                                                                          |
-| rds_master_password                       | Master Password for RDS                                                                                    | string                             | `-`                                                                          |
-| rds_master_username                       | Master Username for RDS                                                                                    | string                             | `master`                                                                     |
-| rds_reader_needed                         | Enable reader for RDS                                                                                      | bool                               | `false`                                                                      |
-| rds_parameter_group_family                | Parameter group Family name                                                                                | string                             | `-`                                                                          |
-| rds_enable_performance_insights           | Enable performance insights for RDS                                                                        | bool                               | `-`                                                                          |
-| rds_performance_insights_retention_period | Performance Insights retention period                                                                      | number                             | `7`                                                                          |
-| rds_enable_event_notifications            | Enable event notifications for RDS                                                                         | bool                               | `true`                                                                       |
-| rds_reader_instance_type                  | Reader instance type for RDS                                                                               | string                             | `-`                                                                          |
-| rds_ingress_whitelist                     | Ingress whitelist for RDS                                                                                  | list                               | `-`                                                                          |
-| rds_enable_deletion_protection            | Enable deletion protection for RDS                                                                         | bool                               | `true`                                                                       |
-| rds_enable_auto_minor_version_upgrade     | Enable auto minor version upgrade for RDS                                                                  | bool                               | `false`                                                                      |
-| rds_db_cluster_parameter_group_parameters | DB cluster parameter group parameters                                                                      | list                               | `[]`                                                                         |
-| rds_preferred_backup_window               | Preferred backup window for RDS                                                                            | string                             | `"07:00-09:00"`                                                              |
-| rds_publicly_accessible                   | Make RDS publicly accessible                                                                               | bool                               | `false`                                                                      |
-| rds_db_parameter_group_parameters         | DB parameter group parameters                                                                              | list(map)                          | `[{"name": "long_query_time", "value": "10", "apply_method": "immediate"}]`  |
-| rds_enabled_cloudwatch_logs_exports       | Enabled CloudWatch Logs Exports for RDS                                                                    | list(string)                       | `["slowquery", "audit", "error"]`                                            |
-| rds_ca_cert_identifier                    | CA certificate identifier for RDS                                                                          | string                             | `-`                                                                          |
-| rds_backup_retention_period               | Backup retention period for RDS in days                                                                    | number                             | `7`                                                                          |
 | directory_service_data_s3_bucket_name| Name of the S3 bucket to mount to EKS| string | `null`|
 | directory_service_data_s3_bucket_path| File path for the sql dump file to import |string|`null`|
 | directory_service_data_s3_bucket_region|region of the S3 bucket|string|`"us-east-1"`|
 | activemq_ingress_whitelist_ips | CIDR to whitelist to activeMQ security group on ingress | list(string) | `[]` |
 | activemq_egress_whitelist_ips | CIDR to whitelist to activeMQ security group on egress | list(string) | `[]` |
-| activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.15.16"`                                                                  |
+| activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.17.6"`                                                                  |
 | activemq_storage_type                     | Preferred storage type for ActiveMQ                                                                        | String                             | `"efs"`                                                                      |
 | activemq_instance_type                    | ActiveMQ host's instance type                                                                              | String                             | `"mq.t2.micro"`                                                              |
 | activemq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window  | bool                               | `true`                                                                       |
@@ -168,21 +154,66 @@ terraform apply
 | rabbitmq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window. | bool | `false` |
 |rabbitmq_virtual_host|Virtual host to create in rabbitmq|string|`/nex_osttra`|
 |rabbitmq_exchange|Exchange to create in rabbitmq |string|`trml_osttra`|
+| env_secrets                      | AWS secret name containing the secrets to be appended                                                                        | string                             |`""`|   
 | lambda_packages_s3_bucket                 | S3 bucket name for bucket storing binary files for lambdas                                                 | string                             | `"fx-dev-lambda-packages"`                                                   |
 | public_subnets\*                          | List of IDs of public subnets                                                                              | list(string)                       |                                                                              |
 | private_subnets\*                         | List of IDs of private subnets                                                                             | list(string)                       |                                                                              |
 | domain_name                               | Domain name to use for exposing endpoints                                                                  | string                             | `batonsystems.com`                                                           |
 | vpc_id\*                                  | VPC ID to to link to lambdas , activeMQ , RDS                                                              | string                             |                                                                              |
 | eks_security_group\*                      | Security group linked to EKS                                                                               | string                             |                                                                              |
-|loadbalancer_url\* | Target for configuring DNS records |  string |`""` |
+| loadbalancer_url\* | Target for configuring DNS records |  string |`""` |
 | cnames | Set of CNAME suffixed for subdomain |set(string)  |`[]` | 
-| cloudflare_api_token\* | API token for configuring cloudflare provider |  string | |
-| kms_key_arn\*                             | KMS key ARN to use for encrypting resources                                                                | string                             |                                                                              |
-| user_secrets                      | AWS secret name containing the secrets to be appended                                                                        | string                             |`""`|   
+| cloudflare_api_token\* | API token for configuring cloudflare provider |  string | `-`|
+| kms_key_arn\*    | KMS key ARN to use for encrypting resources | string  |   `-`  |
 | additional_secrets | Map of secrets to save to AWS secrets manager | map(any) | `{}` |
-| sftp_host\* | Hostname for baton SFTP server | string | |
-| sftp_user\* | Username for baton SFTP server| string | 
-| sftp_password\* |  Password for baton SFTP server | string |  baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| sftp_host\* | Hostname for baton SFTP server | string | `-` |
+| sftp_user\* | Username for baton SFTP server| string | `-` |
+| sftp_password\* |  Password for baton SFTP server | string | `-` |  
+|baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+|import_directory_service_db| Whether to import seed data for directory service bootup | bool |  `true`|
+|rds_config\*            | Configuration parameters for RDS cluster | object | [RDS Config](#markdown-header-rds-config) |
+|crr_rds_config\*            | Configuration parameters for RDS cluster CRR (**DR resources must be provisioned in prior**)| object | [CRR RDS Config](#markdown-header-crr-rds-config) |
+
+### RDS Config
+This object is used to configure the RDS cluster to be created in primary region.
+
+| Name              | Description                                                                | Type           | Default                                            |
+|:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
+|rds_performance_insights_retention_period\*| time period to retain the performance insights|  number | `-`|
+| rds_backup_retention_period\* | Time period to retain RDS CRR backup| number | `-` |
+|rds_enable_deletion_protection|To enable delete protection on RDS cluster or not| bool | `true`|
+|rds_snapshot_identifier|Snapshot ID to restore incase of snapshot restoration| string | `null`| 
+|rds_mysql_version|MYSQL version of the RDS Cluster | string|  `"5.7"`|
+|rds_instance_type|Instance Size of the RDS Cluster|string|`"db.t4g.large"`|
+|rds_master_username| Master username for RDS cluster| string| `master`|
+|create_rds_reader|whether to create RDS reader or not | bool | `false`|
+|rds_parameter_group_family|parameter group family name|string|`"aurora-mysql5.7"`|
+|rds_enable_performance_insights|Whether to enable performace insights | bool|`true` |
+|rds_enable_event_notifications|Enabling event notification for RDS cluster |bool| `false`|
+|rds_reader_instance_type|Instance size for RDS reader| string | `"db.t4g.large"`|
+|rds_ingress_whitelist|CIDR blocks to whitelist to RDS cluster security group| list(string)|`[]`|
+|rds_enable_auto_minor_version_upgrade|Whether to enable auto minor version upgrades on RDS | bool | `false`|
+|rds_publicly_accessible| Whether to enable public access to RDS cluster | bool | `false`|
+|rds_enabled_cloudwatch_logs_exports|Cloudwatch logs to enable for RDS cluster | list(string)|`["slowquery", "audit", "error"]`|
+|rds_ca_cert_identifier| RDS certificate identifier | string| `"rds-ca-rsa2048-g1"`|
+|rds_db_cluster_parameter_group_parameters|Cluster paramter group values|list(map(string))|`[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]` |
+|rds_db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
+
+### CRR RDS Config
+The following object is used to setup Cross Region Replication(CRR) for the RDS cluster created in the primary region. For CRR to be setup the DR region must be already setup without an active EKS cluster. All the below requested parameters are to be provided from DR region. 
+
+| Name              | Description                                                                | Type           | Default                                            |
+|:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
+| backup_retention_period\* | Time period to retain RDS CRR backup| number | `-` |
+| vpc_id\* | VPC ID of DR region | string  | `-`|
+| eks_security_group\*| Security group ID of EKS in DR region|  string | `-` |
+|kms_key_id\*| KMS key ARN used for encrypting generic resources. Has the follwoing alias format `{alias}-{environment}-{region}"` | string | `-`|
+|subnet_ids\*|Subnet IDS in which the CRR cluster needs to bre created | list(string)| `-` |
+|deletion_protection| Whether to enable delete protection or not |  bool | `true` |
+|parameter_group_family| family of the parameter group of RDS cluster | string |`"aurora-mysql5.7"`|
+|engine_version|RDS engine version of the CRR|string|`"5.7.mysql_aurora.2.11.5"`|
+|instance_type|Size of the CRR instance | string|`"db.t4g.large"` |
+|db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
 
 
 ### Baton Application Namespaces
@@ -213,6 +244,7 @@ This object taked the paramters needed by a single service to run and are passed
 | port\*     | Port exposed by the pod | number      |          |
 | health_endpoint | Health check endpoint of the service | string      |`"/health"`|
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service| string  |`""` |
+|replicas| Number of replicas to provision for a deployment | number | `1` |
 | url_prefix\*      | Prefix for the service URL  | string      |          |
 | image_tag         | Version of the image to be used| string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |

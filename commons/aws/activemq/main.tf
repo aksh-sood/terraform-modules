@@ -96,7 +96,7 @@ resource "aws_mq_configuration" "mq_configuration" {
 }
 
 resource "aws_mq_broker" "activemq" {
-  broker_name = var.name
+  broker_name = "${var.name}-activemq"
 
   configuration {
     id = aws_mq_configuration.mq_configuration.id
@@ -114,13 +114,20 @@ resource "aws_mq_broker" "activemq" {
   apply_immediately          = var.apply_immediately
   auto_minor_version_upgrade = var.auto_minor_version_upgrade
   publicly_accessible        = var.publicly_accessible
-  subnet_ids                 = [var.subnet_ids[0]]
+  subnet_ids                 = var.subnet_ids
   security_groups            = [aws_security_group.activemq_sg.id]
-  tags                       = var.tags
+  deployment_mode            = var.deployment_mode
+
   user {
     console_access = true
     username       = var.username
     password       = random_password.activemq_password.result
+  }
+
+  tags = var.tags
+
+  lifecycle {
+    ignore_changes = [engine_version]
   }
 
 }
