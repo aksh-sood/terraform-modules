@@ -168,7 +168,6 @@ module "rabbitmq_nlb" {
   name                   = var.environment
   vpc_id                 = var.vpc_id
   subnet_ids             = var.public_subnet_ids
-  eks_security_group     = var.eks_security_group
   whitelist_ips          = var.rabbitmq_lb_ingress_whitelist
   public_certificate_arn = var.acm_certificate_arn
   rabbitmq_private_ip    = element(local.reg_ip, length(local.reg_ip) - 1)
@@ -582,7 +581,5 @@ module "transit_gateway" {
     aws.us-west-2      = aws.us-west-2
     aws.ap-southeast-1 = aws.ap-southeast-1
     aws.eu-west-1      = aws.eu-west-1
-
   }
 }
-

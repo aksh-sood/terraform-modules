@@ -18,7 +18,7 @@ service:
   enabled: true
   type: ClusterIP
   clusterIP: ""
-  port: 9100
+  port: 9101
   servicePort: ""
   targetPort: https
   portName: https

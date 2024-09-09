@@ -226,7 +226,7 @@ variable "subscribe_security_hub" {
 variable "enable_client_vpn" {
   description = "Whether to enable client vpn or not"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "client_vpn_metadata_bucket_region" {

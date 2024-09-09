@@ -121,21 +121,22 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
 
+  region                       = var.region
+  vendor                       = var.vendor
+  dependency                   = module.istio
   environment                  = var.environment
+  domain_name                  = var.domain_name
   opensearch_endpoint          = var.opensearch_endpoint
   opensearch_password          = var.opensearch_password
   opensearch_username          = var.opensearch_username
   create_s3_bucket_for_curator = var.create_s3_bucket_for_curator
-  docker_image_arn             = var.curator_docker_image_arn
   delete_indices_from_es       = var.delete_indices_from_es
-  domain_name                  = var.domain_name
-  region                       = var.region
 
   providers = {
     kubectl.this = kubectl.this
+    # opensearch.this = opensearch.this
   }
 
-  # depends_on = [module.istio]
 }
 
 module "jaeger" {

@@ -38,7 +38,7 @@ resource "aws_security_group_rule" "ingress_security_group_whitelist_443" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = [each.key]
+  cidr_blocks       = [ each.key ]
   security_group_id = aws_security_group.elb_sg.id
 }
 
@@ -65,16 +65,30 @@ resource "aws_security_group" "internal_alb_sg" {
   description = "Internal ALB Security group for ${var.cluster_name}"
   vpc_id      = var.vpc_id
   ingress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = -1
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [module.cluster.primary_security_group_id]
+  }
+
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
     security_groups = [module.cluster.primary_security_group_id]
   }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  egress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
 
@@ -91,6 +105,7 @@ resource "aws_security_group_rule" "internal_alb_to_vpn_sg_whitelisting" {
   source_security_group_id = var.vpn_security_group
 
 }
+
 resource "aws_security_group_rule" "eks_to_internal_alb_whitelisting" {
   type                     = "ingress"
   from_port                = 0
@@ -167,7 +182,7 @@ module "eks_node" {
 
   node_role_arn             = module.iam.node_role_arn
   primary_security_group_id = module.cluster.primary_security_group_id
-  cluster_version           = module.cluster.version
+  cluster_version           = module.cluster.cluster_version
   ssh_key                   = aws_key_pair.generated_key.key_name
 
   cluster_name = var.cluster_name

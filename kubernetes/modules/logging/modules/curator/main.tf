@@ -5,6 +5,7 @@ terraform {
     opensearch = {
       source  = "opensearch-project/opensearch"
       version = "2.3.0"
+      # configuration_aliases = [opensearch.this]
     }
     kubectl = {
       source                = "gavinbunney/kubectl"
@@ -22,12 +23,10 @@ provider "opensearch" {
   healthcheck        = false
   sign_aws_requests  = false
   opensearch_version = 2.11
-
 }
 
-
 data "template_file" "config_map" {
-  template = file("${path.module}/config.yaml")
+  template = file("${path.module}/configs/config.yaml")
   vars = {
     OPENSEARCH_USERNAME      = var.opensearch_username
     OPENSEARCH_PASSWORD      = var.opensearch_password
@@ -38,7 +37,7 @@ data "template_file" "config_map" {
 }
 
 data "template_file" "cronjob" {
-  template = file("${path.module}/cronjob.yaml")
+  template = file("${path.module}/configs/cronjob.yaml")
   vars = {
     DOCKER_IMAGE = var.docker_image_arn
     CONFIG_MAP   = kubernetes_config_map.curator_config.metadata[0].name
@@ -47,11 +46,11 @@ data "template_file" "cronjob" {
 
 resource "aws_s3_bucket" "curator" {
   count  = var.create_s3_bucket_for_curator ? 1 : 0
-  bucket = "osttra-${var.environment}-elastisearch-backup"
+  bucket = "${var.vendor}-${var.environment}-${var.region}-elastisearch-backup"
 }
 
 resource "aws_iam_role" "curator" {
-  name = "TheSnapShotRole"
+  name = "TheSnapShotRole-${var.environment}-${var.region}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -66,18 +65,18 @@ resource "aws_iam_role" "curator" {
   })
   inline_policy {
     name = "ESS3SnapShotPolicy"
-    policy = templatefile("${path.module}/ESS3SnapShotPolicy.json", {
+    policy = templatefile("${path.module}/configs/ESS3SnapShotPolicy.json", {
       S3_BUCKET = var.create_s3_bucket_for_curator ? aws_s3_bucket.curator[0].id : "osttra-${var.environment}-elastisearch-backup"
     })
   }
 }
 
 resource "aws_iam_user" "curator" {
-  name = "User-Curator"
+  name = "User-Curator-${var.environment}-${var.region}"
 }
 
 resource "aws_iam_policy" "iam_full_access_policy" {
-  name        = "IAMFullAccessPolicy"
+  name        = "IAMFullAccessPolicy-${var.environment}-${var.region}"
   description = "Policy that grants full access to IAM"
 
   policy = jsonencode({
@@ -114,7 +113,7 @@ resource "opensearch_roles_mapping" "curator" {
 }
 
 data "external" "register_es_repository" {
-  program = ["python3", "${path.module}/register_repository.py"]
+  program = ["python3", "${path.module}/configs/register_repository.py"]
   query = {
     bucket         = var.create_s3_bucket_for_curator ? aws_s3_bucket.curator[0].id : "osttra-${var.environment}-elastisearch-backup"
     region         = var.region

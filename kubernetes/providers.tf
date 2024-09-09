@@ -22,6 +22,11 @@ terraform {
       source  = "hashicorp/helm"
       version = "=2.10.1"
     }
+    # opensearch = {
+    #   source  = "opensearch-project/opensearch"
+    #   version = "2.3.0"
+    #   configuration_aliases = [opensearch.this]
+    # }
   }
 }
 
@@ -48,3 +53,13 @@ provider "cloudflare" {
   api_token = var.cloudflare_api_token
   alias     = "this"
 }
+
+# provider "opensearch" {
+#   url                = "https://${var.opensearch_endpoint}:443"
+#   aws_region         = var.region
+#   username           = var.opensearch_username
+#   password           = var.opensearch_password
+#   healthcheck        = false
+#   sign_aws_requests  = false
+#   opensearch_version = 2.11
+# }

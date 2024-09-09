@@ -12,7 +12,7 @@ output "cluster_name" {
   value       = module.eks.cluster_name
 }
 
-output "version" {
+output "cluster_version" {
   description = "EKS cluster version provisioned"
-  value       = module.eks.version
+  value       = module.eks.cluster_version
 }

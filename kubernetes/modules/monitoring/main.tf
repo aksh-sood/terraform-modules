@@ -10,7 +10,7 @@ terraform {
   }
 }
 
-resource "random_password" "password" {
+resource "random_password" "grafana" {
   length      = 16
   special     = false
   lower       = true
@@ -33,8 +33,7 @@ resource "helm_release" "kube_prometheus_stack" {
     templatefile("${path.module}/configs/config.yaml", {
       prometheus_volume_size = var.prometheus_volume_size
       grafana_volume_size    = var.grafana_volume_size
-      grafana_password       = random_password.password.result
-      # TODO: manage custom alerting issue for terragrunt
+      grafana_password       = random_password.grafana.result
       alerts = file("${path.module}/configs/alerts.yaml")
       alerts = templatefile("${path.module}/configs/alerts.yaml", {
         custom_alerts = jsonencode(var.custom_alerts)
@@ -52,8 +51,7 @@ resource "helm_release" "kube_prometheus_stack" {
   ]
 }
 
-resource "helm_release" "prometheus-node-exporter" {
-  depends_on = [helm_release.kube_prometheus_stack]
+resource "helm_release" "prometheus_node_exporter" {
   name       = "node-exporter"
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "prometheus-node-exporter"
@@ -65,11 +63,11 @@ resource "helm_release" "prometheus-node-exporter" {
   ]
   cleanup_on_fail = true
 
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 
-resource "helm_release" "kube-state-metrics" {
-  depends_on = [helm_release.kube_prometheus_stack]
+resource "helm_release" "kube_state_metrics" {
   name       = "kube-state-metrics"
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-state-metrics"
@@ -82,6 +80,7 @@ resource "helm_release" "kube-state-metrics" {
   atomic          = true
   cleanup_on_fail = true
 
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "kubectl_manifest" "monitoring_gateway" {
@@ -108,7 +107,7 @@ spec:
       protocol: HTTP
 YAML
 
-  # depends_on = [helm_release.kube_prometheus_stack]
+  depends_on = [helm_release.kube_prometheus_stack]
 }
 
 resource "kubectl_manifest" "kube_stack_virtualservices" {
@@ -140,7 +139,7 @@ resource "kubectl_manifest" "kube_stack_virtualservices" {
 module "grafana_config" {
   source = "./modules/grafana-config"
 
-  grafana_password = random_password.password.result
+  grafana_password = random_password.grafana.result
   vs_dependency    = kubectl_manifest.kube_stack_virtualservices
 
   environment       = var.environment

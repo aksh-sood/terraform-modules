@@ -17,7 +17,7 @@ data "aws_s3_object" "saml_metadata_document" {
 }
 
 resource "aws_cloudwatch_log_group" "vpn_logs" {
-  name              = "/aws/vpc/clientvpn"
+  name              = "/${var.name}/aws/vpc/clientvpn"
   retention_in_days = 0
 
   tags = var.cost_tags
@@ -85,7 +85,7 @@ resource "aws_ec2_client_vpn_authorization_rule" "internet_authorization" {
 }
 
 resource "aws_iam_saml_provider" "saml_provider" {
-  name                   = var.saml_provider_name
+  name                   = "${var.saml_provider_name}_${upper(split("-", var.name)[0])}"
   saml_metadata_document = data.aws_s3_object.saml_metadata_document.body
   tags                   = var.cost_tags
 }

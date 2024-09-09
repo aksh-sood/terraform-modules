@@ -17,13 +17,13 @@ data "aws_vpc" "central_vpc" {
 }
 
 data "aws_route_table" "subnet_route_tables" {
-  count     = length(var.central_vpc_subnet_ids)
-  subnet_id = var.central_vpc_subnet_ids[count.index]
+  for_each  = toset(var.central_vpc_subnet_ids)
+  subnet_id = each.value
 }
 
 locals {
   unique_route_table_ids = distinct([
-    for rt in data.aws_route_table.subnet_route_tables : rt.route_table_id
+    for rt in values(data.aws_route_table.subnet_route_tables) : rt.route_table_id
   ])
 
   us_east_1_routes = concat([data.aws_vpc.central_vpc.cidr_block], var.region_routes["us-east-1"])
@@ -36,14 +36,14 @@ locals {
 
 # Fetch DR VPC subnet route table IDs
 data "aws_route_table" "dr_subnet_route_tables" {
-  count     = length(var.dr_central_vpc_subnet_ids)
-  subnet_id = var.dr_central_vpc_subnet_ids[count.index]
+  for_each  = toset(var.dr_central_vpc_subnet_ids)
+  subnet_id = each.value
   provider  = aws.us-west-2
 }
 
 locals {
   dr_unique_route_table_ids = distinct([
-    for rt in data.aws_route_table.dr_subnet_route_tables : rt.route_table_id
+    for rt in values(data.aws_route_table.dr_subnet_route_tables) : rt.route_table_id
   ])
 }
 
@@ -480,8 +480,8 @@ resource "aws_ec2_transit_gateway_route" "peering_rt_self_route" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_east_1_to_us_west_2" {
-  count                          = length(local.updated_region_routes["us-west-2"])
-  destination_cidr_block         = local.updated_region_routes["us-west-2"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-west-2"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_us_west_2.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_east_1.id
 
@@ -490,8 +490,8 @@ resource "aws_ec2_transit_gateway_route" "us_east_1_to_us_west_2" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_east_1_to_ap_southeast_1" {
-  count                          = length(local.updated_region_routes["ap-southeast-1"])
-  destination_cidr_block         = local.updated_region_routes["ap-southeast-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["ap-southeast-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_ap_southeast_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_east_1.id
 
@@ -500,8 +500,8 @@ resource "aws_ec2_transit_gateway_route" "us_east_1_to_ap_southeast_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_west_2_to_us_east_1" {
-  count                          = length(local.updated_region_routes["us-east-1"])
-  destination_cidr_block         = local.updated_region_routes["us-east-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-east-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_us_east_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_west_2.id
 
@@ -510,8 +510,8 @@ resource "aws_ec2_transit_gateway_route" "us_west_2_to_us_east_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_west_2_to_ap_southeast_1" {
-  count                          = length(local.updated_region_routes["ap-southeast-1"])
-  destination_cidr_block         = local.updated_region_routes["ap-southeast-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["ap-southeast-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_west_2_ap_southeast_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_west_2.id
 
@@ -520,8 +520,8 @@ resource "aws_ec2_transit_gateway_route" "us_west_2_to_ap_southeast_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_us_east_1" {
-  count                          = length(local.updated_region_routes["us-east-1"])
-  destination_cidr_block         = local.updated_region_routes["us-east-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-east-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_ap_southeast_1_us_east_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_ap_southeast_1.id
 
@@ -530,8 +530,8 @@ resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_us_east_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_us_west_2" {
-  count                          = length(local.updated_region_routes["us-west-2"])
-  destination_cidr_block         = local.updated_region_routes["us-west-2"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-west-2"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_ap_southeast_1_us_west_2.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_ap_southeast_1.id
 
@@ -540,8 +540,8 @@ resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_us_west_2" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_east_1_to_eu_west_1" {
-  count                          = length(local.updated_region_routes["eu-west-1"])
-  destination_cidr_block         = local.updated_region_routes["eu-west-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["eu-west-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_eu_west_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_east_1.id
 
@@ -550,8 +550,8 @@ resource "aws_ec2_transit_gateway_route" "us_east_1_to_eu_west_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "us_west_2_to_eu_west_1" {
-  count                          = length(local.updated_region_routes["eu-west-1"])
-  destination_cidr_block         = local.updated_region_routes["eu-west-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["eu-west-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_eu_west_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_west_2.id
 
@@ -560,8 +560,8 @@ resource "aws_ec2_transit_gateway_route" "us_west_2_to_eu_west_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_eu_west_1" {
-  count                          = length(local.updated_region_routes["eu-west-1"])
-  destination_cidr_block         = local.updated_region_routes["eu-west-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["eu-west-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_ap_southeast_1_eu_west_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_ap_southeast_1.id
 
@@ -570,8 +570,8 @@ resource "aws_ec2_transit_gateway_route" "ap_southeast_1_to_eu_west_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "eu_west_1_to_us_east_1" {
-  count                          = length(local.updated_region_routes["us-east-1"])
-  destination_cidr_block         = local.updated_region_routes["us-east-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-east-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_eu_west_1_us_east_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_eu_west_1.id
 
@@ -580,8 +580,8 @@ resource "aws_ec2_transit_gateway_route" "eu_west_1_to_us_east_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "eu_west_1_to_us_west_2" {
-  count                          = length(local.updated_region_routes["us-west-2"])
-  destination_cidr_block         = local.updated_region_routes["us-west-2"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-west-2"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_eu_west_1_us_west_2.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_eu_west_1.id
 
@@ -590,8 +590,8 @@ resource "aws_ec2_transit_gateway_route" "eu_west_1_to_us_west_2" {
 }
 
 resource "aws_ec2_transit_gateway_route" "eu_west_1_to_ap_southeast_1" {
-  count                          = length(local.updated_region_routes["ap-southeast-1"])
-  destination_cidr_block         = local.updated_region_routes["ap-southeast-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["ap-southeast-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_eu_west_1_ap_southeast_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_eu_west_1.id
 
@@ -657,8 +657,8 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "central_vpc_rt_propa
 
 # Add routes to central VPC route table for all regions
 resource "aws_ec2_transit_gateway_route" "central_vpc_to_us_west_2" {
-  count                          = length(local.updated_region_routes["us-west-2"])
-  destination_cidr_block         = local.updated_region_routes["us-west-2"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-west-2"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_us_west_2.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.central_vpc_rt.id
 
@@ -667,8 +667,8 @@ resource "aws_ec2_transit_gateway_route" "central_vpc_to_us_west_2" {
 }
 
 resource "aws_ec2_transit_gateway_route" "central_vpc_to_ap_southeast_1" {
-  count                          = length(local.updated_region_routes["ap-southeast-1"])
-  destination_cidr_block         = local.updated_region_routes["ap-southeast-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["ap-southeast-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_ap_southeast_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.central_vpc_rt.id
 
@@ -677,8 +677,8 @@ resource "aws_ec2_transit_gateway_route" "central_vpc_to_ap_southeast_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "central_vpc_to_eu_west_1" {
-  count                          = length(local.updated_region_routes["eu-west-1"])
-  destination_cidr_block         = local.updated_region_routes["eu-west-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["eu-west-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_eu_west_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.central_vpc_rt.id
 
@@ -775,8 +775,8 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "dr_central_vpc_rt_pr
 
 # Add routes to DR central VPC route table for all regions
 resource "aws_ec2_transit_gateway_route" "dr_central_vpc_to_us_east_1" {
-  count                          = length(local.updated_region_routes["us-east-1"])
-  destination_cidr_block         = local.updated_region_routes["us-east-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["us-east-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_us_east_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.dr_central_vpc_rt.id
 
@@ -785,8 +785,8 @@ resource "aws_ec2_transit_gateway_route" "dr_central_vpc_to_us_east_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "dr_central_vpc_to_ap_southeast_1" {
-  count                          = length(local.updated_region_routes["ap-southeast-1"])
-  destination_cidr_block         = local.updated_region_routes["ap-southeast-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["ap-southeast-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_west_2_ap_southeast_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.dr_central_vpc_rt.id
 
@@ -795,8 +795,8 @@ resource "aws_ec2_transit_gateway_route" "dr_central_vpc_to_ap_southeast_1" {
 }
 
 resource "aws_ec2_transit_gateway_route" "dr_central_vpc_to_eu_west_1" {
-  count                          = length(local.updated_region_routes["eu-west-1"])
-  destination_cidr_block         = local.updated_region_routes["eu-west-1"][count.index]
+  for_each                       = toset(local.updated_region_routes["eu-west-1"])
+  destination_cidr_block         = each.value
   transit_gateway_attachment_id  = aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_eu_west_1.id
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.dr_central_vpc_rt.id
 
@@ -862,8 +862,8 @@ resource "aws_ram_resource_association" "tgw_share_association_us_east_1" {
 }
 
 resource "aws_ram_principal_association" "tgw_principal_association_us_east_1" {
-  count              = length(var.shared_accounts)
-  principal          = var.shared_accounts[count.index]
+  for_each           = toset(var.shared_accounts)
+  principal          = each.value
   resource_share_arn = aws_ram_resource_share.tgw_share_us_east_1[0].arn
 
   provider = aws.us-east-1
@@ -894,8 +894,8 @@ resource "aws_ram_resource_association" "tgw_share_association_us_west_2" {
 }
 
 resource "aws_ram_principal_association" "tgw_principal_association_us_west_2" {
-  count              = length(var.shared_accounts)
-  principal          = var.shared_accounts[count.index]
+  for_each           = toset(var.shared_accounts)
+  principal          = each.value
   resource_share_arn = aws_ram_resource_share.tgw_share_us_west_2[0].arn
 
   provider = aws.us-west-2
@@ -926,8 +926,8 @@ resource "aws_ram_resource_association" "tgw_share_association_ap_southeast_1" {
 }
 
 resource "aws_ram_principal_association" "tgw_principal_association_ap_southeast_1" {
-  count              = length(var.shared_accounts)
-  principal          = var.shared_accounts[count.index]
+  for_each           = toset(var.shared_accounts)
+  principal          = each.value
   resource_share_arn = aws_ram_resource_share.tgw_share_ap_southeast_1[0].arn
 
   provider = aws.ap-southeast-1
@@ -958,8 +958,8 @@ resource "aws_ram_resource_association" "tgw_share_association_eu_west_1" {
 }
 
 resource "aws_ram_principal_association" "tgw_principal_association_eu_west_1" {
-  count              = length(var.shared_accounts)
-  principal          = var.shared_accounts[count.index]
+  for_each           = toset(var.shared_accounts)
+  principal          = each.value
   resource_share_arn = aws_ram_resource_share.tgw_share_eu_west_1[0].arn
 
   provider = aws.eu-west-1

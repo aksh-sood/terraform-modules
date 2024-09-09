@@ -60,9 +60,9 @@ provider "cloudflare" {
 }
 
 provider "opensearch" {
-  url                = var.opensearch_host_url
-  username           = var.opensearch_admin_username
-  password           = var.opensearch_admin_password
+  url                = var.opensearch_endpoint
+  username           = var.opensearch_username
+  password           = var.opensearch_password
   insecure           = false
   sign_aws_requests  = false
   healthcheck        = false

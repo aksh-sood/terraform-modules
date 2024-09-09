@@ -4,6 +4,10 @@ variable "grafana_volume_size" {
   default     = "10Gi"
 }
 
+variable "gchat_lambda_url" {
+  default = ""
+}
+
 variable "alert_manager_volume_size" {}
 variable "prometheus_volume_size" {}
 variable "slack_web_hook" {}
@@ -16,8 +20,5 @@ variable "environment" {}
 variable "domain_name" {}
 variable "isito_dependency" {}
 variable "configure_grafana" {}
-variable "gchat_lambda_url" {
-  default = ""
-}
 variable "node_exporter_version" {}
 variable "kube_state_metrics_version" {}

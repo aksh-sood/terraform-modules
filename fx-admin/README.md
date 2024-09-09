@@ -215,7 +215,6 @@ The following object is used to setup Cross Region Replication(CRR) for the RDS 
 |instance_type|Size of the CRR instance | string|`"db.t4g.large"` |
 |db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
 
-
 ### Baton Application Namespaces
 
 The following object deals with the namespaces and other kubernetes resources for a service to run . Below are the parameters for the object.

@@ -443,18 +443,18 @@ variable "tgw_region_routes" {
 }
 
 
-variable "opensearch_admin_username" {
+variable "opensearch_username" {
   description = "Admin username for OpenSearch"
   type        = string
 }
 
-variable "opensearch_admin_password" {
+variable "opensearch_password" {
   description = "Admin password for OpenSearch"
   type        = string
   sensitive   = true
 }
 
-variable "opensearch_host_url" {
+variable "opensearch_endpoint" {
   description = "Host URL for OpenSearch cluster (must include https://)"
   type        = string
   validation {
