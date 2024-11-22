@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "automation-state-terraform"
-    key    = "FX-admin/terraform-state"
-    region = "us-east-1"
+    bucket = "baton-central-terraform-state"
+    key    = "DR/FX-admin/terraform-state"
+    region = "us-west-2"
   }
 }
