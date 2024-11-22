@@ -56,32 +56,31 @@ module "kinesis_app" {
 module "sqs" {
   source = "../commons/aws/sqs"
 
-  name = "${var.environment}-normalizer"
+  name = "normalizer-${var.environment}"
 
   tags = var.cost_tags
 }
 
-# module "s3_writer_lambda" {
-#   source = "../commons/aws/lambda"
+module "s3_writer_lambda" {
+  source = "../commons/aws/lambda"
 
-#   sqs_arn         = module.sqs.arn
-#   lambda_role_arn = "arn:aws:iam::010601972186:role/LambdaExecutionRole"
+  sqs_arn         = module.sqs.arn
+  lambda_role_arn = "arn:aws:iam::010601972186:role/lambda-execution-role"
+  name                      = "s3-writer-${var.environment}"
+  package_key               = "s3-writer-lambda-0.0.1-SNAPSHOT.jar"
+  handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
+  vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
+  lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
+  subnet_ids                = var.private_subnet_ids
 
-#   name                      = "${var.environment}-s3-writer"
-#   package_key               = "s3-writer-lambda-0.0.1-SNAPSHOT.jar"
-#   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
-#   vpc_id                    = var.vpc_id
-#   security_group            = var.eks_security_group
-#   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
-#   subnet_ids                = var.private_subnet_ids
+  environment_variables = {
+    region         = var.region
+    s3_bucket_name = "baton-fx-baton-prod2"
+  }
 
-#   environment_variables = {
-#     region         = var.region
-#     s3_bucket_name = "${var.vendor}-${var.environment}"
-#   }
-
-#   tags = var.cost_tags
-# }
+  tags = var.cost_tags
+}
 
 module "activemq" {
   source = "../commons/aws/activemq"
@@ -105,46 +104,46 @@ module "activemq" {
   tags                       = var.cost_tags
 }
 
-# module "normalized_trml_lambda" {
-#   source = "../commons/aws/lambda"
+module "normalized_trml_lambda" {
+  source = "../commons/aws/lambda"
 
-#   stream_arn                = "arn:aws:kinesis:us-west-2:010601972186:stream/fx-baton-prod-normalized-trml"
-#   lambda_role_arn           = "arn:aws:iam::010601972186:role/LambdaExecutionRole"
-#   name                      = "${var.environment}-normalized-trades"
-#   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
-#   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
-#   vpc_id                    = var.vpc_id
-#   security_group            = var.eks_security_group
-#   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
-#   subnet_ids                = var.private_subnet_ids
+  stream_arn                = "arn:aws:kinesis:us-west-2:010601972186:stream/fx-baton-prod-normalized-trml"
+  lambda_role_arn           = "arn:aws:iam::010601972186:role/lambda-execution-role"
+  name                      = "normalized-trades-${var.environment}"
+  package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
+  handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
+  vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
+  lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
+  subnet_ids                = var.private_subnet_ids
 
-#   environment_variables = {
-#     data_type           = "normalized_trades"
-#     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-#     activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
-#   }
+  environment_variables = {
+    data_type           = "normalized_trades"
+    destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
+    activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
+  }
 
-#   tags = var.cost_tags
-# }
+  tags = var.cost_tags
+}
 
-# module "matched_trades_lambda" {
-#   source = "../commons/aws/lambda"
+module "matched_trades_lambda" {
+  source = "../commons/aws/lambda"
 
-#   stream_arn                = "arn:aws:kinesis:us-west-2:010601972186:stream/fx-baton-prod-matched-trades"
-#   lambda_role_arn           = "arn:aws:iam::010601972186:role/LambdaExecutionRole" 
-#   name                      = "${var.environment}-matched-trades"
-#   package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
-#   handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
-#   vpc_id                    = var.vpc_id
-#   security_group            = var.eks_security_group
-#   lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
-#   subnet_ids                = var.private_subnet_ids
+  stream_arn                = "arn:aws:kinesis:us-west-2:010601972186:stream/fx-baton-prod-matched-trades"
+  lambda_role_arn           = "arn:aws:iam::010601972186:role/lambda-execution-role" 
+  name                      = "matched-trades-${var.environment}"
+  package_key               = "central-streams-to-node-queues-1.0-SNAPSHOT.jar"
+  handler                   = "com.batonsystems.StreamsToQueueLambda::handleRequest"
+  vpc_id                    = var.vpc_id
+  security_group            = var.eks_security_group
+  lambda_packages_s3_bucket = var.lambda_packages_s3_bucket
+  subnet_ids                = var.private_subnet_ids
 
-#   environment_variables = {
-#     data_type           = "matched_trades"
-#     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-#     activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
-#   }
+  environment_variables = {
+    data_type           = "matched_trades"
+    destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
+    activemq_broker_url = "failover:(${module.activemq.url},${module.activemq.url})?jms.userName=${module.activemq.username}&jms.password=${module.activemq.password}"
+  }
 
-#   tags = var.cost_tags
-# }
+  tags = var.cost_tags
+}

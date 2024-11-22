@@ -96,7 +96,7 @@ resource "aws_mq_configuration" "mq_configuration" {
 }
 
 resource "aws_mq_broker" "activemq" {
-  broker_name = "${var.name}-activemq"
+  broker_name = "activemq-${var.name}"
 
   configuration {
     id = aws_mq_configuration.mq_configuration.id

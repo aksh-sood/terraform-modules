@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "kinesis_role" {
 }
 
 resource "aws_kinesis_analytics_application" "match-trade-kinesis-app" {
-  name              = "${var.name}-match-trade"
+  name              = "match-trade-${var.name}"
   code              = file("${path.module}/kinesis_app.sql")
   start_application = true
   tags              = var.tags
