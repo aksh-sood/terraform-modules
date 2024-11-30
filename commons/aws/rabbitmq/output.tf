@@ -12,6 +12,10 @@ output "console_url" {
   value = aws_mq_broker.rabbitmq.instances.0.console_url
 }
 
+output "rabbitmq_broker" {
+  value = aws_mq_broker.rabbitmq.broker_name
+}
+
 output "endpoint" {
   value = aws_mq_broker.rabbitmq.instances.0.endpoints.0
 }

@@ -9,6 +9,12 @@ variable "alb_base_attributes" {
   default     = "deletion_protection.enabled=false,routing.http.drop_invalid_header_fields.enabled=true"
 }
 
+variable "waf_arn" {
+  description = "ARN of the WAF to associate with the ALB"
+  type        = string
+  default     = ""
+}
+
 variable "istio_version" {}
 variable "siem_storage_s3_bucket" {}
 variable "enable_siem" {}

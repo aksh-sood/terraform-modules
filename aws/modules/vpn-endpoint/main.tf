@@ -17,14 +17,14 @@ data "aws_s3_object" "saml_metadata_document" {
 }
 
 resource "aws_cloudwatch_log_group" "vpn_logs" {
-  name              = "/${var.name}/aws/vpc/clientvpn"
+  name              = "/${var.name}-${var.region}/aws/vpc/clientvpn"
   retention_in_days = 0
 
   tags = var.cost_tags
 }
 
 resource "aws_security_group" "client_vpn" {
-  name   = "${var.name}-vpn-endpoint"
+  name   = "${var.name}-${var.region}-vpn-endpoint"
   vpc_id = var.vpc_id
 
   ingress {
@@ -42,7 +42,7 @@ resource "aws_security_group" "client_vpn" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = merge(var.cost_tags, { Name = "${var.name}-vpn-endpoint" })
+  tags = merge(var.cost_tags, { Name = "${var.name}-${var.region}-vpn-endpoint" })
 }
 
 resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
@@ -50,7 +50,7 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
   server_certificate_arn = var.acm_certificate_arn
   client_cidr_block      = var.client_cidr_block
   vpc_id                 = var.vpc_id
-  description            = "client VPN for ${var.name}"
+  description            = "client VPN for ${var.name}-${var.region}"
 
   split_tunnel = var.enable_split_tunnel
 
@@ -64,7 +64,7 @@ resource "aws_ec2_client_vpn_endpoint" "client_vpn" {
     cloudwatch_log_group = aws_cloudwatch_log_group.vpn_logs.name
   }
 
-  tags = merge(var.cost_tags, { Name = var.name })
+  tags = merge(var.cost_tags, { Name = "${var.name}-${var.region}" })
 }
 
 resource "aws_ec2_client_vpn_network_association" "network_association" {
@@ -85,7 +85,7 @@ resource "aws_ec2_client_vpn_authorization_rule" "internet_authorization" {
 }
 
 resource "aws_iam_saml_provider" "saml_provider" {
-  name                   = "${var.saml_provider_name}_${upper(split("-", var.name)[0])}"
+  name                   = "${var.saml_provider_name}_${var.name}_${var.region}"
   saml_metadata_document = data.aws_s3_object.saml_metadata_document.body
   tags                   = var.cost_tags
 }

@@ -1,4 +1,4 @@
-#do not remove this comment (added here to maintain yaml formating ) 
+#do not remove this comment (added here to maintain yaml formating ) also do not remove the tab space at the start of each line 
   enabled: true
   config:
     global:
@@ -6,91 +6,94 @@
     route:
       receiver: default
       group_by:
-      - alertname
-      - cluster
-      - service
-      - job
+        - alertname
+        - cluster
+        - service
+        - job
       continue: false
       routes:
-      - receiver: "empty"
-        match:
-          alertname: Watchdog
-        continue: true
-      - receiver: 'gchat'
-        match:
-          severity: warning
-        continue: true
-      - receiver: 'slack'
-        match:
-          severity: warning
-        continue: true
-      - receiver: 'pagerduty'
-        match:
-          severity: critical
-        continue: true
+        - receiver: "empty"
+          match:
+            alertname: Watchdog
+          continue: true
+        - receiver: "gchat"
+          match:
+            severity: warning
+          continue: true
+        - receiver: "slack"
+          match:
+            severity: warning
+          continue: true
+        - receiver: "pagerduty"
+          match:
+            severity: critical
+          continue: true
+      group_wait: 2m
+      group_interval: 5m
+      repeat_interval: 15m
     receivers:
       - name: "empty"
       - name: gchat
         webhook_configs:
-        - send_resolved: true
-          http_config:
-            follow_redirects: true
-          url: ${gchat_lambda_url}
-          max_alerts: 0
+          - send_resolved: true
+            http_config:
+              follow_redirects: true
+            url: ${encoded_gchat_url}
+            max_alerts: 0
       - name: default
         slack_configs:
-        - send_resolved: false
-          http_config:
-            follow_redirects: true
-          channel: ${slack_channel_name}
-          title: |-
-            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
-            {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
-              {{" "}}(
-              {{- with .CommonLabels.Remove .GroupLabels.Names }}
-                {{- range $index, $label := .SortedPairs -}}
-                  {{ if $index }}, {{ end }}
-                  {{- $label.Name }}="{{ $label.Value -}}"
-                {{- end }}
-              {{- end -}}
-              )
-            {{- end }}
-          text: >-
-           {{ range .Alerts -}}
-           *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-           *Description:* {{ .Annotations.description }}
-           *Details:*
-             {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
-             {{ end }}
-           {{ end }}
+          - send_resolved: false
+            http_config:
+              follow_redirects: true
+            channel: ${slack_channel_name}
+            title: |-
+              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
+              {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
+                {{" "}}(
+                {{- with .CommonLabels.Remove .GroupLabels.Names }}
+                  {{- range $index, $label := .SortedPairs -}}
+                    {{ if $index }}, {{ end }}
+                    {{- $label.Name }}="{{ $label.Value -}}"
+                  {{- end }}
+                {{- end -}}
+                )
+              {{- end }}
+            text: >-
+              {{ range .Alerts -}}
+              *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+              *Description:* {{ .Annotations.description }}
+              *Details:*
+                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                {{ end }}
+              {{ end }}
       - name: pagerduty
         pagerduty_configs:
-        - service_key: ${pagerduty_key}
-          send_resolved: true
-      - name: slack 
+          - service_key: ${pagerduty_key}
+            send_resolved: true
+      - name: slack
         slack_configs:
-        - send_resolved: true
-          channel: ${slack_channel_name}
-          title: |-
-            [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
-            {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
-              {{" "}}(
-              {{- with .CommonLabels.Remove .GroupLabels.Names }}
-                {{- range $index, $label := .SortedPairs -}}
-                  {{ if $index }}, {{ end }}
-                  {{- $label.Name }}="{{ $label.Value -}}"
-                {{- end }}
-              {{- end -}}
-              )
-            {{- end }}
-          text: >-
-           {{ range .Alerts -}}
-           *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
-           *Description:* {{ .Annotations.description }}
-           *Details:*
-             {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
-             {{ end }}
-           {{ end }}
+          - send_resolved: true
+            channel: ${slack_channel_name}
+            title: |-
+              [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }} for {{ .CommonLabels.job }}
+              {{- if gt (len .CommonLabels) (len .GroupLabels) -}}
+                {{" "}}(
+                {{- with .CommonLabels.Remove .GroupLabels.Names }}
+                  {{- range $index, $label := .SortedPairs -}}
+                    {{ if $index }}, {{ end }}
+                    {{- $label.Name }}="{{ $label.Value -}}"
+                  {{- end }}
+                {{- end -}}
+                )
+              {{- end }}
+            text: >-
+              {{ range .Alerts -}}
+              *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+              *Description:* {{ .Annotations.description }}
+              *Details:*
+                {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+                {{ end }}
+              {{ end }}
   alertmanagerSpec:
     storage:
       volumeClaimTemplate:

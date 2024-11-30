@@ -50,9 +50,9 @@ resource "aws_kinesis_firehose_delivery_stream" "trm_delivery_firehose_stream" {
   }
 
   server_side_encryption {
-    enabled  = false
-    # key_type = "CUSTOMER_MANAGED_CMK"
-    # key_arn  = var.kms_key_arn
+    enabled  = true
+    key_type = "CUSTOMER_MANAGED_CMK"
+    key_arn  = var.kms_key_arn
   }
 }
 
@@ -67,9 +67,9 @@ resource "aws_kinesis_firehose_delivery_stream" "failed_trml_firehose_stream" {
   }
 
   server_side_encryption {
-    enabled  = false
-    # key_type = "CUSTOMER_MANAGED_CMK"
-    # key_arn  = var.kms_key_arn
+    enabled  = true
+    key_type = "CUSTOMER_MANAGED_CMK"
+    key_arn  = var.kms_key_arn
   }
 }
 

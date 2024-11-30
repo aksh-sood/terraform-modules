@@ -1,8 +1,11 @@
-
-variable "ses_email_account_id" {
-  type        = string
-  description = "SES Email Account ID for sending email alerts"
-  default     = ""
+variable "ses_email_config" {
+  type = object({
+    region       = string
+    role_arn     = string
+    from_address = string
+  })
+  description = "SES Email configuration for sending email alerts"
+  default     = null
 }
 
 variable "ses_email_recipients" {
@@ -30,14 +33,43 @@ variable "gchat_webhook_url" {
   description = "Webhook URL for Google Chat notifications"
   sensitive   = true
 }
-variable "pagerduty_integration_key" {
-  type        = string
-  description = "PagerDuty Integration Key for sending alerts"
-  sensitive   = true
-  default     = ""
-}
 
 variable "monitor_path" {
   type        = string
   description = "Path to the directory containing monitor JSON files"
+}
+
+
+variable "opensearch_username" {
+  description = "Admin username for OpenSearch"
+  type        = string
+}
+
+variable "opensearch_password" {
+  description = "Admin password for OpenSearch"
+  type        = string
+  sensitive   = true
+}
+
+variable "opensearch_endpoint" {
+  description = "Host URL for OpenSearch cluster (must include https://)"
+  type        = string
+}
+
+variable "opensearch_version" {
+  description = "Version of OpenSearch to Connect to"
+  type        = string
+  default     = "2.11"
+}
+
+variable "region" {
+  description = "AWS region"
+  type        = string
+}
+
+variable "pagerduty_integration_key" {
+  description = "Integration key for PagerDuty notifications"
+  type        = string
+  sensitive   = true
+  default     = null
 }

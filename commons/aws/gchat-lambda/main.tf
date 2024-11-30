@@ -1,19 +1,22 @@
+locals {
+  env_vars       = { gchat_webhook_url = var.gchat_webhook_url }
+  slack_env_vars = var.slack_webhook_url != null ? { slack_webhook_url = var.slack_webhook_url } : {}
+}
+
 resource "aws_lambda_function" "this" {
   function_name = "${var.name}-gchat-lambda"
   runtime       = "python3.10"
   handler       = "lambda.lambda_handler"
   publish       = true
   memory_size   = 128
-  timeout       = 3
+  timeout       = 75
   s3_bucket     = var.lambda_packages_s3_bucket
   s3_key        = var.package_key
   role          = aws_iam_role.lambda_execution_role.arn
 
 
   environment {
-    variables = {
-      gchat_webhook_url : var.gchat_webhook_url
-    }
+    variables = merge(local.env_vars, local.slack_env_vars)
   }
 
   tracing_config {

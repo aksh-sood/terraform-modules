@@ -18,16 +18,10 @@ data "template_file" "init" {
   }
 }
 
-resource "kubernetes_namespace" "logging" {
-  metadata {
-    name = "logging"
-  }
-}
-
 resource "kubernetes_service" "proxy" {
   metadata {
     name      = "aws-es"
-    namespace = "logging"
+    namespace = var.namespace
   }
   spec {
     external_name = var.opensearch_endpoint
@@ -37,8 +31,6 @@ resource "kubernetes_service" "proxy" {
       target_port = 443
     }
   }
-
-  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "helm_release" "filebeat" {
@@ -46,11 +38,11 @@ resource "helm_release" "filebeat" {
   repository       = "https://helm.elastic.co/"
   chart            = "filebeat"
   version          = "7.13.0"
-  namespace        = "logging"
-  create_namespace = true
+  namespace        = var.namespace
+  create_namespace = false
 
   values     = [data.template_file.init.rendered]
-  depends_on = [kubernetes_service.proxy, kubernetes_namespace.logging]
+  depends_on = [kubernetes_service.proxy]
 }
 
 resource "kubectl_manifest" "gateway" {
@@ -62,7 +54,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
   name: logging
-  namespace: logging
+  namespace: ${var.namespace}
 spec:
   selector:
     istio: ingressgateway
@@ -74,8 +66,6 @@ spec:
       number: 80
       protocol: HTTP
 YAML
-
-  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "destination_rule" {
@@ -87,15 +77,13 @@ apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
   name: kibana
-  namespace: logging
+  namespace: ${var.namespace}
 spec:
   host: ${var.opensearch_endpoint}
   trafficPolicy:
     tls:
       mode: SIMPLE
 YAML
-
-  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "service_entry" {
@@ -107,7 +95,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
   name: kibana
-  namespace: logging
+  namespace: ${var.namespace}
 spec:
   hosts:
     - ${var.opensearch_endpoint}
@@ -118,8 +106,6 @@ spec:
       protocol: TLS
   resolution: DNS
 YAML
-
-  depends_on = [kubernetes_namespace.logging]
 }
 
 resource "kubectl_manifest" "virtual_service" {
@@ -131,7 +117,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: kibana
-  namespace: logging
+  namespace: ${var.namespace}
 spec:
   gateways:
     - logging
@@ -153,6 +139,4 @@ spec:
           port:
             number: 443
 YAML
-
-  depends_on = [kubernetes_namespace.logging]
 }

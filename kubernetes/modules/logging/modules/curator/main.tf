@@ -5,7 +5,6 @@ terraform {
     opensearch = {
       source  = "opensearch-project/opensearch"
       version = "2.3.0"
-      # configuration_aliases = [opensearch.this]
     }
     kubectl = {
       source                = "gavinbunney/kubectl"
@@ -25,123 +24,118 @@ provider "opensearch" {
   opensearch_version = 2.11
 }
 
-data "template_file" "config_map" {
-  template = file("${path.module}/configs/config.yaml")
-  vars = {
-    OPENSEARCH_USERNAME      = var.opensearch_username
-    OPENSEARCH_PASSWORD      = var.opensearch_password
-    OPENSEARCH_ENDPOINT      = var.opensearch_endpoint
-    DELETE_OLD_INDICES_COUNT = var.delete_indices_from_es
-  }
-
-}
-
-data "template_file" "cronjob" {
-  template = file("${path.module}/configs/cronjob.yaml")
-  vars = {
-    DOCKER_IMAGE = var.docker_image_arn
-    CONFIG_MAP   = kubernetes_config_map.curator_config.metadata[0].name
-  }
-}
-
-resource "aws_s3_bucket" "curator" {
-  count  = var.create_s3_bucket_for_curator ? 1 : 0
-  bucket = "${var.vendor}-${var.environment}-${var.region}-elastisearch-backup"
-}
-
-resource "aws_iam_role" "curator" {
-  name = "TheSnapShotRole-${var.environment}-${var.region}"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "es.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-  inline_policy {
-    name = "ESS3SnapShotPolicy"
-    policy = templatefile("${path.module}/configs/ESS3SnapShotPolicy.json", {
-      S3_BUCKET = var.create_s3_bucket_for_curator ? aws_s3_bucket.curator[0].id : "osttra-${var.environment}-elastisearch-backup"
-    })
-  }
-}
-
-resource "aws_iam_user" "curator" {
-  name = "User-Curator-${var.environment}-${var.region}"
-}
-
-resource "aws_iam_policy" "iam_full_access_policy" {
-  name        = "IAMFullAccessPolicy-${var.environment}-${var.region}"
-  description = "Policy that grants full access to IAM"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action   = "iam:*",
-        Effect   = "Allow",
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_user_policy_attachment" "user_policy_attachment" {
-  user       = aws_iam_user.curator.name
-  policy_arn = aws_iam_policy.iam_full_access_policy.arn
-}
-
-# Create Access Key for IAM User
-resource "aws_iam_access_key" "iam_user_access_key" {
-  user = aws_iam_user.curator.name
-}
-
 
 # Create a role mapping
 resource "opensearch_roles_mapping" "curator" {
   role_name   = "manage_snapshots"
   description = "Adding the Curator role"
   users = [
-    "${aws_iam_user.curator.arn}"
+    var.curator_iam_user_arn
   ]
-
 }
 
-data "external" "register_es_repository" {
-  program = ["python3", "${path.module}/configs/register_repository.py"]
-  query = {
-    bucket         = var.create_s3_bucket_for_curator ? aws_s3_bucket.curator[0].id : "osttra-${var.environment}-elastisearch-backup"
-    region         = var.region
-    es_url         = "https://${var.opensearch_endpoint}/"
-    es_user        = var.opensearch_username
-    es_password    = var.opensearch_password
-    role_arn       = aws_iam_role.curator.arn
-    aws_access_key = aws_iam_access_key.iam_user_access_key.id
-    aws_secret_key = aws_iam_access_key.iam_user_access_key.secret
-
-  }
-}
-
-# ConfigMap for Curator
-resource "kubernetes_config_map" "curator_config" {
+resource "kubernetes_job" "repository_registration" {
   metadata {
-    name      = "curator-config"
+    name      = "curator-snapshot-registration"
     namespace = "logging"
   }
+  spec {
+    template {
+      metadata {
+        name = "curator-snapshot-registration"
+      }
+      spec {
+        container {
+          name  = "curator-snapshot-registration"
+          image = "python:3.9"
+
+
+          command = ["/bin/sh", "-c", "pip install requests && pip install requests-aws4auth && python /scripts/register_repository.py"]
+          env {
+            name  = "OPENSEARCH_USERNAME"
+            value = var.opensearch_username
+          }
+          env {
+            name  = "OPENSEARCH_PASSWORD"
+            value = var.opensearch_password
+          }
+          env {
+            name  = "OPENSEARCH_ENDPOINT"
+            value = var.opensearch_endpoint
+          }
+          env {
+            name  = "REGION"
+            value = var.region
+          }
+          env {
+            name  = "S3_BUCKET"
+            value = var.s3_bucket_for_curator
+          }
+          env {
+            name  = "IAM_ROLE"
+            value = var.curator_iam_role_arn
+          }
+          env {
+            name  = "ACCESS_KEY"
+            value = var.curator_iam_user_access_key
+          }
+          env {
+            name  = "SECRET_KEY"
+            value = var.curator_iam_user_secret_key
+          }
+          volume_mount {
+            name       = "script-volume"
+            mount_path = "/scripts"
+          }
+
+        }
+
+        restart_policy = "Never"
+
+        volume {
+          name = "script-volume"
+
+          config_map {
+            name = kubernetes_config_map.repository_registration.metadata[0].name
+          }
+        }
+      }
+    }
+
+    backoff_limit = 4
+  }
+
+  depends_on = [opensearch_roles_mapping.curator]
+}
+
+resource "kubernetes_config_map" "repository_registration" {
+  metadata {
+    name      = "curator-snapshot-registration"
+    namespace = "logging"
+  }
+
   data = {
-    config = data.template_file.config_map.rendered
+    "register_repository.py" = file("${path.module}/configs/register_repository.py")
   }
 }
 
-# CronJob for Curator
-resource "kubectl_manifest" "curator" {
-  provider  = kubectl.this
-  yaml_body = data.template_file.cronjob.rendered
+resource "kubectl_manifest" "curator_config" {
+  provider = kubectl.this
+  yaml_body = templatefile("${path.module}/configs/curator-config.yaml", {
+    opensearch_endpoint = var.opensearch_endpoint
+    opensearch_username = var.opensearch_username
+    opensearch_password = var.opensearch_password
+
+  })
+
+}
+
+resource "kubectl_manifest" "curator-cronjob" {
+  provider = kubectl.this
+  yaml_body = templatefile("${path.module}/configs/cronjob.yaml", {
+    docker_image = "381491919895.dkr.ecr.us-west-2.amazonaws.com/baton/utilities/curator"
+    tag          = var.curator_image_tag
+  })
 }
 
 

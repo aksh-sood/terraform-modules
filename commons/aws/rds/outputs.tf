@@ -25,3 +25,14 @@ output "cluster_arn" {
   description = "ARN of the RDS cluster"
   value       = module.rds_cluster.cluster_arn
 }
+
+output "cluster_instances" {
+  description = "Name of the RDS cluster writer instance"
+  value       = module.rds_cluster.cluster_members
+}
+
+
+output "cluster_id" {
+  description = "Name of the RDS cluster"
+  value       = module.rds_cluster.cluster_id
+}

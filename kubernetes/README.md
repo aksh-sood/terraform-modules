@@ -167,6 +167,7 @@ terraform apply
 | enable_sftp | Optional enabling of SFTP server|bool | `true` |
 | enable_cluster_autoscaler | Optional installation of cluster autoscaler controller| bool|`false`|
 | baton_application_namespaces\* | List of namespaces and services with requirments                    | list(baton_application_namespaces)                          | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
+| waf_arn | ARN of the WAF to associate with resources | string | `""` |
 
 **NOTE: `enable_siem` parameter is used to enable/disable the logging of istio ingress . If set to `true` ,`siem_storage_s3_bucket` is required attribute with S3 bucekt in the same region as the EKS cluster**
 

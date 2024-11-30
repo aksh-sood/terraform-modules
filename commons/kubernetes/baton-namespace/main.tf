@@ -53,7 +53,7 @@ module "baton_application" {
   volumes              = concat(each.value.volumeMounts.volumes, local.env_cm.volume)
   mounts               = concat(each.value.volumeMounts.mounts, local.env_cm.mount)
   env = merge({
-    "APP_ENVIRONMENT"        = var.is_dr ? "${var.customer}-dr" : var.customer,
+    "APP_ENVIRONMENT"        = var.customer,
     "SPRING_PROFILES_ACTIVE" = var.namespace
     },
     each.value.env, var.common_env

@@ -42,3 +42,4 @@ variable "eks_public_access" {
   type        = bool
   default     = false
 }
+variable "secrets_key_bucket_name" {}

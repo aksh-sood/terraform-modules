@@ -1,9 +1,10 @@
+import os
 import requests
 import sys,json
 from requests_aws4auth import AWS4Auth
 
 def register_repository(bucket, region, es_url, es_user, es_password, role_arn, aws_access_key, aws_secret_key):
-    host = "https://vpc-durga-zk7qamsikixubikoklrbodvbvu.us-east-1.es.amazonaws.com/"
+    host = "https://"+es_url+"/"
     es_auth=(es_user,es_password)
     region = region
     headers = {"Content-Type": "application/json"}
@@ -33,13 +34,13 @@ def register_repository(bucket, region, es_url, es_user, es_password, role_arn, 
             print(json.dumps({"success": "False", "message": response.text})) 
 
 if __name__ == '__main__':
-    input_data = json.load(sys.stdin)
-    bucket = input_data['bucket']
-    region = input_data['region']
-    es_url = input_data['es_url']
-    es_user = input_data['es_user']
-    es_password = input_data['es_password']
-    role_arn = input_data['role_arn']
-    aws_access_key = input_data['aws_access_key']
-    aws_secret_key = input_data['aws_secret_key']
+    es_url = os.getenv('OPENSEARCH_ENDPOINT')
+    es_user=os.getenv('OPENSEARCH_USERNAME')
+    es_password = os.getenv('OPENSEARCH_PASSWORD')
+    region = os.getenv('REGION')
+    bucket = os.getenv('S3_BUCKET')
+    role_arn = os.getenv('IAM_ROLE')
+    aws_access_key = os.getenv('ACCESS_KEY')
+    aws_secret_key = os.getenv('SECRET_KEY')
+
     register_repository(bucket, region, es_url, es_user, es_password, role_arn, aws_access_key, aws_secret_key)

@@ -10,6 +10,10 @@ terraform {
   }
 }
 
+locals {
+  merged_alerts = concat(var.custom_alerts, var.required_alerts)
+}
+
 resource "random_password" "grafana" {
   length      = 16
   special     = false
@@ -34,18 +38,17 @@ resource "helm_release" "kube_prometheus_stack" {
       prometheus_volume_size = var.prometheus_volume_size
       grafana_volume_size    = var.grafana_volume_size
       grafana_password       = random_password.grafana.result
-      alerts = file("${path.module}/configs/alerts.yaml")
       alerts = templatefile("${path.module}/configs/alerts.yaml", {
-        custom_alerts = jsonencode(var.custom_alerts)
+        custom_alerts = jsonencode(local.merged_alerts)
         #  prometheus_volume_size=var.prometheus_volume_size
-        #  grafana_volume_size=var.grafana_volume_size 
+        #  grafana_volume_size=var.grafana_volume_size
       })
       alertmanager = templatefile("${path.module}/configs/alertmanager.yaml", {
         slack_web_hook            = var.slack_web_hook
         slack_channel_name        = var.slack_channel_name
         pagerduty_key             = var.pagerduty_key
         alert_manager_volume_size = var.alert_manager_volume_size
-        gchat_lambda_url          = var.gchat_lambda_url
+        encoded_gchat_url         = "${var.gchat_lambda_url}${urlencode(var.gchat_webhook_url)}"
       })
     })
   ]

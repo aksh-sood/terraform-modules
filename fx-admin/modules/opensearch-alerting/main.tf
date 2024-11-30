@@ -1,24 +1,18 @@
-terraform {
-  required_providers {
-    opensearch = {
-      source                = "opensearch-project/opensearch"
-      configuration_aliases = [opensearch.this]
-    }
-  }
-}
+
 
 module "opensearch_monitors" {
   source = "../../../commons/utilities/opensearch-alerting"
 
-  monitor_path                    = "${path.module}/monitors"
+  opensearch_endpoint             = var.opensearch_endpoint
+  monitor_path                    = "${path.cwd}/${path.module}/monitors"
   slack_webhook_url               = var.slack_webhook_url
   gchat_webhook_url               = var.gchat_webhook_url
   gchat_high_priority_webhook_url = var.gchat_high_priority_webhook_url
   pagerduty_integration_key       = var.pagerduty_integration_key
-  ses_email_account_id            = var.ses_email_account_id
   ses_email_recipients            = var.ses_email_recipients
+  opensearch_password             = var.opensearch_password
+  opensearch_username             = var.opensearch_username
+  region                          = var.region
+  ses_email_config                = var.ses_email_config
 
-  providers = {
-    opensearch.this = opensearch.this
-  }
 }

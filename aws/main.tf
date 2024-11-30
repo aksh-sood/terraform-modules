@@ -89,6 +89,7 @@ module "client_vpn" {
   subnet_id = module.vpc.private_subnets[0]
 
   name                     = var.environment
+  region                   = var.region
   target_network_cidr      = var.vpc_cidr
   access_group_id          = var.client_vpn_access_group_id
   saml_metadata_bucket     = var.client_vpn_metadata_bucket_name
@@ -130,12 +131,12 @@ module "eks" {
   source = "./modules/eks"
   count  = var.create_eks ? 1 : 0
 
-  vpc_id                         = module.vpc.id
-  azs                            = module.vpc.azs
-  private_subnet_ids             = module.vpc.private_subnets
-  public_subnet_ids              = module.vpc.public_subnets
-  kms_key_arn                    = module.kms.key_arn
-  secrets_key_bucket_bucket_name = module.secrets_bucket[0].id
+  vpc_id                  = module.vpc.id
+  azs                     = module.vpc.azs
+  private_subnet_ids      = module.vpc.private_subnets
+  public_subnet_ids       = module.vpc.public_subnets
+  kms_key_arn             = module.kms.key_arn
+  secrets_key_bucket_name = module.secrets_bucket[0].id
 
   region                     = var.region
   vpc_cidr                   = var.vpc_cidr
@@ -160,20 +161,66 @@ module "eks" {
   depends_on = [module.vpc]
 }
 
+
+module "kms_for_curator_s3" {
+
+  source     = "../external/kms"
+  depends_on = [module.opensearch]
+
+  key_administrators = [
+    data.aws_caller_identity.current.arn
+  ]
+
+  key_users                         = [module.eks[0].node_role_arn, module.eks[0].cluster_role_arn, module.opensearch[0].curator_iam_role_arn]
+  key_service_users                 = [module.eks[0].node_role_arn, module.eks[0].cluster_role_arn, module.opensearch[0].curator_iam_role_arn]
+  key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+  aliases                           = ["resource-${var.environment}-curator"]
+
+  tags = var.cost_tags
+}
+
+module "s3_for_curator" {
+
+  source     = "../commons/aws/s3"
+  depends_on = [module.kms_for_curator_s3]
+
+  count       = var.create_s3_bucket_for_curator ? 1 : 0
+  name        = "${var.vendor}-${var.environment}-${var.region}-elastisearch-backup"
+  kms_key_arn = module.kms_for_curator_s3.key_arn
+
+  tags = var.cost_tags
+}
+
+
 module "opensearch" {
   source = "./modules/opensearch"
   count  = var.create_eks ? 1 : 0
 
   vpc_id      = module.vpc.id
-  subnet_ids  = module.vpc.public_subnets
+  subnet_ids  = module.vpc.private_subnets
   kms_key_arn = module.kms.key_arn
   eks_sg      = var.create_eks ? module.eks[0].primary_security_group_id : null
 
-  domain_name     = var.environment
-  engine_version  = var.opensearch_engine_version
-  instance_type   = var.opensearch_instance_type
-  instance_count  = var.opensearch_instance_count
-  ebs_volume_size = var.opensearch_ebs_volume_size
-  master_username = var.opensearch_master_username
-  cost_tags       = var.cost_tags
+  domain_name           = var.environment
+  engine_version        = "OpenSearch_${var.opensearch_version}"
+  instance_type         = var.opensearch_instance_type
+  instance_count        = var.opensearch_instance_count
+  ebs_volume_size       = var.opensearch_ebs_volume_size
+  master_username       = var.opensearch_master_username
+  region                = var.region
+  environment           = var.environment
+  s3_bucket_for_curator = local.s3_bucket
+  cost_tags             = var.cost_tags
+}
+
+module "waf" {
+  source = "./modules/waf"
+  count  = var.enable_waf ? 1 : 0
+
+  name                     = "${var.vendor}-${var.environment}"
+  allowed_ip_sets          = var.waf_allowed_ip_sets
+  custom_waf_rules         = var.waf_custom_rules
+  modify_managed_waf_rules = var.waf_modify_managed_rules
+
+  tags = var.cost_tags
 }

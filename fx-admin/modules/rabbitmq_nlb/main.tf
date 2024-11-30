@@ -15,7 +15,7 @@ resource "aws_security_group_rule" "whitelisting_custom_ips_to_5671" {
   from_port         = "5671"
   type              = "ingress"
   protocol          = "tcp"
-  cidr_blocks       = [ each.key ]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.nlb.id
 }
 
@@ -26,6 +26,10 @@ resource "aws_security_group_rule" "whitelisting_vpc_to_5671" {
   protocol          = "tcp"
   cidr_blocks       = [data.aws_vpc.this.cidr_block]
   security_group_id = aws_security_group.nlb.id
+
+  lifecycle {
+    ignore_changes = [ cidr_blocks ]
+  }
 }
 
 
@@ -36,36 +40,41 @@ resource "aws_security_group_rule" "whitelisting_vpc_on_nlb_on_443" {
   protocol          = "tcp"
   cidr_blocks       = [data.aws_vpc.this.cidr_block]
   security_group_id = aws_security_group.nlb.id
+
+  lifecycle {
+    ignore_changes = [ cidr_blocks ]
+  }
 }
 
-resource "aws_security_group_rule" "whitelisting_vpc_on_rabbitmq_on_443" {
-  to_port           = "443"
-  from_port         = "443"
-  type              = "ingress"
-  protocol          = "tcp"
-  cidr_blocks       = [data.aws_vpc.this.cidr_block]
-  security_group_id = var.rabbitmq_sg
-}
 
 resource "aws_security_group_rule" "whitelisting_rabbitmq" {
-  to_port           = 5671
-  from_port         = 5671
-  type              = "ingress"
-  protocol          = "tcp"
-  source_security_group_id       = var.rabbitmq_sg
-  security_group_id = aws_security_group.nlb.id
+  to_port                  = 5671
+  from_port                = 5671
+  type                     = "ingress"
+  protocol                 = "tcp"
+  source_security_group_id = var.rabbitmq_sg
+  security_group_id        = aws_security_group.nlb.id
 }
 
-resource "aws_security_group_rule" "whitelist_nlb_to_rabbitmq" { #check
-  to_port           = 5671
-  from_port         = 5671
-  type              = "egress"
-  protocol          = "tcp"
-  source_security_group_id       = var.rabbitmq_sg
-  security_group_id = aws_security_group.nlb.id
+resource "aws_security_group_rule" "whitelist_nlb_to_rabbitmq_5671" {
+  to_port                  = 5671
+  from_port                = 5671
+  type                     = "egress"
+  protocol                 = "tcp"
+  source_security_group_id = var.rabbitmq_sg
+  security_group_id        = aws_security_group.nlb.id
 }
 
-resource "aws_security_group_rule" "whitelist_nlb_on_rabbitmq" { #check 
+resource "aws_security_group_rule" "whitelist_nlb_to_rabbitmq_443" {
+  to_port                  = 443
+  from_port                = 443
+  type                     = "egress"
+  protocol                 = "tcp"
+  source_security_group_id = var.rabbitmq_sg
+  security_group_id        = aws_security_group.nlb.id
+}
+
+resource "aws_security_group_rule" "whitelist_nlb_on_rabbitmq" {
   from_port                = 5671
   to_port                  = 5671
   protocol                 = "tcp"
@@ -80,7 +89,7 @@ resource "aws_lb_target_group" "rabbitmq_5671_target_group" {
   protocol    = "TLS"
   target_type = "ip"
   vpc_id      = var.vpc_id
-  
+
   health_check {
     port                = 443
     protocol            = "HTTPS"
@@ -98,6 +107,10 @@ resource "aws_lb_target_group_attachment" "rabbitmq_5671_target_group" {
   target_group_arn = aws_lb_target_group.rabbitmq_5671_target_group.arn
   target_id        = var.rabbitmq_private_ip
   port             = 5671
+
+  lifecycle {
+    ignore_changes = [ target_id ]
+  }
 }
 
 #Creating a Network Load Balancer

@@ -1,0 +1,151 @@
+{
+    "name": "Swift-Delivery",
+    "type": "monitor",
+    "monitor_type": "query_level_monitor",
+    "enabled": true,
+    "schedule": {
+       "period": {
+          "unit": "MINUTES",
+          "interval": 5
+       }
+    },
+    "inputs": [
+       {
+          "search": {
+             "indices": [
+                "filebeat*"
+             ],
+             "query": {
+                "size": 0,
+                "query": {
+                   "bool": {
+                      "filter": [
+                         {
+                            "range": {
+                               "@timestamp": {
+                                  "from": "now-5m",
+                                  "to": "now",
+                                  "include_lower": true,
+                                  "include_upper": true,
+                                  "boost": 1
+                               }
+                            }
+                         },
+                         {
+                            "query_string": {
+                               "query": "kubernetes.container.name:\"swiftservice\" AND message:\"Error occurred while processing message\" AND message:\"Sending failure queueus\"",
+                               "fields": [],
+                               "type": "best_fields",
+                               "default_operator": "or",
+                               "max_determinized_states": 10000,
+                               "enable_position_increments": true,
+                               "fuzziness": "AUTO",
+                               "fuzzy_prefix_length": 0,
+                               "fuzzy_max_expansions": 50,
+                               "phrase_slop": 0,
+                               "escape": false,
+                               "auto_generate_synonyms_phrase_query": true,
+                               "fuzzy_transpositions": true,
+                               "boost": 1
+                            }
+                         }
+                      ],
+                      "adjust_pure_negative": true,
+                      "boost": 1
+                   }
+                }
+             }
+          }
+       }
+    ],
+    "triggers": [
+       {
+          "query_level_trigger": {
+             "name": "Swift-Delivery",
+             "severity": "1",
+             "condition": {
+                "script": {
+                   "source": "ctx.results[0].hits.total.value > 0",
+                   "lang": "painless"
+                }
+             },
+             "actions": [
+                {
+                   "name": "slack",
+                   "destination_id": "${slack_channel_id}",
+                   "message_template": {
+                      "source": " ",
+                      "lang": "mustache"
+                   },
+                   "throttle_enabled": false,
+                   "subject_template": {
+                      "source": "*FX-BATON-PROD* : Found *{{ctx.results.0.hits.total.value}}* entries on *Swift delivery failure* in the last five minutes",
+                      "lang": "mustache"
+                   }
+                },
+                {
+                   "name": "pager",
+                   "destination_id": "${pagerduty_channel_id}",
+                   "message_template": {
+                      "source": "{\"payload\":{\"summary\":\"*FX-BATON-PROD* : Found *{{ctx.results.0.hits.total.value}}* entries on *Swift delivery failure* in the last five minutes\",\"source\":\"Kibana\",\"severity\":\"info\",\"component\":\"Kubernetes\"},\"routing_key\":\"${pagerduty_integration_key}\",\"event_action\":\"trigger\",\"client\":\"Kibana\",\"client_url\":\"https://fx-baton-prod-kibana.batonsystems.com\"}",
+                      "lang": "mustache"
+                   },
+                   "throttle_enabled": false,
+                   "subject_template": {
+                      "source": "",
+                      "lang": "mustache"
+                   }
+                },
+                {
+                   "name": "osttra-email",
+                   "destination_id": "${email_channel_id}",
+                   "message_template": {
+                      "source": "Dear Team,\n\nWe have detected {{ctx.results.0.hits.total.value}} entries related to Swift delivery failures in FX-BATON-PROD in the last five minutes.\n\nPlease note: this e-mail was sent from an address that cannot accept incoming e-mail. Should you need to address any issues related to this alert, please contact our support team at support@batonsystems.com.\n\nBest regards,\nBaton Systems",
+                      "lang": "mustache"
+                   },
+                   "throttle_enabled": false,
+                   "subject_template": {
+                      "source": "FX-BATON-PROD : Detected Swift delivery failure ",
+                      "lang": "mustache"
+                   }
+                }
+             ]
+          }
+       }
+    ],
+    "ui_metadata": {
+       "schedule": {
+          "timezone": null,
+          "frequency": "interval",
+          "period": {
+             "unit": "MINUTES",
+             "interval": 5
+          },
+          "daily": 0,
+          "weekly": {
+             "tue": false,
+             "wed": false,
+             "thur": false,
+             "sat": false,
+             "fri": false,
+             "mon": false,
+             "sun": false
+          },
+          "monthly": {
+             "type": "day",
+             "day": 1
+          },
+          "cronExpression": "0 */1 * * *"
+       },
+       "monitor_type": "query_level_monitor",
+       "search": {
+          "searchType": "query",
+          "timeField": "",
+          "aggregations": [],
+          "groupBy": [],
+          "bucketValue": 1,
+          "bucketUnitOfTime": "h",
+          "filters": []
+       }
+    }
+ }

@@ -1,0 +1,21 @@
+{{- if and ( .Values.health_endpoint ) ( .Values.url_prefix ) }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: prometheus-kube-prometheus-prometheus
+    release: prometheus
+  name: {{ .Release.Name }}
+  namespace: monitoring
+spec:
+  endpoints:
+    - interval: 10s
+      path: {{ .Values.url_prefix }}/metrics
+      port: http
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      application: {{ .Release.Name }}
+      app: {{ .Release.Name }}
+{{- end }}

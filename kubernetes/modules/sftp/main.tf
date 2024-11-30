@@ -1,8 +1,8 @@
 resource "random_password" "password" {
   length           = 16
-  special          = true
-  override_special = "!*=+?"
-  min_special      = 1
+  special          = false
+  # override_special = "!*=+?"
+  # min_special      = 1
   lower            = true
   min_lower        = 1
   numeric          = true

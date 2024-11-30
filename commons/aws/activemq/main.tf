@@ -84,19 +84,16 @@ resource "aws_mq_configuration" "mq_configuration" {
   description    = "ActiveMQ for ${var.name}"
   engine_type    = "ActiveMQ"
   engine_version = var.engine_version
-  data           = file("${path.module}/config.xml")
-
-  # The ignore lifecycle block is added to ignore changes to ActiveMQ configuration 
-  # as it always generates a change in plan whenever triggered which can cause conflict with GITOPS model
-  lifecycle {
-    ignore_changes = [
-      data
-    ]
-  }
+  data = templatefile("${path.module}/config.xml", {
+    network_connector = var.broker_connections
+  })
 }
 
+# The below terraform resource has  a limitation that it runs everytime 
+# due to inability to support minor version changes from version 5.18 onwards
+
 resource "aws_mq_broker" "activemq" {
-  broker_name = "activemq-${var.name}"
+  broker_name = "${var.name}-activemq"
 
   configuration {
     id = aws_mq_configuration.mq_configuration.id
@@ -122,6 +119,12 @@ resource "aws_mq_broker" "activemq" {
     console_access = true
     username       = var.username
     password       = random_password.activemq_password.result
+  }
+
+  maintenance_window_start_time {
+    day_of_week = var.maintenance_window.day
+    time_of_day = var.maintenance_window.time
+    time_zone   = var.maintenance_window.time_zone
   }
 
   tags = var.tags

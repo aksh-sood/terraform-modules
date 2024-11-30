@@ -1,33 +1,43 @@
 terraform {
   required_providers {
     opensearch = {
-      source                = "opensearch-project/opensearch"
-      configuration_aliases = [opensearch.this]
+      source  = "opensearch-project/opensearch"
+      version = "2.3.0"
     }
   }
 }
 
-locals {
-  monitor_files = fileset(var.monitor_path, "*.json")
-  monitors = {
-    for file in local.monitor_files :
-    basename(file) => jsondecode(file("${var.monitor_path}/${file}"))
-  }
+provider "opensearch" {
+  url                = "https://${var.opensearch_endpoint}:443"
+  aws_region         = var.region
+  username           = var.opensearch_username
+  password           = var.opensearch_password
+  sign_aws_requests  = false
+  healthcheck        = false
+  opensearch_version = var.opensearch_version
 }
 
 resource "opensearch_monitor" "dynamic_monitors" {
-  for_each = local.monitors
+  for_each =fileset(var.monitor_path, "*.json")
+
   body = templatefile("${var.monitor_path}/${each.key}", {
-    slack_channel_id               = length(opensearch_channel_configuration.slack) > 0 ? opensearch_channel_configuration.slack[0].id : null,
-    gchat_channel_id               = length(opensearch_channel_configuration.gchat) > 0 ? opensearch_channel_configuration.gchat[0].id : null,
-    gchat_high_priority_channel_id = length(opensearch_channel_configuration.gchat_high_priority) > 0 ? opensearch_channel_configuration.gchat_high_priority[0].id : null,
-    pagerduty_channel_id           = length(opensearch_channel_configuration.pagerduty) > 0 ? opensearch_channel_configuration.pagerduty[0].id : null,
-    ses_email_channel_id           = length(opensearch_channel_configuration.ses_email) > 0 ? opensearch_channel_configuration.ses_email[0].id : null
+    slack_channel_id               = length(opensearch_channel_configuration.slack) > 0 ? opensearch_channel_configuration.slack[0].id : "",
+    gchat_channel_id               = length(opensearch_channel_configuration.gchat) > 0 ? opensearch_channel_configuration.gchat[0].id : "",
+    gchat_high_priority_channel_id = length(opensearch_channel_configuration.gchat_high_priority) > 0 ? opensearch_channel_configuration.gchat_high_priority[0].id : "",
+    pagerduty_channel_id           = length(opensearch_channel_configuration.pagerduty) > 0 ? opensearch_channel_configuration.pagerduty[0].id : "",
+    pagerduty_integration_key      = var.pagerduty_integration_key != null ? var.pagerduty_integration_key : "",
+    email_channel_id               = length(opensearch_channel_configuration.email_notification) > 0 ? opensearch_channel_configuration.email_notification[0].id : ""
   })
+
+
+  lifecycle {
+    ignore_changes = [ body ]
+  }
 }
 
 resource "opensearch_channel_configuration" "slack" {
   count = var.slack_webhook_url != "" ? 1 : 0
+
   body = jsonencode({
     config_id = "slack"
     config = {
@@ -83,32 +93,50 @@ resource "opensearch_channel_configuration" "gchat_high_priority" {
 }
 
 resource "opensearch_channel_configuration" "pagerduty" {
-  count = var.pagerduty_integration_key != "" ? 1 : 0
+  count = var.pagerduty_integration_key != null ? 1 : 0
   body = jsonencode({
     config_id = "pagerduty"
     config = {
       name        = "pagerduty"
       description = "PagerDuty Destination for Application Alerts"
-      config_type = "pagerduty"
+      config_type = "webhook"
       is_enabled  = true
-      pagerduty = {
-        integration_key = var.pagerduty_integration_key
+      webhook = {
+        url = "https://events.pagerduty.com/v2/enqueue"
+        header_params = {
+          "Content-Type" = "application/json"
+        }
+        method = "POST"
       }
     }
   })
 }
 
 resource "opensearch_channel_configuration" "ses_email" {
-  count = var.ses_email_account_id != "" ? 1 : 0
+  count = var.ses_email_config != null ? 1 : 0
   body = jsonencode({
     config_id = "ses_email"
     config = {
       name        = "ses_email"
       description = "SES Email Destination for Application Alerts"
+      config_type = "ses_account"
+      is_enabled  = true
+      ses_account = var.ses_email_config
+    }
+  })
+}
+
+resource "opensearch_channel_configuration" "email_notification" {
+  count = var.ses_email_config != null ? 1 : 0
+  body = jsonencode({
+    config_id = "email_notification"
+    config = {
+      name        = "email_notification"
+      description = "Email Notification Channel for Application Alerts"
       config_type = "email"
       is_enabled  = true
       email = {
-        email_account_id = var.ses_email_account_id
+        email_account_id = opensearch_channel_configuration.ses_email[0].id
         recipients       = var.ses_email_recipients
       }
     }

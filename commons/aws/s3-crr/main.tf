@@ -80,6 +80,16 @@ resource "aws_s3_bucket_replication_configuration" "primary" {
     destination {
       bucket        = "arn:aws:s3:::${var.secondary_bucket_name}"
       storage_class = "STANDARD"
+
+      encryption_configuration {
+        replica_kms_key_id = var.secondary_kms_key
+      }
+    }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
+        status = "Enabled"
+      }
     }
   }
 
@@ -100,6 +110,16 @@ resource "aws_s3_bucket_replication_configuration" "secondary" {
     destination {
       bucket        = "arn:aws:s3:::${var.primary_bucket_name}"
       storage_class = "STANDARD"
+
+      encryption_configuration {
+        replica_kms_key_id = var.primary_kms_key
+      }
+    }
+
+    source_selection_criteria {
+      sse_kms_encrypted_objects {
+        status = "Enabled"
+      }
     }
   }
 

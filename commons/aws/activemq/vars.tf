@@ -15,6 +15,22 @@ variable "subnet_ids" {
   type = list(string)
 }
 
+variable "maintenance_window" {
+  type = object({
+    day       = string
+    time      = string
+    time_zone = string
+  })
+}
+
+variable "broker_connections" {
+  type = map(object({
+    uri       = string
+    user_name = string
+  }))
+  default = {}
+}
+
 variable "name" {}
 variable "region" {}
 variable "vpc_id" {}

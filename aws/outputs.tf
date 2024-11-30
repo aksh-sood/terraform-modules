@@ -53,6 +53,28 @@ output "grafana_role_arn" {
   value       = var.create_eks ? module.eks[0].grafana_role_arn : null
 }
 
+output "curator_iam_role_arn" {
+  value = var.create_eks ? module.opensearch[0].curator_iam_role_arn : null
+}
+
+output "curator_iam_user_arn" {
+  value = var.create_eks ? module.opensearch[0].curator_iam_user_arn : null
+}
+
+output "curator_iam_user_access_key" {
+  value     = var.create_eks ? module.opensearch[0].curator_iam_user_access_key : null
+  sensitive = true
+}
+
+output "curator_iam_user_secret_key" {
+  value     = var.create_eks ? module.opensearch[0].curator_iam_user_secret_key : null
+  sensitive = true
+}
+
+output "s3_bucket_for_curator" {
+  value = var.create_s3_bucket_for_curator ? module.s3_for_curator[0].id : null
+}
+
 
 output "opensearch_endpoint" {
   value = var.create_eks ? module.opensearch[0].endpoint : null
@@ -77,4 +99,9 @@ output "eks_cluster_role_arn" {
 
 output "keys_s3_bucket" {
   value = var.create_eks ? module.secrets_bucket[0].id : null
+}
+
+output "waf_arn" {
+  description = "ARN of the WAF"
+  value       = var.enable_waf ? module.waf[0].arn : null
 }

@@ -35,6 +35,7 @@ variable "client_cidr_block" {
 }
 
 variable "name" {}
+variable "region" {}
 variable "vpc_id" {}
 variable "cost_tags" {}
 variable "access_group_id" {}

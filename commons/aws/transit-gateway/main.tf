@@ -469,6 +469,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "peering_ap_southeast
   provider   = aws.ap-southeast-1
   depends_on = [time_sleep.wait_30_seconds, aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_ap_southeast_1_eu_west_1, aws_ec2_transit_gateway_route_table.peering_ap_southeast_1]
 }
+
 # Add routes to peering route tables
 resource "aws_ec2_transit_gateway_route" "peering_rt_self_route" {
   destination_cidr_block         = data.aws_vpc.central_vpc.cidr_block
@@ -718,6 +719,22 @@ resource "aws_route" "vpc_to_tgw" {
   ]
 }
 
+resource "aws_route" "vpc_to_dr_central_vpc" {
+  for_each = toset(local.unique_route_table_ids)
+
+  route_table_id         = each.value
+  destination_cidr_block = data.aws_vpc.dr_central_vpc.cidr_block
+  transit_gateway_id     = aws_ec2_transit_gateway.tgw_us_east_1.id
+
+  provider = aws.us-east-1
+  depends_on = [
+    aws_ec2_transit_gateway.tgw_us_east_1,
+    aws_ec2_transit_gateway_vpc_attachment.central_vpc_attachment,
+    aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_east_1_us_west_2,
+    time_sleep.wait_30_seconds
+  ]
+}
+
 # Create Transit Gateway attachment for DR central VPC
 resource "aws_ec2_transit_gateway_vpc_attachment" "dr_central_vpc_attachment" {
   subnet_ids         = var.dr_central_vpc_subnet_ids
@@ -771,6 +788,16 @@ resource "aws_ec2_transit_gateway_route_table_propagation" "dr_central_vpc_rt_pr
     aws_ec2_transit_gateway_route_table.dr_central_vpc_rt,
     time_sleep.wait_30_seconds
   ]
+}
+
+# Add dr central routes to peering route tables
+resource "aws_ec2_transit_gateway_route" "peering_rt_dr_self_route" {
+  destination_cidr_block         = data.aws_vpc.dr_central_vpc.cidr_block
+  transit_gateway_attachment_id  = aws_ec2_transit_gateway_vpc_attachment.dr_central_vpc_attachment.id
+  transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.peering_us_west_2.id
+
+  provider   = aws.us-west-2
+  depends_on = [aws_ec2_transit_gateway_vpc_attachment.dr_central_vpc_attachment, time_sleep.wait_30_seconds, aws_ec2_transit_gateway_route_table.peering_us_west_2]
 }
 
 # Add routes to DR central VPC route table for all regions
@@ -832,6 +859,22 @@ resource "aws_route" "dr_vpc_to_tgw" {
     aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_us_east_1,
     aws_ec2_transit_gateway_peering_attachment.tgw_peering_us_west_2_ap_southeast_1,
     aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_eu_west_1,
+    time_sleep.wait_30_seconds
+  ]
+}
+
+resource "aws_route" "dr_vpc_to_central_vpc" {
+  for_each = toset(local.dr_unique_route_table_ids)
+
+  route_table_id         = each.value
+  destination_cidr_block = data.aws_vpc.central_vpc.cidr_block
+  transit_gateway_id     = aws_ec2_transit_gateway.tgw_us_west_2.id
+
+  provider = aws.us-west-2
+  depends_on = [
+    aws_ec2_transit_gateway.tgw_us_west_2,
+    aws_ec2_transit_gateway_vpc_attachment.dr_central_vpc_attachment,
+    aws_ec2_transit_gateway_peering_attachment_accepter.tgw_peering_accepter_us_west_2_us_east_1,
     time_sleep.wait_30_seconds
   ]
 }

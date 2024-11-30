@@ -20,7 +20,8 @@ Below is a list of resources created :-
     - IAM roles and policies for EKS Cluster and Nodes
     - EFS Drive for persistent volume and security Group For EFS
     - Opensearch Domain
-  
+    - WAF
+
   - Kubernetes
     - LBC Addons 
     - Istio installation in EKS cluster
@@ -63,7 +64,10 @@ Below is a list of resources created :-
     - Utilities
       - Cloudflare
 
-Documentation to the relevant resources can be found in [AWS](./aws/README.md), [Kubernetes](./kubernetes/README.md), [Commons](./commons/README.md) and [FX ADMIN](./fx-admin/README.md)
+  - Rollback
+    - RDS CRR
+
+Documentation to the relevant resources can be found in [AWS](./aws/README.md), [Kubernetes](./kubernetes/README.md), [Commons](./commons/README.md), [FX ADMIN](./fx-admin/README.md) and [ROLLBACK](./rollback/README.MD)
 
 # WHY MULTIPLE FOLDERS
 
@@ -75,7 +79,7 @@ The Terraform community also suggests keeping these folders separate for better 
 
 The [commons](./commons/) folder is used a utility across multiple folders with common resources being created across multiple folders and acts as a universal module for other folders.
 
-The [FX Admin](./fx-admin/) folder deals with the creation of resources strictly for the admin account which distributes the messages to other customer accounts .
+The [FX Admin](./fx-admin/) folder deals with the creation of resources strictly for the admin account which distributes the messages to other customer accounts.
 
 # The External Folder
 

@@ -35,17 +35,17 @@ provider "aws" {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/${var.environment}"
+  config_path = "~/.kube/${var.environment}-${var.region}"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/${var.environment}"
+    config_path = "~/.kube/${var.environment}-${var.region}"
   }
 }
 
 provider "kubectl" {
-  config_path = "~/.kube/${var.environment}"
+  config_path = "~/.kube/${var.environment}-${var.region}"
   alias       = "this"
 }
 

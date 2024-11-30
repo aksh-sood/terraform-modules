@@ -15,6 +15,7 @@ The following folder is a sub part of the entire Terraform IAC project and deals
 - IAM roles and policies for EKS Cluster and Nodes
 - EFS Drive for persistent volume and security Group For EFS
 - Opensearch Kibana Domain
+- WAF
 
 # Modules
 
@@ -187,6 +188,10 @@ terraform apply
 | opensearch_instance_count  | The number of instances in the domain  | number |`1`|
 | opensearch_ebs_volume_size | The size of the EBS volumes            | number |`20`|
 | opensearch_master_username | The master username for the domain     | string |`master`|
+| enable_waf | Enable or disable WAF | bool | `true` |
+| waf_allowed_ip_sets | IP sets to be created and used in WAF rules | map(object({ip_address_version = string, addresses = list(string)})) | `{}` |
+| waf_custom_rules | Custom WAF rules to be added to the WAF | map(object({priority = number, action = string, statement = any, visibility_config = object({cloudwatch_metrics_enabled = bool, metric_name = string, sampled_requests_enabled = bool})})) | `{}` |
+| waf_modify_managed_rules | Map to modify or override default WAF rules | map(object({rules_to_count = list(string), priority = number})) | `{}` |
 
 **Note: If `enable_siem` is `true` , `siem_s3_bucket` is required parameter for logging VPC traffic** 
 **Note: If `client_vpn_enable` is `false`, then the VPN's Security Group needs to be whitelisted manually to the Private Load Balancer's Security Group and vice versa, inorder to expose Grafana and OpenSearch privately.**

@@ -81,7 +81,7 @@ module "eks" {
   #logging
   cluster_enabled_log_types = ["audit", "api", "authenticator", "controllerManager", "scheduler"]
 
-  #configuration of kms key  
+  #configuration of kms key
   create_kms_key = false
   cluster_encryption_config = {
     provider_key_arn = var.kms_key_arn
@@ -125,8 +125,9 @@ resource "aws_security_group_rule" "cluster" {
 resource "null_resource" "cluster_config_pull" {
   provisioner "local-exec" {
     command = <<-EOT
-    aws eks --region ${var.region} update-kubeconfig --name ${var.cluster_name} --kubeconfig ~/.kube/${var.cluster_name}
+    aws eks --region ${var.region} update-kubeconfig --name ${var.cluster_name} --kubeconfig ~/.kube/${var.cluster_name}-${var.region}
     export KUBECONFIG=$KUBECONFIG:~/.kube/${var.cluster_name}
+    aws s3 cp ~/.kube/${var.cluster_name}-${var.region} s3://${var.secrets_key_bucket_name}/kubeconfig/${var.cluster_name}-${var.region}
     EOT
   }
 

@@ -1,9 +1,9 @@
 locals {
   node_groups_list = lookup(var.eks_node_groups, "node_groups", var.node_groups)
 
-  # By converting the list to map, we use the keys instead of the indexes from the list 
+  # By converting the list to map, we use the keys instead of the indexes from the list
   # for maintenance of terraform state and resources created.
-  # This makes the entire state management order independent i.e the user can insert or delete 
+  # This makes the entire state management order independent i.e the user can insert or delete
   # a resource configuration anywhere in the list without affecting other resources.
   # It also increases the readability, dependency management and maintenance of the infrastructure.
   node_groups_map = {
@@ -38,7 +38,7 @@ resource "aws_security_group_rule" "ingress_security_group_whitelist_443" {
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = [ each.key ]
+  cidr_blocks       = [each.key]
   security_group_id = aws_security_group.elb_sg.id
 }
 
@@ -145,6 +145,7 @@ module "cluster" {
   eks_ingress_whitelist_ips = var.eks_ingress_whitelist_ips
   eks_public_access         = var.eks_public_access
   eks_public_access_ips     = var.eks_public_access_ips
+  secrets_key_bucket_name   = var.secrets_key_bucket_name
 
   depends_on = [module.iam]
 }
@@ -169,7 +170,7 @@ resource "aws_key_pair" "generated_key" {
 
 #This resources saves the private key to access EKS nodes
 resource "aws_s3_object" "eks_nodes_private_key" {
-  bucket = var.secrets_key_bucket_bucket_name
+  bucket = var.secrets_key_bucket_name
   key    = "${var.cluster_name}-eks-nodes.pem"
   source = pathexpand("~/${var.cluster_name}-eks-nodes.pem")
 

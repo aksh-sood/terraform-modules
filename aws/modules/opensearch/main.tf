@@ -1,3 +1,5 @@
+data "aws_caller_identity" "this" {}
+
 resource "random_password" "password" {
   length           = 16
   special          = true
@@ -107,4 +109,51 @@ resource "aws_opensearch_domain_policy" "main" {
 EOF
 
   depends_on = [time_sleep.domain_policy]
+}
+
+resource "aws_iam_role" "curator" {
+  name = "TheSnapShotRole-${var.environment}-${var.region}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "es.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+  inline_policy {
+    name = "ESS3SnapShotPolicy-${var.environment}-${var.region}"
+    policy = templatefile("${path.module}/templates/ESS3SnapShotPolicy.json", {
+      S3_BUCKET = var.s3_bucket_for_curator
+    })
+  }
+}
+
+
+resource "aws_iam_user" "curator" {
+  name = "User-Curator-${var.environment}-${var.region}"
+}
+
+resource "aws_iam_policy" "iam_full_access_policy" {
+  name        = "IAMFullAccessPolicy-${var.environment}-${var.region}"
+  description = "Policy that grants full access to IAM"
+
+  policy = templatefile("${path.module}/templates/CuratorUserPolicy.json", {
+    ACCOUNT_ID    = data.aws_caller_identity.this.account_id
+    SNAPSHOT_ROLE = aws_iam_role.curator.id
+  })
+}
+
+resource "aws_iam_user_policy_attachment" "user_policy_attachment" {
+  user       = aws_iam_user.curator.name
+  policy_arn = aws_iam_policy.iam_full_access_policy.arn
+}
+
+# Create Access Key for IAM User
+resource "aws_iam_access_key" "iam_user_access_key" {
+  user = aws_iam_user.curator.name
 }

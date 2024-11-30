@@ -71,6 +71,7 @@ module "istio" {
   siem_storage_s3_bucket      = var.siem_storage_s3_bucket
   security_group              = var.elb_security_group
   internal_alb_security_group = var.internal_alb_security_group
+  waf_arn                     = var.waf_arn
 
   providers = {
     kubectl.this = kubectl.this
@@ -80,9 +81,9 @@ module "istio" {
 }
 
 module "gchat_lambda" {
-  source = "../commons/aws/gchat-lambda"
-  count  = var.gchat_webhook != null ? 1 : 0
-
+  source                    = "../commons/aws/gchat-lambda"
+  count                     = var.gchat_webhook != null ? 1 : 0
+  slack_webhook_url         = ""
   name                      = var.environment
   environment               = var.environment
   region                    = var.region
@@ -97,6 +98,8 @@ module "monitoring" {
 
   isito_dependency = module.istio
 
+  gchat_lambda_url = var.gchat_webhook != null ? module.gchat_lambda[0].url : null
+
   configure_grafana             = var.create_dns_records
   environment                   = var.environment
   domain_name                   = var.domain_name
@@ -105,12 +108,12 @@ module "monitoring" {
   node_exporter_version         = var.node_exporter_version
   kube_state_metrics_version    = var.kube_state_metrics_version
   slack_web_hook                = var.slack_web_hook
+  gchat_webhook_url             = var.gchat_webhook
   pagerduty_key                 = var.pagerduty_key
-  custom_alerts                 = var.custom_alerts
+  custom_alerts                 = var.prometheus_custom_alerts
   alert_manager_volume_size     = var.alert_manager_volume_size
   prometheus_volume_size        = var.prometheus_volume_size
   grafana_role_arn              = var.grafana_role_arn
-  gchat_lambda_url              = ""
 
   providers = {
     kubectl.this = kubectl.this
@@ -121,20 +124,23 @@ module "monitoring" {
 module "logging" {
   source = "./modules/logging"
 
-  region                       = var.region
-  vendor                       = var.vendor
-  dependency                   = module.istio
-  environment                  = var.environment
-  domain_name                  = var.domain_name
-  opensearch_endpoint          = var.opensearch_endpoint
-  opensearch_password          = var.opensearch_password
-  opensearch_username          = var.opensearch_username
-  create_s3_bucket_for_curator = var.create_s3_bucket_for_curator
-  delete_indices_from_es       = var.delete_indices_from_es
+  region                      = var.region
+  vendor                      = var.vendor
+  dependency                  = module.istio
+  environment                 = var.environment
+  domain_name                 = var.domain_name
+  s3_bucket_for_curator       = var.s3_bucket_for_curator
+  opensearch_endpoint         = var.opensearch_endpoint
+  opensearch_password         = var.opensearch_password
+  opensearch_username         = var.opensearch_username
+  curator_image_tag           = var.curator_image_tag
+  curator_iam_role_arn        = var.curator_iam_role_arn
+  curator_iam_user_arn        = var.curator_iam_user_arn
+  curator_iam_user_access_key = var.curator_iam_user_access_key
+  curator_iam_user_secret_key = var.curator_iam_user_secret_key
 
   providers = {
     kubectl.this = kubectl.this
-    # opensearch.this = opensearch.this
   }
 
 }

@@ -134,11 +134,11 @@ variable "enable_cluster_autoscaler" {
 variable "cluster_version" {
   description = "eks cluster verison"
   type        = string
-  default     = "1.30"
+  default     = "1.28"
 }
 
 variable "eks_ingress_whitelist_ips" {
-  description = "List of IPv4 CIDR blocks to whitelist to EKS (ingress)"
+  description = "List of IPv4 CIDR blocks to whitelist to EKS sg (ingress)"
   type        = list(string)
   default     = []
 }
@@ -343,7 +343,7 @@ variable "disabled_security_hub_controls" {
 variable "opensearch_ebs_volume_size" {
   description = "Size of EBS volumes attached to data nodes (in GiB)"
   type        = number
-  default     = 20
+  default     = 100
 }
 
 variable "opensearch_instance_type" {
@@ -364,10 +364,68 @@ variable "opensearch_instance_count" {
   type        = number
 }
 
-variable "opensearch_engine_version" {
-  description = "Specify the engine version for the Amazon OpenSearch Service domain"
-  default     = "OpenSearch_2.11"
+variable "opensearch_version" {
+  description = "Specify the engine version for the Amazon OpenSearch Service domain. Just give the version number alone eg. 2.15"
+  default     = "2.15"
   type        = string
 }
 
 variable "vendor" {}
+
+variable "enable_waf" {
+  description = "Whether to enable WAF"
+  type        = bool
+  default     = true
+}
+
+variable "waf_allowed_ip_sets" {
+  type = map(object({
+    ip_address_version = string
+    addresses          = list(string)
+  }))
+  description = "IP sets to be created and used in WAF rules"
+  default     = {}
+}
+
+variable "waf_custom_rules" {
+  type = map(object({
+    priority  = number
+    action    = string
+    statement = any
+    visibility_config = object({
+      cloudwatch_metrics_enabled = bool
+      metric_name                = string
+      sampled_requests_enabled   = bool
+    })
+  }))
+  description = "Custom WAF rules to be added to the WAF"
+  default     = {}
+}
+
+variable "waf_modify_managed_rules" {
+  type = map(object({
+    rules_to_count = list(string)
+    priority       = number
+  }))
+  default     = {}
+  description = "Map to modify or override default WAF rules"
+}
+
+variable "create_s3_bucket_for_curator" {
+  type    = bool
+  default = true
+}
+
+variable "custom_s3_bucket_for_curator" {
+  type        = string
+  default     = null
+  description = "User provided s3 bucket that curator should use for backing up"
+  validation {
+    condition     = !(var.create_s3_bucket_for_curator == true && (var.custom_s3_bucket_for_curator != null && var.custom_s3_bucket_for_curator != ""))
+    error_message = "If the variable create_s3_bucket_for_curator is set to true, then the variable custom_s3_bucket_for_curator should be null"
+  }
+  validation {
+    condition     = !(var.create_s3_bucket_for_curator == false && (var.custom_s3_bucket_for_curator == null || var.custom_s3_bucket_for_curator == ""))
+    error_message = "If the variable create_s3_bucket_for_curator is set to false then a custom s3 bucket should be provided in the variable custom_s3_bucket_for_curator"
+  }
+}

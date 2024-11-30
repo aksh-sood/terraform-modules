@@ -1,0 +1,11 @@
+{
+  "Version" : "2012-10-17",
+  "Statement" : 
+  [
+    {
+      "Action"  : "iam:PassRole",
+      "Effect"   : "Allow",
+      "Resource" : "arn:aws:iam::${ACCOUNT_ID}:role/${SNAPSHOT_ROLE}"
+    }
+  ]
+}

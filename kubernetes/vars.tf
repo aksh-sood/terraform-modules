@@ -56,7 +56,7 @@ variable "node_exporter_version" {
 variable "kube_state_metrics_version" {
   description = "Kube state metrics version for helm chart"
   type        = string
-  default     = "1.7.0"
+  default     = "2.1.1"
 }
 
 variable "efs_id" {
@@ -213,12 +213,63 @@ variable "gchat_webhook" {
   type    = string
 }
 
+variable "curator_image_tag" {
+  type    = string
+  default = "1.1.7"
+}
+
 variable "create_s3_bucket_for_curator" {
-  type = bool
+  type    = bool
+  default = true
+}
+
+variable "custom_s3_bucket_for_curator" {
+  type        = string
+  default     = null
+  description = "User provided s3 bucket that curator should use for backing up"
+  validation {
+    condition     = !(var.create_s3_bucket_for_curator == true && (var.custom_s3_bucket_for_curator != null && var.custom_s3_bucket_for_curator != ""))
+    error_message = "If the variable create_s3_bucket_for_curator is set to true, then the variable custom_s3_bucket_for_curator should be null"
+  }
+  validation {
+    condition     = !(var.create_s3_bucket_for_curator == false && (var.custom_s3_bucket_for_curator == null || var.custom_s3_bucket_for_curator == ""))
+    error_message = "If the variable create_s3_bucket_for_curator is set to false then a custom s3 bucket should be provided in the variable custom_s3_bucket_for_curator"
+  }
+}
+
+variable "prometheus_custom_alerts" {
+  description = "custom prometheus alerts"
+  type = list(
+    object({
+      alert = string
+      expr  = string
+      for   = string
+      labels = object({
+        severity = string
+      })
+      annotations = object({
+        summary     = string
+        description = string
+      })
+    })
+  )
+
+  default = []
+}
+
+variable "waf_arn" {
+  description = "ARN of the WAF to associate with resources"
+  type        = string
+  default     = ""
 }
 
 variable "vendor" {}
-variable "delete_indices_from_es" {}
 variable "opensearch_password" {}
 variable "opensearch_username" {}
 variable "opensearch_endpoint" {}
+variable "curator_iam_user_arn" {}
+variable "curator_iam_role_arn" {}
+variable "curator_iam_user_access_key" {}
+variable "curator_iam_user_secret_key" {}
+variable "s3_bucket_for_curator" {}
+

@@ -18,7 +18,7 @@ variable "gchat_high_priority_webhook_url" {
 
 variable "pagerduty_integration_key" {
   type        = string
-  default     = ""
+  default     = null
   description = "The integration key for PagerDuty notifications"
 }
 
@@ -32,4 +32,41 @@ variable "ses_email_recipients" {
   type        = list(string)
   default     = []
   description = "List of email addresses to receive SES notifications"
+}
+
+variable "opensearch_username" {
+  description = "Admin username for OpenSearch"
+  type        = string
+}
+
+variable "opensearch_password" {
+  description = "Admin password for OpenSearch"
+  type        = string
+  sensitive   = true
+}
+
+variable "opensearch_endpoint" {
+  description = "Host URL for OpenSearch cluster (must include https://)"
+  type        = string
+}
+
+variable "opensearch_version" {
+  description = "Version of OpenSearch to Connect to"
+  type        = string
+  default     = "2.11"
+}
+
+variable "region" {
+  type        = string
+  description = "The AWS region to deploy resources"
+}
+
+variable "ses_email_config" {
+  type = object({
+    region       = string
+    role_arn     = string
+    from_address = string
+  })
+  description = "SES Email configuration for sending email alerts"
+  default     = null
 }

@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: curator-config
+  namespace: logging
+data:
+  config.yaml: |-
+    client:
+      host: ${opensearch_endpoint}
+      port: 443
+      use_ssl: yes
+      ssl_no_validate: true
+      username: ${opensearch_username}
+      password: ${opensearch_password}
+      retry:
+        count: 5
+        back-off: 0.2
+    actions:
+    - name: create_snapshot
+      description: "Make backup of all indices"
+      options:
+        repository: s3-snapshot
+        name: snapshot_of_indices
+        continue_if_exception: False
+        ignore_unavailable: False
+        include_global_state: True
+        partial: False
+        disable_action: False
+        wait_for_completion: True
+        include_monitoring_objects: True
+      filters:
+        index_pattern: "filebeat*"
+        direction: older
+        unit: days
+        count: 1
+    - name: delete_indices
+      description: "Clean up ES by deleting 90 old indices"
+      options:
+        repository: s3-snapshot
+        continue_if_exception: False
+      filters:
+        index_pattern: "filebeat*"
+        direction: older
+        unit: days
+        count: 90
+    - name: delete_monitoring_objects
+      description: "Delete all Monitoring Objects's JSONs older than the given date "
+      options:
+        repository: s3-snapshot
+        disable_action: False
+        continue_if_exception: False
+      filters:
+        unit: days
+        count: 90

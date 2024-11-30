@@ -4,29 +4,24 @@ terraform {
       source  = "hashicorp/aws"
       version = "=5.20.1"
     }
-    # kubernetes = {
-    #   source  = "hashicorp/kubernetes"
-    #   version = "=2.10.0"
-    # }
-    # helm = {
-    #   source  = "hashicorp/helm"
-    #   version = "=2.10.1"
-    # }
-    # kubectl = {
-    #   source                = "gavinbunney/kubectl"
-    #   version               = ">= 1.7.0"
-    #   configuration_aliases = [kubectl.this]
-    # }
-    # cloudflare = {
-    #   source                = "cloudflare/cloudflare"
-    #   version               = "~> 4.0"
-    #   configuration_aliases = [cloudflare.this]
-    # }
-    # opensearch = {
-    #   source                = "opensearch-project/opensearch"
-    #   version               = "2.3.0"
-    #   configuration_aliases = [opensearch.this]
-    # }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "=2.10.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "=2.10.1"
+    }
+    kubectl = {
+      source                = "gavinbunney/kubectl"
+      version               = ">= 1.7.0"
+      configuration_aliases = [kubectl.this]
+    }
+    cloudflare = {
+      source                = "cloudflare/cloudflare"
+      version               = "~> 4.0"
+      configuration_aliases = [cloudflare.this]
+    }
   }
 }
 
@@ -39,55 +34,45 @@ provider "aws" {
   alias  = "dr"
 }
 
-# provider "kubernetes" {
-#   config_path = "~/.kube/${var.k8s_cluster_name}"
-# }
+provider "kubernetes" {
+  config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+}
 
-# provider "helm" {
-#   kubernetes {
-#     config_path = "~/.kube/${var.k8s_cluster_name}"
-#   }
-# }
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+  }
+}
 
-# provider "kubectl" {
-#   config_path = "~/.kube/${var.k8s_cluster_name}"
-#   alias       = "this"
-# }
+provider "kubectl" {
+  config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+  alias       = "this"
+}
 
-# provider "cloudflare" {
-#   api_token = var.cloudflare_api_token
-#   alias     = "this"
-# }
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+  alias     = "this"
+}
 
-# provider "opensearch" {
-#   url                = var.opensearch_endpoint
-#   username           = var.opensearch_username
-#   password           = var.opensearch_password
-#   insecure           = false
-#   sign_aws_requests  = false
-#   healthcheck        = false
-#   opensearch_version = var.opensearch_version
-#   alias              = "this"
-# }
 
-# # Below providers are for transit gateway
+# Below providers are for transit gateway
 
-# provider "aws" {
-#   alias  = "us-east-1"
-#   region = "us-east-1"
-# }
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+}
 
-# provider "aws" {
-#   alias  = "us-west-2"
-#   region = "us-west-2"
-# }
+provider "aws" {
+  alias  = "us-west-2"
+  region = "us-west-2"
+}
 
-# provider "aws" {
-#   alias  = "ap-southeast-1"
-#   region = "ap-southeast-1"
-# }
+provider "aws" {
+  alias  = "ap-southeast-1"
+  region = "ap-southeast-1"
+}
 
-# provider "aws" {
-#   alias  = "eu-west-1"
-#   region = "eu-west-1"
-# }
+provider "aws" {
+  alias  = "eu-west-1"
+  region = "eu-west-1"
+}
