@@ -1,14 +1,14 @@
 resource "random_password" "password" {
-  length           = 16
-  special          = false
+  length  = 16
+  special = false
   # override_special = "!*=+?"
   # min_special      = 1
-  lower            = true
-  min_lower        = 1
-  numeric          = true
-  min_numeric      = 1
-  upper            = true
-  min_upper        = 1
+  lower       = true
+  min_lower   = 1
+  numeric     = true
+  min_numeric = 1
+  upper       = true
+  min_upper   = 1
 }
 
 resource "kubernetes_namespace_v1" "this" {

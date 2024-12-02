@@ -28,7 +28,7 @@ resource "aws_security_group_rule" "whitelisting_vpc_to_5671" {
   security_group_id = aws_security_group.nlb.id
 
   lifecycle {
-    ignore_changes = [ cidr_blocks ]
+    ignore_changes = [cidr_blocks]
   }
 }
 
@@ -42,7 +42,7 @@ resource "aws_security_group_rule" "whitelisting_vpc_on_nlb_on_443" {
   security_group_id = aws_security_group.nlb.id
 
   lifecycle {
-    ignore_changes = [ cidr_blocks ]
+    ignore_changes = [cidr_blocks]
   }
 }
 
@@ -111,7 +111,7 @@ resource "aws_lb_target_group_attachment" "rabbitmq_5671_target_group" {
   port             = 5671
 
   lifecycle {
-    ignore_changes = [ target_id ]
+    ignore_changes = [target_id]
   }
 }
 

@@ -36,7 +36,6 @@ resource "aws_rds_cluster" "dr" {
 }
 
 resource "aws_rds_cluster_instance" "dr" {
-  count = 1
 
   identifier              = "${var.name}-1"
   cluster_identifier      = aws_rds_cluster.dr.id

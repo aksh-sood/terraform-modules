@@ -185,7 +185,7 @@ variable "eks_node_groups" {
       instance_types             = list(string)
       min_size                   = number
       max_size                   = number
-      cortex_agent_tags          = optional(string,"")
+      cortex_agent_tags          = optional(string, "")
       labels                     = optional(map(string), {})
       additional_security_groups = optional(list(string), [])
       tags                       = optional(map(string), {})

@@ -3,7 +3,7 @@ variable "region" {
   default = "us-east-1"
 }
 
-variable "dr_region" {
+variable "primary_region" {
   type    = string
   default = "us-west-2"
 }
@@ -34,8 +34,8 @@ variable "setup_dr" {
   default = false
 }
 
-variable "dr_kms_key_arn" {
-  description = "KMS key ARN in DR for FX ADMIN resources"
+variable "primary_kms_key_arn" {
+  description = "KMS key ARN in PRIMARY for FX ADMIN resources"
   type        = string
   default     = null
 }
@@ -67,7 +67,7 @@ variable "rds_config" {
     preferred_backup_window               = string
     backup_retention_period               = number
     enable_deletion_protection            = optional(bool, true)
-    mysql_version                         = optional(string, "8.0")
+    engine_version                        = optional(string, "8.0.mysql_aurora.3.05.2")
     instance_type                         = optional(string, "db.t4g.large")
     master_username                       = optional(string, "master")
     parameter_group_family                = optional(string, "aurora-mysql8.0")
@@ -116,35 +116,10 @@ variable "rds_config" {
   }
 }
 
-variable "crr_rds_config" {
+variable "primary_rds_cluster_arn" {
   description = "Parameters to configure RDS cluster"
-  type = object({
-    backup_retention_period         = number
-    eks_security_group              = string
-    kms_key_id                      = string
-    subnet_ids                      = list(string)
-    deletion_protection             = optional(bool, true)
-    parameter_group_family          = optional(string, "aurora-mysql8.0")
-    engine_version                  = optional(string, "8.0.mysql_aurora.3.05.2")
-    instance_type                   = optional(string, "db.t4g.large")
-    enabled_cloudwatch_logs_exports = optional(list(string), ["slowquery", "audit", "error"])
-    db_parameter_group_parameters = optional(list(map(string)), [
-      {
-        name         = "log_bin_trust_function_creators"
-        value        = 1
-        apply_method = "pending-reboot"
-        }, {
-        name         = "binlog_format"
-        value        = "MIXED"
-        apply_method = "pending-reboot"
-        }, {
-        name         = "long_query_time"
-        value        = "10"
-        apply_method = "immediate"
-      }
-    ])
-  })
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "enable_activemq_cluster" {
@@ -468,7 +443,7 @@ variable "additional_secrets" {
 }
 
 variable "create_tgw" {
-  type = bool
+  type    = bool
   default = true
 }
 

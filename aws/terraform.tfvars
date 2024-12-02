@@ -71,26 +71,26 @@ eks_node_groups = {
   node_groups = [{
     name = "default"
 
-    instance_types = ["m6a.large"]
+    instance_types    = ["m6a.large"]
     cortex_agent_tags = "aws,baton,iac,test"
-    min_size = 1
-    max_size = 1
+    min_size          = 1
+    max_size          = 1
 
     additional_security_groups = []
 
     tags = {}
     },
     {
-    name = "non-xdr"
+      name = "non-xdr"
 
-    instance_types = ["m6a.large"]
+      instance_types = ["m6a.large"]
 
-    min_size = 1
-    max_size = 1
+      min_size = 1
+      max_size = 1
 
-    additional_security_groups = []
+      additional_security_groups = []
 
-    tags = {}
+      tags = {}
     }
   ]
 }
@@ -100,5 +100,5 @@ eks_node_groups = {
 # opensearch_instance_count  = 1
 # opensearch_engine_version  = "OpenSearch_2.11"
 
-enable_waf=false
-vendor="baton"
+enable_waf = false
+vendor     = "baton"

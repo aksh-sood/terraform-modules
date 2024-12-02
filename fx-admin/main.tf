@@ -49,17 +49,6 @@ resource "null_resource" "directory_service_data_import_validation" {
   }
 }
 
-resource "null_resource" "rds_validation" {
-  lifecycle {
-    precondition {
-      condition = var.is_dr ? (
-        !var.create_rds
-      ) : true
-      error_message = "is_dr and create_rds cannot be true at the same time"
-    }
-  }
-}
-
 resource "null_resource" "rds_data_source_validation" {
   lifecycle {
     precondition {
@@ -76,10 +65,10 @@ resource "null_resource" "rds_dr_validation" {
   lifecycle {
     precondition {
       condition = var.setup_dr ? (
-        var.crr_rds_config != {} && var.dr_region != "" &&
-        var.crr_rds_config != null && var.dr_region != null
+        var.primary_rds_cluster_arn != "" && var.primary_rds_cluster_arn != null &&
+        var.primary_region != "" && var.primary_region != null
       ) : true
-      error_message = "Provide correct value for crr_rds_config, dr_region"
+      error_message = "Provide correct value for primary_rds_cluster_arn, primary_region"
     }
   }
 }
@@ -88,9 +77,9 @@ resource "null_resource" "s3_dr_validation" {
   lifecycle {
     precondition {
       condition = var.setup_dr ? (
-        var.dr_kms_key_arn != "" && var.dr_kms_key_arn != null
+        var.primary_kms_key_arn != "" && var.primary_kms_key_arn != null
       ) : true
-      error_message = "Provide correct value for dr_kms_key_arn"
+      error_message = "Provide correct value for primary_kms_key_arn"
     }
   }
 }
@@ -204,16 +193,16 @@ module "s3_swift" {
 module "swift_s3_crr" {
   source = "../commons/aws/s3-crr"
 
-  count = var.setup_dr && !var.is_dr ? 1 : 0
+  count = var.setup_dr && var.is_dr ? 1 : 0
 
   name                  = "${var.environment}-swift"
-  primary_bucket_name   = module.s3_swift.id
-  primary_kms_key       = module.kms_sse.key_arn
-  secondary_bucket_name = "${var.vendor}-${var.environment}-swift-messages-dr"
-  secondary_kms_key     = var.dr_kms_key_arn
+  primary_bucket_name   = "${var.vendor}-${var.environment}-swift-messages"
+  primary_kms_key       = var.primary_kms_key_arn
+  secondary_bucket_name = module.s3_swift.id
+  secondary_kms_key     = module.kms_sse.key_arn
 
   providers = {
-    aws.dr = aws.dr
+    aws.primary = aws.primary
   }
 
   depends_on = [null_resource.s3_dr_validation]
@@ -231,16 +220,16 @@ module "s3" {
 module "s3_crr" {
   source = "../commons/aws/s3-crr"
 
-  count = var.setup_dr && !var.is_dr ? 1 : 0
+  count = var.setup_dr && var.is_dr ? 1 : 0
 
   name                  = var.environment
-  primary_bucket_name   = module.s3.id
-  primary_kms_key       = module.kms_sse.key_arn
-  secondary_bucket_name = "${var.vendor}-${var.environment}-dr"
-  secondary_kms_key     = var.dr_kms_key_arn
+  primary_bucket_name   = "${var.vendor}-${var.environment}"
+  primary_kms_key       = var.primary_kms_key_arn
+  secondary_bucket_name = module.s3.id
+  secondary_kms_key     = module.kms_sse.key_arn
 
   providers = {
-    aws.dr = aws.dr
+    aws.primary = aws.primary
   }
 
   depends_on = [null_resource.s3_dr_validation]
@@ -405,7 +394,7 @@ module "rds_cluster" {
   subnets                               = var.private_subnet_ids
   vpc_id                                = var.vpc_id
   name                                  = var.environment
-  mysql_version                         = var.rds_config.mysql_version
+  mysql_version                         = var.rds_config.engine_version
   rds_instance_type                     = var.rds_config.instance_type
   master_username                       = var.rds_config.master_username
   create_rds_reader                     = var.rds_config.create_rds_reader
@@ -434,32 +423,27 @@ module "rds_cluster" {
   depends_on = [null_resource.rds_validation, null_resource.rds_data_source_validation]
 }
 
-
 module "rds_crr" {
   source = "../commons/aws/rds-crr"
-  count  = var.setup_dr && (!var.is_dr && var.create_rds) ? 1 : 0
+  count  = var.setup_dr && var.is_dr && var.create_rds ? 1 : 0
 
   name                            = "${var.environment}-dr"
   region                          = var.region
-  primary_rds_cluster_arn         = module.rds_cluster[0].cluster_arn
-  vpc_id                          = var.dr_central_vpc_id
-  dr_eks_security_group           = var.crr_rds_config.eks_security_group
-  subnet_ids                      = var.crr_rds_config.subnet_ids
-  kms_key_id                      = var.crr_rds_config.kms_key_id
-  deletion_protection             = var.crr_rds_config.deletion_protection
-  db_parameter_group_parameters   = var.crr_rds_config.db_parameter_group_parameters
-  engine_version                  = var.crr_rds_config.engine_version
-  backup_retention_period         = var.crr_rds_config.backup_retention_period
-  instance_class                  = var.crr_rds_config.instance_type
-  parameter_group_family          = var.crr_rds_config.parameter_group_family
-  enabled_cloudwatch_logs_exports = var.crr_rds_config.enabled_cloudwatch_logs_exports
+  vpc_id                          = var.vpc_id
+  kms_key_id                      = var.kms_key_arn
+  subnet_ids                      = var.private_subnet_ids
+  dr_eks_security_group           = var.eks_security_group
+  primary_rds_cluster_arn         = var.primary_rds_cluster_arn
+  engine_version                  = var.rds_config.engine_version
+  deletion_protection             = var.rds_config.enable_deletion_protection
+  parameter_group_family          = var.rds_config.parameter_group_family
+  enabled_cloudwatch_logs_exports = var.rds_config.enabled_cloudwatch_logs_exports
+  db_parameter_group_parameters   = var.rds_config.db_parameter_group_parameters
+  backup_retention_period         = var.rds_config.backup_retention_period
+  instance_class                  = var.rds_config.instance_type
   tags                            = merge(var.cost_tags, var.dr_tags)
 
-  providers = {
-    aws.dr = aws.dr
-  }
-
-  depends_on = [null_resource.rds_dr_validation, module.rds_cluster]
+  depends_on = [null_resource.rds_dr_validation]
 
 }
 
@@ -470,10 +454,10 @@ module "secrets" {
   kms_key_arn = module.kms_sse.key_arn
 
   secrets = merge({
-    database_writer_url   = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].writer_endpoint : "",
-    database_readonly_url = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].reader_endpoint : "",
-    database_username     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_username : "",
-    database_password     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_password : "",
+    database_writer_url   = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].writer_endpoint : module.rds_crr[0].writer_endpoint,
+    database_readonly_url = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].reader_endpoint : module.rds_crr[0].reader_endpoint,
+    database_username     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_username : module.rds_crr[0].master_username,
+    database_password     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_password : module.rds_crr[0].master_password,
     activemq_url_1        = module.activemq[0].url,
     activemq_url_2        = module.activemq[0].url,
     activemq_username     = module.activemq[0].username,
@@ -537,7 +521,6 @@ module "baton_application_namespace" {
   source   = "../commons/kubernetes/baton-namespace"
   for_each = { for k, v in local.baton_application_namespaces : k => v }
 
-  is_dr                    = var.is_dr
   domain_name              = var.domain_name
   namespace                = each.key
   customer                 = each.value.customer
@@ -570,26 +553,6 @@ module "opensearch_monitors" {
 
 }
 
-module "transit_gateway" {
-  source = "../commons/aws/transit-gateway"
-  count  = (var.create_tgw && !var.is_dr) ? 1 : 0
-
-  central_vpc_id            = var.vpc_id
-  central_vpc_subnet_ids    = var.private_subnet_ids
-  shared_accounts           = var.tgw_shared_accounts
-  cost_tags                 = var.cost_tags
-  region_routes             = var.tgw_region_routes
-  dr_central_vpc_id         = var.dr_central_vpc_id
-  dr_central_vpc_subnet_ids = var.dr_central_vpc_subnet_ids
-
-  providers = {
-    aws.us-east-1      = aws.us-east-1
-    aws.us-west-2      = aws.us-west-2
-    aws.ap-southeast-1 = aws.ap-southeast-1
-    aws.eu-west-1      = aws.eu-west-1
-  }
-}
-
 module "cloudwatch_alerts_gchat_lambda" {
   source = "../commons/aws/gchat-lambda"
   count  = (var.cloudwatch_alerts_high_priority_gchat_webhook_url != null || var.cloudwatch_alerts_slack_webhook_url != null) ? 1 : 0
@@ -617,3 +580,22 @@ module "cloudwatch_alerts" {
   region                    = var.region
 }
 
+module "transit_gateway" {
+  source = "../commons/aws/transit-gateway"
+  count  = (var.create_tgw && !var.is_dr) ? 1 : 0
+
+  central_vpc_id            = var.vpc_id
+  central_vpc_subnet_ids    = var.private_subnet_ids
+  shared_accounts           = var.tgw_shared_accounts
+  cost_tags                 = var.cost_tags
+  region_routes             = var.tgw_region_routes
+  dr_central_vpc_id         = var.dr_central_vpc_id
+  dr_central_vpc_subnet_ids = var.dr_central_vpc_subnet_ids
+
+  providers = {
+    aws.us-east-1      = aws.us-east-1
+    aws.us-west-2      = aws.us-west-2
+    aws.ap-southeast-1 = aws.ap-southeast-1
+    aws.eu-west-1      = aws.eu-west-1
+  }
+}

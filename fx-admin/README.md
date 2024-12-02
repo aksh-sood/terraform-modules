@@ -172,7 +172,7 @@ terraform apply
 |baton_application_namespaces\*            | List of namespaces and services with requirments                                                           | list(baton_application_namespaces) | [Baton Application Namespace](#markdown-header-baton-application-namespaces) |
 |import_directory_service_db| Whether to import seed data for directory service bootup | bool |  `true`|
 |rds_config\*            | Configuration parameters for RDS cluster | object | [RDS Config](#markdown-header-rds-config) |
-|crr_rds_config\*            | Configuration parameters for RDS cluster CRR (**DR resources must be provisioned in prior**)| object | [CRR RDS Config](#markdown-header-crr-rds-config) |
+|primary_rds_cluster_arn            |ARN of Primary RDS cluster to setup replication from  (**Primary resources must be provisioned in prior**)| string| `null` |
 
 ### RDS Config
 This object is used to configure the RDS cluster to be created in primary region.
@@ -198,22 +198,6 @@ This object is used to configure the RDS cluster to be created in primary region
 |rds_ca_cert_identifier| RDS certificate identifier | string| `"rds-ca-rsa2048-g1"`|
 |rds_db_cluster_parameter_group_parameters|Cluster paramter group values|list(map(string))|`[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]` |
 |rds_db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
-
-### CRR RDS Config
-The following object is used to setup Cross Region Replication(CRR) for the RDS cluster created in the primary region. For CRR to be setup the DR region must be already setup without an active EKS cluster. All the below requested parameters are to be provided from DR region. 
-
-| Name              | Description                                                                | Type           | Default                                            |
-|:------------------|:---------------------------------------------------------------------------|:---------------|:---------------------------------------------------|
-| backup_retention_period\* | Time period to retain RDS CRR backup| number | `-` |
-| vpc_id\* | VPC ID of DR region | string  | `-`|
-| eks_security_group\*| Security group ID of EKS in DR region|  string | `-` |
-|kms_key_id\*| KMS key ARN used for encrypting generic resources. Has the follwoing alias format `{alias}-{environment}-{region}"` | string | `-`|
-|subnet_ids\*|Subnet IDS in which the CRR cluster needs to bre created | list(string)| `-` |
-|deletion_protection| Whether to enable delete protection or not |  bool | `true` |
-|parameter_group_family| family of the parameter group of RDS cluster | string |`"aurora-mysql5.7"`|
-|engine_version|RDS engine version of the CRR|string|`"5.7.mysql_aurora.2.11.5"`|
-|instance_type|Size of the CRR instance | string|`"db.t4g.large"` |
-|db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
 
 ### Baton Application Namespaces
 

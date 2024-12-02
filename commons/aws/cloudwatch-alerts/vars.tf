@@ -1,5 +1,5 @@
 variable "cloudwatch_alerts" {
-    type = map(object({
+  type = map(object({
     name                = string
     description         = string
     metric_name         = string

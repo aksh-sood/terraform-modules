@@ -30,8 +30,8 @@ provider "aws" {
 }
 
 provider "aws" {
-  region = var.dr_region
-  alias  = "dr"
+  region = var.primary_region
+  alias  = "primary"
 }
 
 provider "kubernetes" {

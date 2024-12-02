@@ -11,7 +11,7 @@ data "cloudinit_config" "linux_eks_managed_node_group" {
   # Prepend to existing user data supplied by AWS EKS
   part {
     content_type = "text/x-shellscript"
-    content      =  templatefile("${path.module}/cortex.sh",{
+    content = templatefile("${path.module}/cortex.sh", {
       cortex_tags = var.cortex_agent_tags
     })
   }
@@ -95,11 +95,11 @@ resource "aws_launch_template" "this" {
   }
 
   metadata_options {
-    http_tokens = "required"
+    http_tokens                 = "required"
     http_put_response_hop_limit = 2
   }
 
-  user_data    = var.cortex_agent_tags!="" && var.cortex_agent_tags!=null ? data.cloudinit_config.linux_eks_managed_node_group.rendered : null
+  user_data = var.cortex_agent_tags != "" && var.cortex_agent_tags != null ? data.cloudinit_config.linux_eks_managed_node_group.rendered : null
 
   key_name      = var.ssh_key
   ebs_optimized = true
