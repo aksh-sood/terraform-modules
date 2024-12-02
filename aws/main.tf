@@ -133,8 +133,8 @@ module "eks" {
 
   vpc_id                  = module.vpc.id
   azs                     = module.vpc.azs
-  private_subnet_ids      = module.vpc.private_subnets
-  public_subnet_ids       = module.vpc.public_subnets
+  private_subnet_ids      = slice(module.vpc.private_subnets,0,length(module.vpc.azs))
+  public_subnet_ids       = slice(module.vpc.public_subnets,0,length(module.vpc.azs))
   kms_key_arn             = module.kms.key_arn
   secrets_key_bucket_name = module.secrets_bucket[0].id
 
@@ -197,7 +197,7 @@ module "opensearch" {
   count  = var.create_eks ? 1 : 0
 
   vpc_id      = module.vpc.id
-  subnet_ids  = module.vpc.private_subnets
+  subnet_ids  = slice(module.vpc.public_subnets,0,length(module.vpc.azs))
   kms_key_arn = module.kms.key_arn
   eks_sg      = var.create_eks ? module.eks[0].primary_security_group_id : null
 

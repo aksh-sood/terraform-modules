@@ -33,7 +33,7 @@ module "vpc" {
   private_subnets     = var.private_subnet_cidrs
   private_subnet_tags = merge(var.cost_tags, var.private_subnet_tags)
   private_subnet_tags_per_az = {
-    for az in data.aws_availability_zones.this.names : az => {
+    for az in slice(data.aws_availability_zones.this.names,0,var.az_count) : az => {
       Name = "${var.name}-private-subnet-${az}"
     }
   }
@@ -43,7 +43,7 @@ module "vpc" {
   public_subnets          = var.public_subnet_cidrs
   public_subnet_tags      = merge(var.cost_tags, var.public_subnet_tags)
   public_subnet_tags_per_az = {
-    for az in data.aws_availability_zones.this.names : az => {
+     for az in slice(data.aws_availability_zones.this.names,0,var.az_count) : az => {
       Name = "${var.name}-public-subnet-${az}"
     }
   }
