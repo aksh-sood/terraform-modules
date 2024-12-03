@@ -164,7 +164,7 @@ resource "aws_key_pair" "generated_key" {
   tags     = var.eks_tags
 
   provisioner "local-exec" {
-    command = "echo '${trimspace(tls_private_key.ssh_key.private_key_pem)}' > ${pathexpand("~/${var.cluster_name}-eks-nodes.pem")}"
+    command = "echo '${tls_private_key.ssh_key.private_key_pem}' > ${pathexpand("~/${var.cluster_name}-eks-nodes.pem")}"
   }
 }
 
@@ -209,6 +209,7 @@ module "eks_node" {
   min_size     = try(each.value.min_size, 1)
 
   instance_types = try(each.value.instance_types, ["m5.large"])
+  cortex_agent_tags = try(each.value.cortex_agent_tags, "")
 
   labels = try(each.value.labels, {})
 

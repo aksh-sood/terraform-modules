@@ -48,7 +48,7 @@ locals {
   })
 }
 
-# eks cluster
+# EKS Cluster
 module "eks" {
   source = "../../../../../external/eks"
 
@@ -110,18 +110,6 @@ resource "aws_security_group_rule" "cluster" {
   cidr_blocks              = lookup(each.value, "cidr_blocks", null)
   source_security_group_id = lookup(each.value, "source_security_group_id", null)
 }
-
-
-# resource "aws_security_group_rule" "ingress_whitelisted_ips" {
-#   count = length(var.eks_ingress_whitelist_ips)
-
-#   type              = "ingress"
-#   from_port         = 0
-#   to_port           = 0
-#   protocol          = "-1"
-#   cidr_blocks       = [element(var.eks_ingress_whitelist_ips, count.index)]
-#   security_group_id = module.eks.cluster_primary_security_group_id
-# }
 
 #fetching kube config file from aws
 resource "null_resource" "cluster_config_pull" {

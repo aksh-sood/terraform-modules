@@ -217,6 +217,7 @@ The following object defines the differnet node group settings with parameters m
 | name* | Name of the node group | string | `"node1"`|
 | min_size\* | Minimum and desired number of nodes in node group | number | `1`|
 | max_size\* | Maximum number of nodes in node group | number | `1`|
+| cortex_agent_tags  | **If the tags are not provided then the agent will not be installed.** Tags to add to cortex agent. Make sure you have access to `baton-central-dump`  S3 bucket if installing this agent. | string | `""`|
 | additional_security_groups | Additional custom security groups for EKS nodes |list(string) |`[]`|
 | instance_types\* | List of types of EC2 instances to create nodes| list(string) | `["m5.large"]`|
 | labels| Lables for EKS nodes | map(string)| `{}` |

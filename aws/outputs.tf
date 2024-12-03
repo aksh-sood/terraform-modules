@@ -72,7 +72,7 @@ output "curator_iam_user_secret_key" {
 }
 
 output "s3_bucket_for_curator" {
-  value = var.create_s3_bucket_for_curator ? module.s3_for_curator[0].id : null
+  value = var.create_s3_bucket_for_curator ? module.s3_for_curator[0].id : var.custom_s3_bucket_for_curator
 }
 
 
