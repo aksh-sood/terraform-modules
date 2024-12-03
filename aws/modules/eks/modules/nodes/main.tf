@@ -81,6 +81,7 @@ resource "aws_launch_template" "this" {
 
   metadata_options {
     http_tokens = "required"
+    http_put_response_hop_limit = 2
   }
 
   key_name      = var.ssh_key

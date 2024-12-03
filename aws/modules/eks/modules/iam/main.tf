@@ -129,7 +129,20 @@ resource "aws_iam_role" "node_role" {
             "Service": "ec2.amazonaws.com"
           },
           "Action": "sts:AssumeRole"
+      },
+      {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/*"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringLike": {
+          "*:aud": "sts.amazonaws.com",
+          "*:sub": "system:serviceaccount:kube-system:efs-csi-*"
+        }
       }
+     }
     ]
 }
 EOF
@@ -147,7 +160,6 @@ resource "aws_iam_role_policy_attachment" "node_role" {
 
 
 #Grafana role 
-
 resource "aws_iam_role" "grafana" {
   name               = "grafana_${var.cluster_name}_${var.region}"
   assume_role_policy = <<-EOF

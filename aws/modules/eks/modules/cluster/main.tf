@@ -58,7 +58,9 @@ module "eks" {
   # IAM role for cluster
   create_iam_role = false
   iam_role_arn    = var.cluster_role_arn
-  enable_irsa     = false
+
+  # OIDC provider config
+  include_oidc_root_ca_thumbprint = true
 
   #VPC configuration
   vpc_id     = var.vpc_id
