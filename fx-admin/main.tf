@@ -5,6 +5,18 @@ data "aws_secretsmanager_secret_version" "env_secrets" {
   secret_id = var.env_secrets
 }
 
+# DNS Query via Cloudflare DNS Resolver API
+data "http" "rabbitmq_endpoint_dns_query" {
+  url = "https://cloudflare-dns.com/dns-query?name=${local.rabbitmq_endpoint}&type=A"
+
+  # Set the Accept header to application/dns-json for structured response
+  request_headers = {
+    "Accept" = "application/dns-json"
+  }
+
+  depends_on = [module.rabbitmq]
+}
+
 resource "null_resource" "domain_validation" {
   lifecycle {
     precondition {
@@ -151,17 +163,6 @@ module "rabbitmq" {
   tags = var.cost_tags
 }
 
-data "external" "rabbitmq_private_ip" {
-
-  program = ["bash", "${path.module}/getRabbitmqPrivateIP.sh"]
-
-  query = {
-    "url" = replace(module.rabbitmq.console_url, "https://", "")
-  }
-
-  depends_on = [module.rabbitmq]
-}
-
 module "rabbitmq_nlb" {
   source = "./modules/rabbitmq_nlb"
 
@@ -170,10 +171,10 @@ module "rabbitmq_nlb" {
   subnet_ids             = var.public_subnet_ids
   whitelist_ips          = var.rabbitmq_lb_ingress_whitelist
   public_certificate_arn = var.acm_certificate_arn
-  rabbitmq_private_ip    = element(local.reg_ip, length(local.reg_ip) - 1)
+  rabbitmq_private_ip    = local.rabbitmq_private_ips
   rabbitmq_sg            = module.rabbitmq.rabbitmq_sg
 
-  depends_on = [data.external.rabbitmq_private_ip]
+  depends_on = [data.http.rabbitmq_endpoint_dns_query]
 }
 
 module "nlb_cloudflare" {

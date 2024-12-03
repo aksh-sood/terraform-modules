@@ -31,9 +31,14 @@ EOT
 
   resources_key_user_arns = [module.lambda_iam.lambda_role_arn, module.kinesis_app.role_arn, var.eks_cluster_role_arn, var.eks_node_role_arn, module.kinesis_firehose.firehose_role_arn]
 
-  jq_ip = data.external.rabbitmq_private_ip.result
+  rabbitmq_endpoint = try(
+    regex("(?:https?|amqps)://([^/:]+)(?::\\d+)?", module.rabbitmq.console_url)[0],
+    trimsuffix(module.rabbitmq.console_url, "/")
+  )
 
-  reg_ip = regex("(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})", local.jq_ip.ip)
+  rabbitmq_private_ips = { for r in jsondecode(data.http.dns_query.response_body)["Answer"] :
+    r["data"] => r if r["type"] == 1
+  }
 
   env_secrets = var.env_secrets != "" && var.env_secrets != null ? jsondecode(data.aws_secretsmanager_secret_version.env_secrets[0].secret_string) : {}
 
