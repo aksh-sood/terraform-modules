@@ -429,3 +429,4 @@ variable "custom_s3_bucket_for_curator" {
     error_message = "If the variable create_s3_bucket_for_curator is set to false then a custom s3 bucket should be provided in the variable custom_s3_bucket_for_curator"
   }
 }
+
