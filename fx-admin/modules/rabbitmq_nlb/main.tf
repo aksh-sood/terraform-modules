@@ -104,8 +104,10 @@ resource "aws_lb_target_group" "rabbitmq_5671_target_group" {
 
 #Attaching the target group to the RabbitMQ instance
 resource "aws_lb_target_group_attachment" "rabbitmq_5671_target_group" {
+  for_each = var.rabbitmq_private_ip
+
   target_group_arn = aws_lb_target_group.rabbitmq_5671_target_group.arn
-  target_id        = var.rabbitmq_private_ip
+  target_id        = each.key
   port             = 5671
 
   lifecycle {

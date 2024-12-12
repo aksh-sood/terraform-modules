@@ -54,6 +54,7 @@ provider "cloudflare" {
   alias     = "this"
 }
 
+provider "http" {}
 
 # Below providers are for transit gateway
 
