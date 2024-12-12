@@ -1,16 +1,12 @@
-variable "primary_crr_rds_config" {
-  description = "Parameters to configure RDS cluster"
+variable "rds_config" {
+  description = "parameters to configure RDS cluster"
   type = object({
-    backup_retention_period         = number
-    eks_security_group              = string
-    kms_key_id                      = string
-    subnet_ids                      = list(string)
-    deletion_protection             = optional(bool, true)
-    parameter_group_family          = optional(string, "aurora-mysql8.0")
-    engine_version                  = optional(string, "8.0.mysql_aurora.3.05.2")
-    instance_type                   = optional(string, "db.t4g.large")
-    enabled_cloudwatch_logs_exports = optional(list(string), ["slowquery", "audit", "error"])
-    db_parameter_group_parameters = optional(list(map(string)), [
+    engine_version             = optional(string, "8.0.mysql_aurora.3.05.2")
+    backup_retention_period    = number
+    enable_deletion_protection = optional(bool, true)
+    instance_type              = optional(string, "db.t4g.large")
+    parameter_group_family     = optional(string, "aurora-mysql8.0")
+    db_cluster_parameter_group_parameters = optional(list(map(string)), [
       {
         name         = "log_bin_trust_function_creators"
         value        = 1
@@ -25,8 +21,11 @@ variable "primary_crr_rds_config" {
         apply_method = "immediate"
       }
     ])
+    enabled_cloudwatch_logs_exports = optional(list(string), ["slowquery", "audit", "error"])
   })
-  default = null
+  default = {
+    backup_retention_period = 7
+  }
 }
 
 variable "cost_tags" {
@@ -34,7 +33,7 @@ variable "cost_tags" {
   default = {}
 }
 
-variable "primary_central_vpc_id" {
+variable "vpc_id" {
   type = string
 }
 
@@ -48,6 +47,9 @@ variable "primary_db_subnet_group_id" {
 
 variable "region" {}
 variable "environment" {}
+variable "kms_key_id" {}
+variable "eks_security_group" {}
+variable "private_subnet_ids" {}
+variable "secondary_rds_cluster_arn" {}
 variable "primary_rds_security_group_id" {}
-variable "dr_rds_cluster_arn" {}
 variable "db_parameter_group_name" {}

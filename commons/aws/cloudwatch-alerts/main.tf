@@ -103,7 +103,7 @@ resource "aws_sns_topic" "production_alerts" {
 }
 
 resource "aws_sns_topic_subscription" "pagerduty" {
-  count     = var.pagerduty_integration_key != null && var.pagerduty_integration_key != "" ? 1 : 0
+  count = var.pagerduty_integration_key != null && var.pagerduty_integration_key != "" ? 1 : 0
 
   topic_arn = aws_sns_topic.production_alerts.arn
   protocol  = "https"
@@ -111,7 +111,7 @@ resource "aws_sns_topic_subscription" "pagerduty" {
 }
 
 resource "aws_sns_topic_subscription" "email" {
-  for_each     = toset(var.email_ids)
+  for_each = toset(var.email_ids)
 
   topic_arn = aws_sns_topic.production_alerts.arn
   protocol  = "email"
@@ -119,7 +119,7 @@ resource "aws_sns_topic_subscription" "email" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cloudwatch_alerts" {
-  for_each            = var.cloudwatch_alerts
+  for_each = var.cloudwatch_alerts
 
   alarm_name          = each.value["name"]
   alarm_description   = each.value["description"]

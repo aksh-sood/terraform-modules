@@ -40,13 +40,6 @@ variable "enable_activemq" {
   default     = false
 }
 
-
-variable "is_dr" {
-  description = "If the setup is DR setup or not"
-  type        = bool
-  default     = false
-}
-
 variable "activemq_username" {
   type    = string
   default = "admin"

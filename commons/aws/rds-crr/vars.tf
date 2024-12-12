@@ -97,3 +97,41 @@ variable "instance_class" {
 variable "enabled_cloudwatch_logs_exports" {
   default = ["slowquery", "audit", "error"]
 }
+
+
+variable "security_group" {
+  description = "Security group ID of Primary site used before switchover to DR"
+  type        = string
+  default     = null
+}
+
+variable "create_sg" {
+  type    = bool
+  default = true
+}
+
+variable "create_db_subnet_group" {
+  type    = bool
+  default = true
+}
+
+variable "create_rds_parameter_subnet_group" {
+  type    = bool
+  default = true
+}
+
+
+variable "rds_cluster_parameter_group_name" {
+  type    = string
+  default = null
+}
+
+variable "db_subnet_group_id" {
+  type    = string
+  default = null
+}
+
+variable "db_parameter_group_name" {
+  type    = string
+  default = null
+}

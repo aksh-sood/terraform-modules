@@ -30,6 +30,22 @@ output "rabbitmq_nlb_url" {
   value = module.rabbitmq_nlb.url
 }
 
+output "primary_rds_cluster_parameter_group_name" {
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].db_cluster_parameter_group_id : null
+}
+
+output "primary_db_subnet_group_id" {
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].db_subnet_group_name : null
+}
+
+output "db_parameter_group_name" {
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].db_parameter_group_id : null
+}
+
+output "primary_rds_security_group_id" {
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].security_group_id : null
+}
+
 output "rds_writer_endpoint" {
   description = "Writer endpoint of the RDS cluster"
   value       = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].writer_endpoint : null

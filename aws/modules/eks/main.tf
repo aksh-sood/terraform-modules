@@ -208,7 +208,7 @@ module "eks_node" {
   desired_size = try(each.value.min_size, 1)
   min_size     = try(each.value.min_size, 1)
 
-  instance_types = try(each.value.instance_types, ["m5.large"])
+  instance_types    = try(each.value.instance_types, ["m5.large"])
   cortex_agent_tags = try(each.value.cortex_agent_tags, "")
 
   labels = try(each.value.labels, {})

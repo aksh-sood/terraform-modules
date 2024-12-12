@@ -143,8 +143,8 @@ module "eks" {
 
   vpc_id                  = module.vpc.id
   azs                     = module.vpc.azs
-  private_subnet_ids      = slice(module.vpc.private_subnets,0,length(module.vpc.azs))
-  public_subnet_ids       = slice(module.vpc.public_subnets,0,length(module.vpc.azs))
+  private_subnet_ids      = slice(module.vpc.private_subnets, 0, length(module.vpc.azs))
+  public_subnet_ids       = slice(module.vpc.public_subnets, 0, length(module.vpc.azs))
   kms_key_arn             = module.kms.key_arn
   secrets_key_bucket_name = module.secrets_bucket[0].id
 
@@ -190,15 +190,15 @@ module "kms_for_curator_s3" {
 }
 
 module "s3_for_curator" {
-  source     = "../commons/aws/s3"
-  count       = var.create_s3_bucket_for_curator ? 1 : 0
+  source = "../commons/aws/s3"
+  count  = var.create_s3_bucket_for_curator ? 1 : 0
 
   name        = "${var.vendor}-${var.environment}-${var.region}-elastisearch-backup"
   kms_key_arn = module.kms_for_curator_s3.key_arn
 
   tags = var.cost_tags
 
-  depends_on = [null_resource.curator_bucket_validation,module.kms_for_curator_s3]
+  depends_on = [null_resource.curator_bucket_validation, module.kms_for_curator_s3]
 }
 
 
@@ -207,7 +207,7 @@ module "opensearch" {
   count  = var.create_eks ? 1 : 0
 
   vpc_id      = module.vpc.id
-  subnet_ids  = slice(module.vpc.public_subnets,0,length(module.vpc.azs))
+  subnet_ids  = slice(module.vpc.public_subnets, 0, length(module.vpc.azs))
   kms_key_arn = module.kms.key_arn
   eks_sg      = var.create_eks ? module.eks[0].primary_security_group_id : null
 

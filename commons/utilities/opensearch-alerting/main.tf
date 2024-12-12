@@ -18,7 +18,7 @@ provider "opensearch" {
 }
 
 resource "opensearch_monitor" "dynamic_monitors" {
-  for_each =fileset(var.monitor_path, "*.json")
+  for_each = fileset(var.monitor_path, "*.json")
 
   body = templatefile("${var.monitor_path}/${each.key}", {
     slack_channel_id               = length(opensearch_channel_configuration.slack) > 0 ? opensearch_channel_configuration.slack[0].id : "",
@@ -31,7 +31,7 @@ resource "opensearch_monitor" "dynamic_monitors" {
 
 
   lifecycle {
-    ignore_changes = [ body ]
+    ignore_changes = [body]
   }
 }
 

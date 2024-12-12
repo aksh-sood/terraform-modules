@@ -36,3 +36,19 @@ output "cluster_id" {
   description = "Name of the RDS cluster"
   value       = module.rds_cluster.cluster_id
 }
+
+output "db_subnet_group_name" {
+  value = module.rds_cluster.db_subnet_group_name
+}
+
+output "db_parameter_group_id" {
+  value = module.rds_cluster.db_parameter_group_id
+}
+
+output "db_cluster_parameter_group_id" {
+  value = module.rds_cluster.db_cluster_parameter_group_id
+}
+
+output "security_group_id" {
+  value = module.rds_cluster.security_group_id
+}

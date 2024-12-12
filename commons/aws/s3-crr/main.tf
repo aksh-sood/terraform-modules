@@ -3,7 +3,7 @@ terraform {
     aws = {
       source                = "hashicorp/aws"
       version               = ">= 2.7.0"
-      configuration_aliases = [aws.dr]
+      configuration_aliases = [aws.primary]
     }
   }
 }
@@ -93,6 +93,8 @@ resource "aws_s3_bucket_replication_configuration" "primary" {
     }
   }
 
+  provider = aws.primary
+
   depends_on = [aws_iam_role_policy_attachment.s3_crr_role]
 }
 
@@ -122,8 +124,6 @@ resource "aws_s3_bucket_replication_configuration" "secondary" {
       }
     }
   }
-
-  provider = aws.dr
 
   depends_on = [aws_iam_role_policy_attachment.s3_crr_role]
 }

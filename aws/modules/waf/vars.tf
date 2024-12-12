@@ -36,7 +36,7 @@ variable "default_waf_rules" {
       priority       = 120
     },
     "AWSManagedRulesSQLiRuleSet" = {
-      rules_to_count = ["SQLi_BODY","SQLi_COOKIE"]
+      rules_to_count = ["SQLi_BODY", "SQLi_COOKIE"]
       priority       = 140
     }
   }
