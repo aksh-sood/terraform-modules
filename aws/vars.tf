@@ -134,7 +134,7 @@ variable "enable_cluster_autoscaler" {
 variable "cluster_version" {
   description = "eks cluster verison"
   type        = string
-  default     = "1.28"
+  default     = "1.30"
 }
 
 variable "eks_ingress_whitelist_ips" {
@@ -185,6 +185,7 @@ variable "eks_node_groups" {
       instance_types             = list(string)
       min_size                   = number
       max_size                   = number
+      cortex_agent_tags          = optional(string,"")
       labels                     = optional(map(string), {})
       additional_security_groups = optional(list(string), [])
       tags                       = optional(map(string), {})
@@ -370,8 +371,6 @@ variable "opensearch_version" {
   type        = string
 }
 
-variable "vendor" {}
-
 variable "enable_waf" {
   description = "Whether to enable WAF"
   type        = bool
@@ -420,13 +419,6 @@ variable "custom_s3_bucket_for_curator" {
   type        = string
   default     = null
   description = "User provided s3 bucket that curator should use for backing up"
-  validation {
-    condition     = !(var.create_s3_bucket_for_curator == true && (var.custom_s3_bucket_for_curator != null && var.custom_s3_bucket_for_curator != ""))
-    error_message = "If the variable create_s3_bucket_for_curator is set to true, then the variable custom_s3_bucket_for_curator should be null"
-  }
-  validation {
-    condition     = !(var.create_s3_bucket_for_curator == false && (var.custom_s3_bucket_for_curator == null || var.custom_s3_bucket_for_curator == ""))
-    error_message = "If the variable create_s3_bucket_for_curator is set to false then a custom s3 bucket should be provided in the variable custom_s3_bucket_for_curator"
-  }
 }
 
+variable "vendor" {}

@@ -35,6 +35,16 @@ resource "null_resource" "certificate_validation" {
   }
 }
 
+resource "null_resource" "curator_bucket_validation" {
+  lifecycle {
+    precondition {
+      condition = !var.create_s3_bucket_for_curator ? (
+      var.custom_s3_bucket_for_curator != "" && var.custom_s3_bucket_for_curator != null) : true
+      error_message = "Provide custom_s3_bucket_for_curator or set create_s3_bucket_for_curator to true"
+    }
+  }
+}
+
 module "security_hub" {
   source = "./modules/security-hub"
   count  = var.subscribe_security_hub ? 1 : 0
@@ -180,15 +190,15 @@ module "kms_for_curator_s3" {
 }
 
 module "s3_for_curator" {
-
   source     = "../commons/aws/s3"
-  depends_on = [module.kms_for_curator_s3]
-
   count       = var.create_s3_bucket_for_curator ? 1 : 0
+
   name        = "${var.vendor}-${var.environment}-${var.region}-elastisearch-backup"
   kms_key_arn = module.kms_for_curator_s3.key_arn
 
   tags = var.cost_tags
+
+  depends_on = [null_resource.curator_bucket_validation,module.kms_for_curator_s3]
 }
 
 

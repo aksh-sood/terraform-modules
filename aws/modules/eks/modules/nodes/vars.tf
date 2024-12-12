@@ -2,6 +2,7 @@ variable "tag_specifications" {
   default = ["instance", "volume", "network-interface"]
 }
 
+variable "ssh_key" {}
 variable "cluster_name" {}
 variable "node_security_group_id" {}
 variable "primary_security_group_id" {}
@@ -14,6 +15,6 @@ variable "desired_size" {}
 variable "instance_types" {}
 variable "labels" {}
 variable "tags" {}
+variable "cortex_agent_tags" {}
 variable "block_device_mappings" {}
-variable "ssh_key" {}
 variable "cluster_version" {}

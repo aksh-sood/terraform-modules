@@ -2,6 +2,21 @@ data "aws_ssm_parameter" "eks_ami_release_version" {
   name = "/aws/service/eks/optimized-ami/${var.cluster_version}/amazon-linux-2/recommended/release_version"
 }
 
+data "cloudinit_config" "linux_eks_managed_node_group" {
+
+  base64_encode = true
+  gzip          = false
+  boundary      = "//"
+
+  # Prepend to existing user data supplied by AWS EKS
+  part {
+    content_type = "text/x-shellscript"
+    content      =  templatefile("${path.module}/cortex.sh",{
+      cortex_tags = var.cortex_agent_tags
+    })
+  }
+}
+
 resource "aws_eks_node_group" "managed_nodes" {
 
   cluster_name    = var.cluster_name
@@ -83,6 +98,8 @@ resource "aws_launch_template" "this" {
     http_tokens = "required"
     http_put_response_hop_limit = 2
   }
+
+  user_data    = var.cortex_agent_tags!="" && var.cortex_agent_tags!=null ? data.cloudinit_config.linux_eks_managed_node_group.rendered : null
 
   key_name      = var.ssh_key
   ebs_optimized = true
