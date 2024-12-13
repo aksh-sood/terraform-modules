@@ -5,18 +5,6 @@ data "aws_secretsmanager_secret_version" "env_secrets" {
   secret_id = var.env_secrets
 }
 
-# DNS Query via Cloudflare DNS Resolver API
-data "http" "rabbitmq_endpoint_dns_query" {
-  url = "https://cloudflare-dns.com/dns-query?name=${local.rabbitmq_endpoint}&type=A"
-
-  # Set the Accept header to application/dns-json for structured response
-  request_headers = {
-    "Accept" = "application/dns-json"
-  }
-
-  depends_on = [module.rabbitmq]
-}
-
 resource "null_resource" "domain_validation" {
   lifecycle {
     precondition {
@@ -155,15 +143,16 @@ module "rabbitmq" {
 module "rabbitmq_nlb" {
   source = "./modules/rabbitmq_nlb"
 
+  rabbitmq_sg            = module.rabbitmq.rabbitmq_sg
+  rabbitmq_endpoint      = module.rabbitmq.endpoint
+
   name                   = var.environment
   vpc_id                 = var.vpc_id
   subnet_ids             = var.public_subnet_ids
   whitelist_ips          = var.rabbitmq_lb_ingress_whitelist
   public_certificate_arn = var.acm_certificate_arn
-  rabbitmq_private_ip    = local.rabbitmq_private_ips
-  rabbitmq_sg            = module.rabbitmq.rabbitmq_sg
-
-  depends_on = [data.http.rabbitmq_endpoint_dns_query]
+  rabbitmq_cluster_mode  = var.enable_rabbitmq_cluster
+  tags=var.cost_tags
 }
 
 module "nlb_cloudflare" {
@@ -357,7 +346,7 @@ module "normalized_trml_lambda" {
   environment_variables = {
     data_type           = "normalized_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-    activemq_broker_url = "failover:(${module.activemq[0].url},${module.activemq[0].url})?jms.userName=${module.activemq[0].username}&jms.password=${module.activemq[0].password}"
+    activemq_broker_url = "failover:(${module.activemq[0].url_1},${module.activemq[0].url_2})?jms.userName=${module.activemq[0].username}&jms.password=${module.activemq[0].password}"
   }
 
   tags = var.cost_tags
@@ -379,7 +368,7 @@ module "matched_trades_lambda" {
   environment_variables = {
     data_type           = "matched_trades"
     destination_queue   = replace("${var.environment}-<node>-<data_type>", "${var.vendor}", "<customer>")
-    activemq_broker_url = "failover:(${module.activemq[0].url},${module.activemq[0].url})?jms.userName=${module.activemq[0].username}&jms.password=${module.activemq[0].password}"
+    activemq_broker_url = "failover:(${module.activemq[0].url_1},${module.activemq[0].url_2})?jms.userName=${module.activemq[0].username}&jms.password=${module.activemq[0].password}"
   }
 
   tags = var.cost_tags
@@ -420,7 +409,7 @@ module "rds_cluster" {
 
   tags = var.cost_tags
 
-  depends_on = [null_resource.rds_validation, null_resource.rds_data_source_validation]
+  depends_on = [null_resource.rds_data_source_validation]
 }
 
 module "rds_crr" {
@@ -458,8 +447,8 @@ module "secrets" {
     database_readonly_url = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].reader_endpoint : module.rds_crr[0].reader_endpoint,
     database_username     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_username : module.rds_crr[0].master_username,
     database_password     = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].master_password : module.rds_crr[0].master_password,
-    activemq_url_1        = module.activemq[0].url,
-    activemq_url_2        = module.activemq[0].url,
+    activemq_url_1        = module.activemq[0].url_1,
+    activemq_url_2        = module.activemq[0].url_2,
     activemq_username     = module.activemq[0].username,
     activemq_password     = module.activemq[0].password,
     swift_bucket_name     = module.s3_swift.id,
