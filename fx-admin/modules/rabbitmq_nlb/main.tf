@@ -10,7 +10,11 @@ locals {
 
   ip_addresses = data.dns_a_record_set.rabbitmq.addrs
 
-  target_private_ips = [for ip in local.ip_addresses: ip if ip!=null]
+  target_private_ips = {
+    for idx in range(3) :
+    "ip-${idx + 1}" => try(local.ip_addresses[idx], null)
+    if try(local.ip_addresses[idx], null) != null
+  }
 }
 
 
@@ -117,22 +121,18 @@ resource "aws_lb_target_group" "rabbitmq_5671_target_group" {
 }
 
 resource "aws_lb_target_group_attachment" "rabbitmq_5671_target_group" {
-  for_each = toset(local.target_private_ips)
+  for_each = var.rabbitmq_cluster_mode == true ? {
+    "ip_1" = try(local.target_private_ips["ip-1"], null)
+    "ip_2" = try(local.target_private_ips["ip-2"], null)
+    "ip_3" = try(local.target_private_ips["ip-3"], null)
+    } : {
+    "ip_1" = try(local.target_private_ips["ip-1"], null)
+  }
 
   target_group_arn = aws_lb_target_group.rabbitmq_5671_target_group.arn
-  target_id        = each.key
+  target_id        = each.value
   port             = 5671
 
-  lifecycle {
-    replace_triggered_by = [
-      # Recreate when cluster mode changes
-      terraform_data.cluster_mode_trigger.id
-    ]
-  }
-}
-
-resource "terraform_data" "cluster_mode_trigger" {
-  input = var.rabbitmq_cluster_mode
 }
 
 resource "aws_lb" "network_load_balancer" {

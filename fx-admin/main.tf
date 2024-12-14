@@ -152,6 +152,7 @@ module "rabbitmq_nlb" {
   whitelist_ips          = var.rabbitmq_lb_ingress_whitelist
   public_certificate_arn = var.acm_certificate_arn
   rabbitmq_cluster_mode  = var.enable_rabbitmq_cluster
+
   tags=var.cost_tags
 }
 
