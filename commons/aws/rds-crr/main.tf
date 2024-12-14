@@ -54,13 +54,13 @@ resource "aws_db_subnet_group" "dr" {
 }
 
 resource "aws_rds_cluster_parameter_group" "dr" {
-  count = var.create_rds_parameter_subnet_group ? 1 : 0
+  count = var.create_rds_cluster_parameter_group ? 1 : 0
 
   name_prefix = var.name
   family      = var.parameter_group_family
 
   dynamic "parameter" {
-    for_each = var.db_parameter_group_parameters
+    for_each = var.db_cluster_parameter_group_parameters
 
     content {
       name         = parameter.value.name
@@ -69,12 +69,16 @@ resource "aws_rds_cluster_parameter_group" "dr" {
     }
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = var.tags
 }
 
 resource "aws_rds_cluster" "dr" {
   cluster_identifier              = var.name
-  db_cluster_parameter_group_name = var.create_rds_parameter_subnet_group ? aws_rds_cluster_parameter_group.dr[0].name : var.rds_cluster_parameter_group_name
+  db_cluster_parameter_group_name = var.create_rds_cluster_parameter_group ? aws_rds_cluster_parameter_group.dr[0].name : var.rds_cluster_parameter_group_name
   vpc_security_group_ids          = var.create_sg ? [aws_security_group.rds_dr[0].id] : [var.security_group]
   db_subnet_group_name            = var.create_db_subnet_group ? aws_db_subnet_group.dr[0].id : var.db_subnet_group_id
   engine                          = var.engine

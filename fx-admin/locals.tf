@@ -8,13 +8,14 @@ locals {
           for service_key, service_value in ns_value.services : service_key => merge(
             service_value,
             {
-              command = service_key == "swiftservice" ? var.swift_prod_cmd == [] || var.swift_prod_cmd == null ? [
+              command = service_key == "swiftservice" ? length(var.swift_prod_cmd) > 0 ? var.swift_prod_cmd : [
                 "/bin/sh",
                 "-c",
                 <<-EOT
 cp /home/app/app-cm/sftp-rsa /home/app/sftp-rsa && chmod 400 /home/app/sftp-rsa && ( ssh -oStrictHostKeyChecking=no -i /home/app/sftp-rsa -f ubuntu@${module.sftp_host[0].eip} -L 3000:${var.triana_sftp_host_endpoint}:22 -N &> output.log & ) && echo 'Tunnel is running' && "java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp -XX:+ExitOnOutOfMemoryError -jar /home/app/app.jar"
 EOT
-              ] : var.swift_prod_cmd : service_value.command
+              ] : service_value.command
+
               config_map = service_key == "swiftservice" ? merge(service_value.config_map, {
                 "sftp-rsa" = try(module.sftp_host[0].sftp_rsa, "empty")
               }) : service_value.config_map

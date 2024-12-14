@@ -25,7 +25,6 @@ variable "whitelist_eks" {
 
 variable "subnet_ids" {
   description = "List of subnets for the RDS DR cluster"
-  type        = list(string)
 }
 
 variable "tags" {
@@ -53,8 +52,7 @@ variable "parameter_group_family" {
   description = "This value will be used by both db parameter group and db cluster parameter group"
 }
 
-
-variable "db_parameter_group_parameters" {
+variable "db_cluster_parameter_group_parameters" {
   description = "A list of DB cluster parameters to apply. Note that parameters may differ from a family to an other"
   type        = list(map(string))
   default = [
@@ -115,11 +113,10 @@ variable "create_db_subnet_group" {
   default = true
 }
 
-variable "create_rds_parameter_subnet_group" {
+variable "create_rds_cluster_parameter_group" {
   type    = bool
   default = true
 }
-
 
 variable "rds_cluster_parameter_group_name" {
   type    = string

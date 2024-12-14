@@ -47,7 +47,7 @@ variable "primary_db_subnet_group_id" {
 
 variable "region" {}
 variable "environment" {}
-variable "kms_key_id" {}
+variable "kms_key_arn" {}
 variable "eks_security_group" {}
 variable "private_subnet_ids" {}
 variable "secondary_rds_cluster_arn" {}

@@ -26,7 +26,7 @@ resource "aws_security_group" "nlb" {
   name        = "${var.name}-rabbitmq-nlb"
   description = "Security Group for Network Load Balancer for RabbitMQ"
   vpc_id      = var.vpc_id
-  tags = var.tags
+  tags        = var.tags
 }
 
 resource "aws_security_group_rule" "whitelisting_custom_ips_to_5671" {

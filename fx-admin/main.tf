@@ -143,8 +143,8 @@ module "rabbitmq" {
 module "rabbitmq_nlb" {
   source = "./modules/rabbitmq_nlb"
 
-  rabbitmq_sg            = module.rabbitmq.rabbitmq_sg
-  rabbitmq_endpoint      = module.rabbitmq.endpoint
+  rabbitmq_sg       = module.rabbitmq.rabbitmq_sg
+  rabbitmq_endpoint = module.rabbitmq.endpoint
 
   name                   = var.environment
   vpc_id                 = var.vpc_id
@@ -153,7 +153,7 @@ module "rabbitmq_nlb" {
   public_certificate_arn = var.acm_certificate_arn
   rabbitmq_cluster_mode  = var.enable_rabbitmq_cluster
 
-  tags=var.cost_tags
+  tags = var.cost_tags
 }
 
 module "nlb_cloudflare" {
@@ -417,21 +417,21 @@ module "rds_crr" {
   source = "../commons/aws/rds-crr"
   count  = var.setup_dr && var.is_dr && var.create_rds ? 1 : 0
 
-  name                            = "${var.environment}-dr"
-  region                          = var.region
-  vpc_id                          = var.vpc_id
-  kms_key_id                      = var.kms_key_arn
-  subnet_ids                      = var.private_subnet_ids
-  dr_eks_security_group           = var.eks_security_group
-  primary_rds_cluster_arn         = var.primary_rds_cluster_arn
-  engine_version                  = var.rds_config.engine_version
-  deletion_protection             = var.rds_config.enable_deletion_protection
-  parameter_group_family          = var.rds_config.parameter_group_family
-  enabled_cloudwatch_logs_exports = var.rds_config.enabled_cloudwatch_logs_exports
-  db_parameter_group_parameters   = var.rds_config.db_parameter_group_parameters
-  backup_retention_period         = var.rds_config.backup_retention_period
-  instance_class                  = var.rds_config.instance_type
-  tags                            = merge(var.cost_tags, var.dr_tags)
+  name                                  = "${var.environment}-dr"
+  region                                = var.region
+  vpc_id                                = var.vpc_id
+  kms_key_id                            = var.kms_key_arn
+  subnet_ids                            = var.private_subnet_ids
+  dr_eks_security_group                 = var.eks_security_group
+  primary_rds_cluster_arn               = var.primary_rds_cluster_arn
+  engine_version                        = var.rds_config.engine_version
+  deletion_protection                   = var.rds_config.enable_deletion_protection
+  parameter_group_family                = var.rds_config.parameter_group_family
+  enabled_cloudwatch_logs_exports       = var.rds_config.enabled_cloudwatch_logs_exports
+  db_cluster_parameter_group_parameters = var.rds_config.db_cluster_parameter_group_parameters
+  backup_retention_period               = var.rds_config.backup_retention_period
+  instance_class                        = var.rds_config.instance_type
+  tags                                  = merge(var.cost_tags, var.dr_tags)
 
   depends_on = [null_resource.rds_dr_validation]
 

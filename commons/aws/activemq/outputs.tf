@@ -5,7 +5,7 @@ output "url_1" {
 
 output "url_2" {
   description = "URL of the activeMQ instance created inside the EKS VPC"
-  value       = var.deployment_mode== "ACTIVE_STANDBY_MULTI_AZ"? aws_mq_broker.activemq.instances.1.endpoints[0]:aws_mq_broker.activemq.instances.0.endpoints[0]
+  value       = var.deployment_mode == "ACTIVE_STANDBY_MULTI_AZ" ? aws_mq_broker.activemq.instances.1.endpoints[0] : aws_mq_broker.activemq.instances.0.endpoints[0]
 }
 
 output "password" {
@@ -28,5 +28,5 @@ output "console_url_1" {
 
 output "console_url_2" {
   description = "URL 2 of the activeMQ instance"
-  value       = var.deployment_mode== "ACTIVE_STANDBY_MULTI_AZ"? regex("https://([^:]+)", aws_mq_broker.activemq.instances.1.console_url)[0]:regex("https://([^:]+)", aws_mq_broker.activemq.instances.0.console_url)[0]
+  value       = var.deployment_mode == "ACTIVE_STANDBY_MULTI_AZ" ? regex("https://([^:]+)", aws_mq_broker.activemq.instances.1.console_url)[0] : regex("https://([^:]+)", aws_mq_broker.activemq.instances.0.console_url)[0]
 }

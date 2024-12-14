@@ -227,7 +227,7 @@ module "waf" {
   source = "./modules/waf"
   count  = var.enable_waf ? 1 : 0
 
-  name                     = "${var.vendor}-${var.environment}"
+  name                     = "${var.vendor}-${var.environment}-${var.region}"
   allowed_ip_sets          = var.waf_allowed_ip_sets
   custom_waf_rules         = var.waf_custom_rules
   modify_managed_waf_rules = var.waf_modify_managed_rules
