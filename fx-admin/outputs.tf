@@ -1,5 +1,5 @@
 output "activemq_url" {
-  value = module.activemq[0].url
+  value = [module.activemq[0].url_1,module.activemq[0].url_2]
 }
 
 output "activemq_password" {

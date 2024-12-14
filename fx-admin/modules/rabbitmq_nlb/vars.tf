@@ -1,7 +1,9 @@
 variable "name" {}
+variable "tags" {}
 variable "vpc_id" {}
 variable "subnet_ids" {}
 variable "rabbitmq_sg" {}
-variable "rabbitmq_private_ip" {}
+variable "rabbitmq_endpoint" {}
 variable "whitelist_ips" {}
 variable "public_certificate_arn" {}
+variable "rabbitmq_cluster_mode" {}
