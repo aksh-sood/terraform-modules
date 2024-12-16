@@ -97,9 +97,6 @@ resource "aws_mq_configuration" "mq_configuration" {
 resource "aws_mq_broker" "activemq" {
   broker_name = "${var.name}-activemq"
 
-  # data_replication_mode               = "CRDR"
-  # data_replication_primary_broker_arn = aws_mq_broker.primary.arn
-
   configuration {
     id       = aws_mq_configuration.mq_configuration.id
     revision = aws_mq_configuration.mq_configuration.latest_revision

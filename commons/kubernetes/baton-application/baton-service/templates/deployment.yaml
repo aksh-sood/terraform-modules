@@ -18,6 +18,10 @@ spec:
         app: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Release.Name }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
       containers:
         - name: {{ .Release.Name }}
           image: {{ .Values.docker_registry }}/baton/{{ .Values.customer }}/{{ .Release.Name }}:{{ .Values.image_tag }}
@@ -52,4 +56,4 @@ spec:
               value: {{ $v | quote }}
             {{- end }}
       volumes: 
-{{ toYaml .Values.volumes | indent 8}}        
+{{ toYaml .Values.volumes | indent 8}}

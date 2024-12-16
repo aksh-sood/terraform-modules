@@ -274,8 +274,9 @@ This object taked the paramters needed by a single service to run and are passed
 | target_port\*     | Target port for the service   | number      |          |
 | health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
-| url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
-| image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
+| node_selectors | Node Selectors to add to deployment file| map(string) | `{}` |
+| url_prefix\*      | Prefix for the service URL | string      |          |
+| image_tag         | Version of the image to be used |string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 |volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
 

@@ -304,6 +304,7 @@ variable "baton_application_namespaces" {
       subdomain_suffix     = optional(string, "")
       env                  = optional(map(string), {})
       image_tag            = optional(string, "latest")
+      node_selectors       = optional(map(string), {})
       volumeMounts = optional(object({
         volumes = list(any)
         mounts = list(object({

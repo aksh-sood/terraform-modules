@@ -13,3 +13,4 @@ volumes: []
 mounts: []
 security_context: true
 command:  []
+nodeSelector: {}

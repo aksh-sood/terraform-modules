@@ -240,11 +240,24 @@ eks_node_groups = {
   additional_node_policies        = null
   volume_type                     = "gp3"
   volume_size                     = 20
-
   node_groups = [{
     name = "node1"
 
     instance_types = ["m5.large"]
+
+    min_size = 1
+    max_size = 1
+
+    additional_security_groups = []
+
+    tags = {}
+    },
+    {
+    name = "node2"
+
+    instance_types = ["m5.large"]
+
+    cortex_agent_tags = "aws,baton,osttra,test"
 
     min_size = 1
     max_size = 1

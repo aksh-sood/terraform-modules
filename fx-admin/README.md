@@ -228,6 +228,7 @@ This object taked the paramters needed by a single service to run and are passed
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service| string  |`""` |
 |replicas| Number of replicas to provision for a deployment | number | `1` |
 | url_prefix\*      | Prefix for the service URL  | string      |          |
+| node_selectors | Node Selectors to add to deployment file| map(string) | `{}` |
 | image_tag         | Version of the image to be used| string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 |volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
@@ -316,6 +317,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           health_endpoint = "/health"
           target_port     = 8080
           subdomain_suffix= "-api"
+          node_selectors = {"selector1" = "value1", "selector2" = "value2"}
           url_prefix      = "/app2"
           env             = { "key3" = "v3", "key4" = "v4" }
           image_tag       = "latest"
