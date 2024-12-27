@@ -8,16 +8,27 @@ output "url_2" {
   value       = var.deployment_mode == "ACTIVE_STANDBY_MULTI_AZ" ? aws_mq_broker.activemq.instances.1.endpoints[0] : aws_mq_broker.activemq.instances.0.endpoints[0]
 }
 
-output "password" {
-  description = "Password for ActiveMQ"
-  value       = random_password.activemq_password.result
-  sensitive   = true
-
-}
-
 output "username" {
   description = "Username for ActiveMQ"
   value       = var.username
+  sensitive   = true
+}
+
+output "password" {
+  description = "Password for ActiveMQ"
+  value       = random_password.activemq_password[0].result
+  sensitive   = true
+}
+
+output "replica_username" {
+  description = "Username for ActiveMQ"
+  value       = var.replica_username
+  sensitive   = true
+}
+
+output "replica_password" {
+  description = "Password for ActiveMQ"
+  value       = random_password.activemq_password[1].result
   sensitive   = true
 }
 

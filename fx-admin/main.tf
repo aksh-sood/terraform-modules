@@ -310,7 +310,7 @@ module "s3_writer_lambda" {
 
 module "activemq" {
   source = "../commons/aws/activemq"
-  count  = var.create_activemq ? 1 : 0
+  count  = (var.create_activemq && !var.is_dr) ? 1 : 0
 
   name                       = var.environment
   region                     = var.region
@@ -326,9 +326,38 @@ module "activemq" {
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
   deployment_mode            = var.enable_activemq_cluster ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
+  data_replication_mode      = var.enable_activemq_cluster && var.setup_dr ? "CRDR" : "NONE"
   broker_connections         = var.activemq_connections
   maintenance_window         = var.activemq_maintenance_window
   tags                       = var.cost_tags
+}
+
+module "activemq_crr" {
+  source = "./activemq"
+  count  = var.setup_dr && var.is_dr && var.create_activemq && var.enable_activemq_cluster ? 1 : 0
+
+  name                                = "${var.environment}-dr"
+  region                              = var.region
+  vpc_id                              = var.vpc_id
+  subnet_ids                          = var.enable_activemq_cluster ? [var.private_subnet_ids[0], var.private_subnet_ids[1]] : [var.private_subnet_ids[0]]
+  engine_version                      = var.activemq_engine_version
+  instance_type                       = var.activemq_instance_type
+  publicly_accessible                 = var.activemq_publicly_accessible
+  apply_immediately                   = var.activemq_apply_immediately
+  username                            = var.activemq_username
+  auto_minor_version_upgrade          = var.activemq_auto_minor_version_upgrade
+  whitelist_security_groups           = var.eks_security_group
+  broker_connections                  = var.activemq_connections
+  ingress_whitelist_ips               = var.activemq_ingress_whitelist_ips
+  egress_whitelist_ips                = var.activemq_egress_whitelist_ips
+  deployment_mode                     = var.enable_activemq_cluster ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
+  data_replication_mode               = var.enable_activemq_cluster && var.setup_dr ? "CRDR" : "NONE"
+  data_replication_primary_broker_arn = var.primary_activemq_broker_arn
+  replica_password                    = var.activemq_replica_user_password
+
+
+  tags = var.cost_tags
+
 }
 
 module "normalized_trml_lambda" {

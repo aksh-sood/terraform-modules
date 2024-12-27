@@ -7,11 +7,15 @@ output "activemq_password" {
   sensitive = true
 }
 
+output "activemq_replica_user_password" {
+  value     = module.activemq[0].replica_password
+  sensitive = true
+}
+
 output "activemq_username" {
   value     = var.activemq_username
   sensitive = true
 }
-
 
 output "rabbitmq_password" {
   value     = module.rabbitmq.password

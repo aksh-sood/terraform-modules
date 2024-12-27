@@ -127,6 +127,16 @@ variable "enable_activemq_cluster" {
   default = false
 }
 
+variable "primary_activemq_broker_arn" {
+  type    = string
+  default = null
+}
+
+variable "activemq_replica_user_password" {
+  type    = string
+  default = null
+}
+
 variable "create_activemq" {
   type    = bool
   default = true
