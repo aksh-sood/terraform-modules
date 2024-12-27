@@ -132,6 +132,18 @@ variable "snapshot_identifier" {
   default     = null
 }
 
+variable "primary_cluster_arn" {
+  description = "ARN of primary RDS cluster for creating Global cluster"
+  type=string
+  default = null
+}
+
+variable "create_global_cluster" {
+  description = "True if global rds cluster is to be created"
+  type=bool
+  default = false
+}
+
 variable "apply_immediately" {
   type    = bool
   default = false

@@ -412,7 +412,9 @@ module "rds_cluster" {
   kms_key_id                            = var.kms_key_arn
   subnets                               = var.private_subnet_ids
   vpc_id                                = var.vpc_id
-  name                                  = var.environment
+  name                                  =var.primary_rds_cluster_arn!=null&& var.setup_dr && var.is_dr ? var.environment : "${var.environment}-dr"
+  create_global_cluster = var.primary_rds_cluster_arn!=null&& var.setup_dr && var.is_dr
+  primary_cluster_arn = var.primary_rds_cluster_arn 
   mysql_version                         = var.rds_config.engine_version
   rds_instance_type                     = var.rds_config.instance_type
   master_username                       = var.rds_config.master_username
@@ -439,32 +441,78 @@ module "rds_cluster" {
 
   tags = var.cost_tags
 
+  providers = {
+    aws.primary = aws.primary
+  }
+
   depends_on = [null_resource.rds_data_source_validation]
 }
 
-module "rds_crr" {
-  source = "../commons/aws/rds-crr"
-  count  = var.setup_dr && var.is_dr && var.create_rds ? 1 : 0
+# module "rds_cluster_crr" {
+#   source = "../commons/aws/rds"
+#   count  = (!var.is_dr && var.create_rds) ? 1 : 0
 
-  name                                  = "${var.environment}-dr"
-  region                                = var.region
-  vpc_id                                = var.vpc_id
-  kms_key_id                            = var.kms_key_arn
-  subnet_ids                            = var.private_subnet_ids
-  dr_eks_security_group                 = var.eks_security_group
-  primary_rds_cluster_arn               = var.primary_rds_cluster_arn
-  engine_version                        = var.rds_config.engine_version
-  deletion_protection                   = var.rds_config.enable_deletion_protection
-  parameter_group_family                = var.rds_config.parameter_group_family
-  enabled_cloudwatch_logs_exports       = var.rds_config.enabled_cloudwatch_logs_exports
-  db_cluster_parameter_group_parameters = var.rds_config.db_cluster_parameter_group_parameters
-  backup_retention_period               = var.rds_config.backup_retention_period
-  instance_class                        = var.rds_config.instance_type
-  tags                                  = merge(var.cost_tags, var.dr_tags)
+#   whitelist_eks                         = true
+#   kms_key_id                            = var.kms_key_arn
+#   subnets                               = var.private_subnet_ids
+#   vpc_id                                = var.vpc_id
+#   name                                  = "${var.environment}-dr"
+#   create_global_cluster = var.primary_rds_cluster_arn!=null&& var.setup_dr && var.is_dr
+#   mysql_version                         = var.rds_config.engine_version
+#   rds_instance_type                     = var.rds_config.instance_type
+#   master_username                       = var.rds_config.master_username
+#   create_rds_reader                     = var.rds_config.create_rds_reader
+#   ingress_whitelist                     = var.rds_config.ingress_whitelist
+#   enable_performance_insights           = var.rds_config.enable_performance_insights
+#   performance_insights_retention_period = var.rds_config.performance_insights_retention_period
+#   enable_rds_event_notifications        = var.rds_config.enable_event_notifications
+#   enable_deletion_protection            = var.rds_config.enable_deletion_protection
+#   enable_auto_minor_version_upgrade     = var.rds_config.enable_auto_minor_version_upgrade
+#   preferred_backup_window               = var.rds_config.preferred_backup_window
+#   backup_retention_period               = var.rds_config.backup_retention_period
+#   publicly_accessible                   = var.rds_config.publicly_accessible
+#   ca_cert_identifier                    = var.rds_config.ca_cert_identifier
+#   enabled_cloudwatch_logs_exports       = var.rds_config.enabled_cloudwatch_logs_exports
+#   reader_instance_type                  = var.rds_config.reader_instance_type
+#   parameter_group_family                = var.rds_config.parameter_group_family
+#   db_parameter_group_parameters         = var.rds_config.db_parameter_group_parameters
+#   db_cluster_parameter_group_parameters = var.rds_config.db_cluster_parameter_group_parameters
+#   snapshot_identifier                   = var.rds_config.snapshot_identifier
+#   apply_immediately                     = var.rds_config.apply_immediately
+#   eks_sg                                = var.eks_security_group
+#   resources_key_arn                     = module.kms_sse.key_arn
 
-  depends_on = [null_resource.rds_dr_validation]
+#   tags = var.cost_tags
 
-}
+#   providers = {
+#     aws.primary = aws.primary
+#   }
+
+# }
+
+# module "rds_crr" {
+#   source = "../commons/aws/rds-crr"
+#   count  = var.setup_dr && var.is_dr && var.create_rds ? 1 : 0
+
+#   name                                  = "${var.environment}-dr"
+#   region                                = var.region
+#   vpc_id                                = var.vpc_id
+#   kms_key_id                            = var.kms_key_arn
+#   subnet_ids                            = var.private_subnet_ids
+#   dr_eks_security_group                 = var.eks_security_group
+#   primary_rds_cluster_arn               = var.primary_rds_cluster_arn
+#   engine_version                        = var.rds_config.engine_version
+#   deletion_protection                   = var.rds_config.enable_deletion_protection
+#   parameter_group_family                = var.rds_config.parameter_group_family
+#   enabled_cloudwatch_logs_exports       = var.rds_config.enabled_cloudwatch_logs_exports
+#   db_cluster_parameter_group_parameters = var.rds_config.db_cluster_parameter_group_parameters
+#   backup_retention_period               = var.rds_config.backup_retention_period
+#   instance_class                        = var.rds_config.instance_type
+#   tags                                  = merge(var.cost_tags, var.dr_tags)
+
+#   depends_on = [null_resource.rds_dr_validation]
+
+# }
 
 module "secrets" {
   source = "../commons/aws/secrets"

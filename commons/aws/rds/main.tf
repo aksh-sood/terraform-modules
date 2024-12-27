@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "=5.20.1"
+      configuration_aliases = [ aws.primary ]
+    }
+  }
+}
+
 data "aws_vpc" "rds" {
   id = var.vpc_id
 }
@@ -37,6 +47,19 @@ resource "random_password" "password" {
   min_upper   = 1
 }
 
+# RDS Global Cluster Creation
+resource "aws_rds_global_cluster" "this" {
+  count = var.primary_cluster_arn!=null && var.create_global_cluster ? 1:0
+
+  provider = aws.primary
+
+  global_cluster_identifier = "${replace(var.name,"dr","")}global"
+  engine                    = "aurora-mysql"
+  engine_version            = var.mysql_version
+  storage_encrypted         = true
+  source_db_cluster_identifier = var.primary_cluster_arn
+}
+
 # Define RDS Aurora Cluster module
 module "rds_cluster" {
   source = "../../../external/rds"
@@ -46,9 +69,9 @@ module "rds_cluster" {
   engine                                      = "aurora-mysql"
   engine_version                              = var.mysql_version
   instance_class                              = var.rds_instance_type
-  master_username                             = var.master_username
   manage_master_user_password                 = false
-  master_password                             = random_password.password.result
+  master_username                             = var.primary_cluster_arn!=null && var.create_global_cluster?null:var.master_username
+  master_password                             = var.primary_cluster_arn!=null && var.create_global_cluster?null:random_password.password.result
   deletion_protection                         = var.enable_deletion_protection
   kms_key_id                                  = var.kms_key_id
   auto_minor_version_upgrade                  = var.enable_auto_minor_version_upgrade
@@ -58,6 +81,8 @@ module "rds_cluster" {
   performance_insights_retention_period       = var.enable_performance_insights ? var.performance_insights_retention_period : null
   publicly_accessible                         = var.publicly_accessible
   snapshot_identifier                         = var.snapshot_identifier
+  global_cluster_identifier = var.primary_cluster_arn!=null && var.create_global_cluster ? aws_rds_global_cluster.this.id : null
+  is_primary_cluster = !(var.primary_cluster_arn!=null && var.create_global_cluster)
   storage_encrypted                           = true
   ca_cert_identifier                          = var.ca_cert_identifier
   create_db_subnet_group                      = true
@@ -185,8 +210,5 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
 
-  tags = merge(var.tags, {
-    Name      = "${var.name}-RDS"
-    Terraform = "true"
-  })
+  tags = var.tags
 }
