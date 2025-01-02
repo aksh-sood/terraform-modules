@@ -36,10 +36,10 @@ output "internal_alb_security_group" {
 }
 
 output "cluster_cert" {
-value = module.eks.cluster_cert
+value = module.cluster.cluster_cert
 }
 
 output "cluster_endpoint" {
-  value = module.eks.cluster_endpoint
+  value = module.cluster.cluster_endpoint
 }
 

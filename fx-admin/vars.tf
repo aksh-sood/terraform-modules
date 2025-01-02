@@ -664,3 +664,5 @@ variable "kms_key_arn" {}
 variable "eks_node_role_arn" {}
 variable "eks_cluster_role_arn" {}
 variable "external_loadbalancer_url" {}
+variable "cluster_endpoint" {}
+variable "cluster_ca_cert" {}

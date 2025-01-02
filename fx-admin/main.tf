@@ -333,7 +333,7 @@ module "activemq" {
 }
 
 module "activemq_crr" {
-  source = "./activemq"
+  source = "../commons/aws/activemq"
   count  = var.setup_dr && var.is_dr && var.create_activemq && var.enable_activemq_cluster ? 1 : 0
 
   name                                = "${var.environment}-dr"
@@ -352,8 +352,9 @@ module "activemq_crr" {
   egress_whitelist_ips                = var.activemq_egress_whitelist_ips
   deployment_mode                     = var.enable_activemq_cluster ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
   data_replication_mode               = var.enable_activemq_cluster && var.setup_dr ? "CRDR" : "NONE"
-  data_replication_primary_broker_arn = var.primary_activemq_broker_arn
+  primary_broker_arn = var.primary_activemq_broker_arn
   replica_password                    = var.activemq_replica_user_password
+  maintenance_window = var.activemq_maintenance_window
 
 
   tags = var.cost_tags
