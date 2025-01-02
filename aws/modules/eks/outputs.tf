@@ -34,3 +34,12 @@ output "elb_security_group" {
 output "internal_alb_security_group" {
   value = aws_security_group.internal_alb_sg.id
 }
+
+output "cluster_cert" {
+value = module.eks.cluster_cert
+}
+
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+

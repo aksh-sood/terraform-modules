@@ -16,3 +16,11 @@ output "cluster_version" {
   description = "EKS cluster version provisioned"
   value       = module.eks.cluster_version
 }
+
+output "cluster_cert" {
+value = module.eks.cluster_certificate_authority_data
+}
+
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}

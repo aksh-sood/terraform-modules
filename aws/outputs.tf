@@ -105,3 +105,12 @@ output "waf_arn" {
   description = "ARN of the WAF"
   value       = var.enable_waf ? module.waf[0].arn : null
 }
+
+
+output "cluster_cert" {
+value =  var.create_eks ? module.eks[0].cluster_cert :null
+}
+
+output "cluster_endpoint" {
+  value = var.create_eks ?  module.eks[0].cluster_endpoint:null
+}
