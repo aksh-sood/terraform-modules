@@ -79,13 +79,3 @@ output "fx_env_kms_key_arn" {
   description = "KMS key ARN for FX ADMIN module resources"
   value       = module.kms_sse.key_arn
 }
-
-output "crr_cluster_endpoint" {
-  description = "Writer endpoint for the cluster"
-  value       = var.setup_dr && (!var.is_dr && var.create_rds) ? module.rds_crr[0].cluster_endpoint : null
-}
-
-output "crr_cluster_reader_endpoint" {
-  description = "A read-only endpoint for the cluster, automatically load-balanced across replicas"
-  value       = var.setup_dr && (!var.is_dr && var.create_rds) ? module.rds_crr[0].cluster_reader_endpoint : null
-}

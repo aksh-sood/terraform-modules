@@ -97,6 +97,9 @@ resource "aws_mq_configuration" "mq_configuration" {
 resource "aws_mq_broker" "activemq" {
   broker_name = "${var.name}-activemq"
 
+  # data_replication_mode               = "CRDR"
+  # data_replication_primary_broker_arn = aws_mq_broker.primary.arn
+
   configuration {
     id       = aws_mq_configuration.mq_configuration.id
     revision = aws_mq_configuration.mq_configuration.latest_revision
@@ -117,6 +120,8 @@ resource "aws_mq_broker" "activemq" {
   subnet_ids                 = var.subnet_ids
   security_groups            = [aws_security_group.activemq_sg.id]
   deployment_mode            = var.deployment_mode
+  data_replication_mode               = var.data_replication_mode
+  data_replication_primary_broker_arn = var.primary_broker_arn  
 
   maintenance_window_start_time {
     day_of_week = var.maintenance_window.day
@@ -137,9 +142,6 @@ resource "aws_mq_broker" "activemq" {
     password         = var.replica_password == null ? random_password.activemq_password[1].result : var.replica_password
     replication_user = true
   }
-
-  data_replication_mode               = var.data_replication_mode
-  data_replication_primary_broker_arn = var.primary_broker_arn
 
   tags = var.tags
 

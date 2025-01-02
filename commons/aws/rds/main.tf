@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "=5.20.1"
+      version = "=5.82.2"
       configuration_aliases = [ aws.primary ]
     }
   }
@@ -51,13 +51,14 @@ resource "random_password" "password" {
 resource "aws_rds_global_cluster" "this" {
   count = var.primary_cluster_arn!=null && var.create_global_cluster ? 1:0
 
-  provider = aws.primary
-
   global_cluster_identifier = "${replace(var.name,"dr","")}global"
   engine                    = "aurora-mysql"
   engine_version            = var.mysql_version
   storage_encrypted         = true
   source_db_cluster_identifier = var.primary_cluster_arn
+  force_destroy = true
+
+  provider = aws.primary
 }
 
 # Define RDS Aurora Cluster module
@@ -81,7 +82,7 @@ module "rds_cluster" {
   performance_insights_retention_period       = var.enable_performance_insights ? var.performance_insights_retention_period : null
   publicly_accessible                         = var.publicly_accessible
   snapshot_identifier                         = var.snapshot_identifier
-  global_cluster_identifier = var.primary_cluster_arn!=null && var.create_global_cluster ? aws_rds_global_cluster.this.id : null
+  global_cluster_identifier = var.primary_cluster_arn!=null && var.create_global_cluster ? aws_rds_global_cluster.this[0].id : null
   is_primary_cluster = !(var.primary_cluster_arn!=null && var.create_global_cluster)
   storage_encrypted                           = true
   ca_cert_identifier                          = var.ca_cert_identifier
