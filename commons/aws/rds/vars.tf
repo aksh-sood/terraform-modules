@@ -132,8 +132,8 @@ variable "snapshot_identifier" {
   default     = null
 }
 
-variable "primary_cluster_arn" {
-  description = "ARN of primary RDS cluster for creating Global cluster"
+variable "global_rds_identifier" {
+  description = "Global RDS Cluster  identifier"
   type=string
   default = null
 }

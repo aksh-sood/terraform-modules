@@ -68,7 +68,7 @@ variable "rds_config" {
     backup_retention_period               = number
     enable_deletion_protection            = optional(bool, true)
     engine_version                        = optional(string, "8.0.mysql_aurora.3.05.2")
-    instance_type                         = optional(string, "db.t4g.large")
+    instance_type                         = optional(string, "db.r5.large")
     master_username                       = optional(string, "master")
     parameter_group_family                = optional(string, "aurora-mysql8.0")
     enable_performance_insights           = optional(bool, true)
@@ -116,8 +116,8 @@ variable "rds_config" {
   }
 }
 
-variable "primary_rds_cluster_arn" {
-  description = "Parameters to configure RDS cluster"
+variable "global_rds_identifier" {
+  description = "Global RDS cluster ID"
   type        = string
   default     = null
 }

@@ -47,20 +47,6 @@ resource "random_password" "password" {
   min_upper   = 1
 }
 
-# RDS Global Cluster Creation
-resource "aws_rds_global_cluster" "this" {
-  count = var.primary_cluster_arn!=null && var.create_global_cluster ? 1:0
-
-  global_cluster_identifier = "${replace(var.name,"dr","")}global"
-  # engine                    = "aurora-mysql"
-  # engine_version            = var.mysql_version
-  storage_encrypted         = true
-  source_db_cluster_identifier = var.primary_cluster_arn
-  force_destroy = true
-
-  provider = aws.primary
-}
-
 # Define RDS Aurora Cluster module
 module "rds_cluster" {
   source = "../../../external/rds"
@@ -71,8 +57,8 @@ module "rds_cluster" {
   engine_version                              = var.mysql_version
   instance_class                              = var.rds_instance_type
   manage_master_user_password                 = false
-  master_username                             = var.primary_cluster_arn!=null && var.create_global_cluster?null:var.master_username
-  master_password                             = var.primary_cluster_arn!=null && var.create_global_cluster?null:random_password.password.result
+  master_username                             = var.create_global_cluster?var.master_username:null
+  master_password                             = var.create_global_cluster?random_password.password.result:null
   deletion_protection                         = var.enable_deletion_protection
   kms_key_id                                  = var.kms_key_id
   auto_minor_version_upgrade                  = var.enable_auto_minor_version_upgrade
@@ -82,8 +68,6 @@ module "rds_cluster" {
   performance_insights_retention_period       = var.enable_performance_insights ? var.performance_insights_retention_period : null
   publicly_accessible                         = var.publicly_accessible
   snapshot_identifier                         = var.snapshot_identifier
-  global_cluster_identifier = var.primary_cluster_arn!=null && var.create_global_cluster ? aws_rds_global_cluster.this[0].id : null
-  is_primary_cluster = !(var.primary_cluster_arn!=null && var.create_global_cluster)
   storage_encrypted                           = true
   ca_cert_identifier                          = var.ca_cert_identifier
   create_db_subnet_group                      = true
@@ -109,9 +93,11 @@ module "rds_cluster" {
   db_cluster_parameter_group_family     = var.parameter_group_family
   db_cluster_parameter_group_parameters = try(var.db_cluster_parameter_group_parameters, [])
 
-  skip_final_snapshot       = true # For prod env should be set to false. In that case final_snapshot_identifier is required. Set to true in test scenarios
+  skip_final_snapshot       = false # For prod env should be set to false. In that case final_snapshot_identifier is required. Set to true in test scenarios
   final_snapshot_identifier = "snapshot-made-while-deletion-of-${var.name}-rds-cluster"
 
+  # Global RDS config
+  global_cluster_identifier = var.create_global_cluster ? null : var.global_rds_identifier
   instances = {
     1 = {
       promotion_tier = 0
@@ -212,4 +198,13 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
 
   tags = var.tags
+}
+
+# RDS Global Cluster Creation
+resource "aws_rds_global_cluster" "this" {
+  count = var.create_global_cluster ? 1:0
+
+  global_cluster_identifier = "${var.name}-global"
+  source_db_cluster_identifier = module.rds_cluster.cluster_arn
+  force_destroy = true
 }

@@ -79,3 +79,8 @@ output "fx_env_kms_key_arn" {
   description = "KMS key ARN for FX ADMIN module resources"
   value       = module.kms_sse.key_arn
 }
+
+output "global_rds_identifier" {
+  description = "Global RDS identifier if created"
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].global_rds_identifier :null
+}
