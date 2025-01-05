@@ -52,8 +52,8 @@ resource "aws_rds_global_cluster" "this" {
   count = var.primary_cluster_arn!=null && var.create_global_cluster ? 1:0
 
   global_cluster_identifier = "${replace(var.name,"dr","")}global"
-  engine                    = "aurora-mysql"
-  engine_version            = var.mysql_version
+  # engine                    = "aurora-mysql"
+  # engine_version            = var.mysql_version
   storage_encrypted         = true
   source_db_cluster_identifier = var.primary_cluster_arn
   force_destroy = true

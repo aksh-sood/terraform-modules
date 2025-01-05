@@ -406,7 +406,7 @@ module "matched_trades_lambda" {
 
 module "rds_cluster" {
   source = "../commons/aws/rds"
-  count  = (!var.is_dr && var.create_rds) ? 1 : 0
+  count  = var.create_rds ? 1 : 0
 
   whitelist_eks                         = true
   kms_key_id                            = var.kms_key_arn
