@@ -15,6 +15,7 @@ variable "environment" {
 }
 
 variable "is_dr" {
+  description = "If the script is being executed for DR setup and in DR region"
   type    = bool
   default = false
 }
@@ -452,27 +453,6 @@ variable "additional_secrets" {
   default     = {}
 }
 
-variable "create_tgw" {
-  type    = bool
-  default = true
-}
-
-variable "tgw_shared_accounts" {
-  type    = list(string)
-  default = []
-}
-
-variable "tgw_region_routes" {
-  type = map(list(string))
-  default = {
-    "us-east-1"      = [],
-    "us-west-2"      = [],
-    "ap-southeast-1" = [],
-    "eu-west-1"      = []
-  }
-}
-
-
 variable "opensearch_username" {
   description = "Admin username for OpenSearch"
   type        = string
@@ -646,16 +626,6 @@ variable "sftp_triana_password" {
 
 variable "vendor" {
   type = string
-}
-
-variable "dr_central_vpc_subnet_ids" {
-  type    = list(string)
-  default = null
-}
-
-variable "dr_central_vpc_id" {
-  type    = string
-  default = null
 }
 
 variable "vpc_id" {}
