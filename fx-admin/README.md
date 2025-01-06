@@ -125,28 +125,27 @@ terraform apply
 | region                                    | AWS region to configure provider and provision the resources                                               | string                             | `"us-east-1"`                                                                |
 |dr_region | AWS region for DR setup | string| `us-west-2` |
 |setup_dr| Whether to setup DR replcation for not(works only if run on the primary infra side) | bool| `false`|  
-|is_dr| Whether the currently being infrastrcture is for DR purpose or not | bool | `false` |
+|is_dr| Whether the currently being infrastrcture is for DR purpose and execution region is  DR region | bool | `false` |
 | dr_kms_key_arn | KMS key ARN for the FX ADMIN resources in the DR region(required if `setup_dr` is true)(Has the following alias `resource-{environment}-{region}`)| string | `null` |
 | create_rds | Wheather to create RDS cluster or not (conflicts with `is_dr`)| bool | `true`|
 | k8s_cluster_name | EKS cluster name in which the applicaitons should run | string|`"test"`|
 | environment                               | Environment for which the resources are being provisioned                                                  | string                             | `"test"`                                                                     |
 | cost_tags                                 | Tags associated with specifc customer and environment                                                      | map(string)                        | `{ env-type = "test" customer = "internal" cost-center = "overhead"}`        |
 | dr_tags                                 | Tags associated for RDS CRR resources   | map(string)                        | `{}`        |
-| vendor\*                                  | Name of the vendor hosting applications                                                                    | string                             |                                                                              |
+| vendor\*| Name of the vendor hosting applications| string|`-`|
 | directory_service_data_s3_bucket_name| Name of the S3 bucket to mount to EKS| string | `null`|
 | directory_service_data_s3_bucket_path| File path for the sql dump file to import |string|`null`|
 | directory_service_data_s3_bucket_region|region of the S3 bucket|string|`"us-east-1"`|
 | activemq_ingress_whitelist_ips | CIDR to whitelist to activeMQ security group on ingress | list(string) | `[]` |
 | activemq_egress_whitelist_ips | CIDR to whitelist to activeMQ security group on egress | list(string) | `[]` |
-| activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.17.6"`                                                                  |
-| activemq_storage_type                     | Preferred storage type for ActiveMQ                                                                        | String                             | `"efs"`                                                                      |
-| activemq_instance_type                    | ActiveMQ host's instance type                                                                              | String                             | `"mq.t2.micro"`                                                              |
-| activemq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window  | bool                               | `true`                                                                       |
-| activemq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | bool                               | `false`                                                                      |
-| activemq_publicly_accessible              | Specify whether the ActiveMQ instance should be publicly accessible                                        | bool                               | `true`                                                                       |
-| activemq_username                         | Username to authenticate into the ActiveMQ server                                                          | String                             | `"admin"`                                                                    |
-| tgw_ram_principals                         | List of accounts to which tgw needs to be shared                                                      | list(string)                             | `[]`                                                                    |
-| rabbitmq_engine_version                   | Version of the RabbitMQ broker engine                                                                      | String                             | `3.11.20`                                                                    |
+| activemq_engine_version| Version of ActiveMQ engine| string | `"5.17.6"`|
+| activemq_storage_type| Preferred storage type for ActiveMQ| string | `"efs"` |
+| activemq_instance_type| ActiveMQ host's instance type| string | `"mq.t2.micro"` |
+| activemq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window  | bool| `true` |
+| activemq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | bool | `false` |
+| activemq_publicly_accessible              | Specify whether the ActiveMQ instance should be publicly accessible | bool | `true` |
+| activemq_username | Username to authenticate into the ActiveMQ server | string | `"admin"` |
+| rabbitmq_engine_version                   | Version of the RabbitMQ broker engine | string| `3.11.20`|
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
 | rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |

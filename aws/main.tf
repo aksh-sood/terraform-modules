@@ -235,7 +235,6 @@ module "waf" {
   tags = var.cost_tags
 }
 
-
 #Creates Transit gateway, linking to DR VPC, and Cross Account Resource Sharing.
 module "transit_gateway" {
   source = "../commons/aws/transit-gateway"

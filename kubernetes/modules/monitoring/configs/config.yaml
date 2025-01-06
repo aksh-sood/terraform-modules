@@ -2,6 +2,7 @@ additionalPrometheusRulesMap: ${alerts}
 alertmanager: ${alertmanager}
 prometheus:
   prometheusSpec:
+    retention: 90d
     storageSpec:
       volumeClaimTemplate:
         spec:
