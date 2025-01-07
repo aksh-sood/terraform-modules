@@ -279,12 +279,12 @@ module "kinesis_app" {
 module "lambda_iam" {
   source = "../commons/aws/lambda-iam"
 
+  name   = var.environment
+  region = var.region
+
   s3_bucket_arn = module.s3.bucket_arn
   sqs_queue_arn = module.sqs.arn
   streams_arn   = [module.normalized_trml_kinesis_stream.stream_arn, module.normalized_trml_kinesis_stream.stream_arn]
-
-  name   = var.environment
-  region = var.region
 }
 
 module "sqs" {

@@ -34,22 +34,6 @@ provider "aws" {
   alias  = "primary"
 }
 
-# provider "kubernetes" {
-#   config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
-# }
-
-# provider "helm" {
-#   kubernetes {
-#     config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
-#   }
-# }
-
-# provider "kubectl" {
-#   config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
-#   alias       = "this"
-# }
-
-
 provider "kubernetes" {
   host                   = var.cluster_endpoint
   cluster_ca_certificate = base64decode(var.cluster_ca_cert)

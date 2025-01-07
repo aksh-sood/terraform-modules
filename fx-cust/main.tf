@@ -1,5 +1,4 @@
 data "aws_caller_identity" "current" {}
-
 resource "null_resource" "domain_validation" {
   lifecycle {
     precondition {
@@ -35,22 +34,55 @@ module "external_alb_cloudflare" {
   }
 }
 
+#Creates KMS key for encrypting the resources specific to FX Cust Infra
+module "kms_sse" {
+  source = "../external/kms"
+
+  key_administrators = [
+    data.aws_caller_identity.current.arn
+  ]
+
+  key_users                         = local.resources_key_user_arns
+  key_service_users                 = local.resources_key_user_arns
+  key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
+  aliases                           = ["resource-${var.environment}"]
+
+  tags = var.cost_tags
+}
 
 module "s3" {
   source = "../commons/aws/s3"
 
+  name = !var.is_dr ? "${var.vendor}-${var.environment}":"${var.vendor}-${var.environment}-dr"
   kms_key_arn = module.kms_sse.key_arn
 
-  name = "${var.vendor}-${var.environment}"
   tags = var.cost_tags
+}
+
+#Creating S3 CRR for above bucket in DR
+
+module "s3_crr" {
+  source = "../commons/aws/s3-crr"
+
+  count = var.setup_dr && var.is_dr ? 1 : 0
+
+  name                  = "${var.environment}"
+  primary_bucket_name   = "${var.vendor}-${var.environment}"
+  primary_kms_key       = var.primary_kms_key_arn
+  secondary_bucket_name = module.s3.id
+  secondary_kms_key     = module.kms_sse.key_arn
+
+  providers = {
+    aws.primary = aws.primary
+  }
 }
 
 module "transfer_messages_kinesis_stream" {
   source = "../commons/aws/stream"
 
+  name = "${var.environment}-transfer-messages"
   kms_key_arn = module.kms_sse.key_arn
 
-  name = "${var.environment}-transfer-messages"
   tags = var.cost_tags
 }
 
@@ -63,22 +95,27 @@ module "sqs" {
 
 module "activemq" {
   source = "../commons/aws/activemq"
+  count  = var.create_activemq ? 1 : 0
 
-  name                       = "${var.environment}-activemq"
+  name                       = var.environment
   region                     = var.region
   vpc_id                     = var.vpc_id
-  subnet_ids                 = var.private_subnet_ids
-  auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
+  subnet_ids                 = var.enable_activemq_cluster ? [var.private_subnet_ids[0], var.private_subnet_ids[1]] : [var.private_subnet_ids[0]]
   engine_version             = var.activemq_engine_version
   instance_type              = var.activemq_instance_type
   publicly_accessible        = var.activemq_publicly_accessible
   apply_immediately          = var.activemq_apply_immediately
-  storage_type               = var.activemq_storage_type
   username                   = var.activemq_username
+  auto_minor_version_upgrade = var.activemq_auto_minor_version_upgrade
+  whitelist_security_groups  = var.eks_security_group
+  broker_connections         = var.activemq_connections
   ingress_whitelist_ips      = var.activemq_ingress_whitelist_ips
   egress_whitelist_ips       = var.activemq_egress_whitelist_ips
-  whitelist_security_groups  = var.eks_security_group
-  
+  deployment_mode            = var.enable_activemq_cluster ? "ACTIVE_STANDBY_MULTI_AZ" : "SINGLE_INSTANCE"
+  data_replication_mode      = var.enable_activemq_cluster && var.setup_dr && var.is_dr ? "CRDR" : "NONE"
+  primary_broker_arn         = var.primary_activemq_broker_arn
+  replica_password           = var.activemq_replica_user_password
+  maintenance_window         = var.activemq_maintenance_window
   tags                       = var.cost_tags
 }
 
@@ -171,21 +208,6 @@ module "rds_cluster" {
   eks_sg                                = var.eks_security_group
 
   cost_tags                             = var.cost_tags
-}
-
-module "kms_sse" {
-  source = "../external/kms"
-
-  key_administrators = [
-    data.aws_caller_identity.current.arn
-  ]
-
-  key_users                         = local.resources_key_user_arns
-  key_service_users                 = local.resources_key_user_arns
-  key_service_roles_for_autoscaling = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"]
-  aliases                           = ["resource-${var.environment}"]
-
-  tags = var.cost_tags
 }
 
 module "baton_application_namespace" {
