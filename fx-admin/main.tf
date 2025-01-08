@@ -524,6 +524,7 @@ module "baton_application_namespace" {
   istio_injection          = each.value.istio_injection
   services                 = each.value.services
   enable_activemq          = each.value.enable_activemq
+
   providers = {
     kubectl.this = kubectl.this
   }

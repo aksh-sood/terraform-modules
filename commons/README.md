@@ -59,6 +59,9 @@ This module creates an Aurora RDS Cluster with MYSQL engine with multiple config
 | rds_enabled_cloudwatch_logs_exports       | Enabled CloudWatch Logs Exports for RDS   | list(string) | `["slowquery", "audit", "error"]`                                           |
 | rds_ca_cert_identifier                    | CA certificate identifier for RDS         | string       | `-`                                                                         |
 | rds_backup_retention_period               | Backup retention period for RDS in days   | number       | `7`                                                                         |
+|global_rds_identifier| ID for global RDS cluster with which the cluster needs to be associated with. This property is required if running the script in DR region and RDS cluster needs to be setup as secondary cluster.| string| `null`| 
+| create_global_cluster| Wheather the global cluster is to be created or not. Should be true in primary region script execution and false for DR region execution.| bool | `false` |
+|snapshot_identifier| Snapshot ID from which to restore the RDS cluster | string| `null` |
 
 ##### Outputs
 
@@ -69,6 +72,7 @@ This module creates an Aurora RDS Cluster with MYSQL engine with multiple config
 | rds_cloudwatch_log_groups | string | CloudWatch log groups associated with the RDS cluster |
 | rds_master_username       | string | MYSQL Username for the master user                    |
 | rds_master_password       | string | MYSQL Password for the master user                    |
+|global_rds_identifier| string| ID of Global RDS cluster if created| 
 
 ### [ACTIVE MQ](./aws/activemq/)
 
@@ -85,14 +89,22 @@ This module provisions a single ACTIVEMQ Broker and security group for it .
 | auto_minor_version_upgrade | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.  | bool   | `false`         |
 | publicly_accessible        | Specify whether the ActiveMQ instance should be publicly accessible                                       | bool   | `true`          |
 | username                   | Username to authenticate into the ActiveMQ server                                                         | String | `"admin"`       |
+|data_replication_mode\*|IF CRR is to be enabled for activemq or not. Valid values are `NONE` and `CRDR`| string | `NONE` |
+|primary_broker_arn|ARN of the primary Broker from whcih the replication pair is to be created| string|   `null`  |
+|replica_password| Password of the replica user for broker from which the rreplication is to be carried out| string| `null`|
 
 ##### Outputs
 
 | Name     | Type   | Description                |
 |:---------|:-------|:---------------------------|
-| url      | string | URL of the ActiveMQ broker |
+| url_1      | string | URL 1 of the ActiveMQ broker |
+| url_2      | string | URL 2 of the ActiveMQ broker |
+| console_url_1      | string | URL 1 of the ActiveMQ broker |
+| console_url_2      | string | URL 2 of the ActiveMQ broker |
 | username | string | Username for ActiveMQ      |
+| replica_username | string | Replica User Username for ActiveMQ      |
 | password | string | Password for ActiveMQ      |
+| replica_password | string | Replica User Password for ActiveMQ      |
 
 ### [RABBITMQ (AWS)](./aws/activemq/)
 
@@ -274,8 +286,9 @@ This object taked the paramters needed by a single service to run and are passed
 | target_port\*     | Target port for the service   | number      |          |
 | health_endpoint\* | Health check endpoint of the service                                                                                                   | string      |          |
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service                                                                   | string      | `""`     |
-| url_prefix\*      | Prefix for the service URL                                                                                                             | string      |          |
-| image_tag         | Version of the image to be used                                                                                                        | string      | `latest` |
+| node_selectors | Node Selectors to add to deployment file| map(string) | `{}` |
+| url_prefix\*      | Prefix for the service URL | string      |          |
+| image_tag         | Version of the image to be used |string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 |volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
 

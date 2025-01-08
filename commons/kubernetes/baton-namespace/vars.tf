@@ -11,6 +11,7 @@ variable "services" {
     health_endpoint      = optional(string, "/health")
     port                 = optional(number, 8080)
     subdomain_suffix     = optional(string, "")
+    node_selectors       = optional(map(string), {})
     command              = optional(list(string), null)
     image_tag            = optional(string, "latest")
     volumeMounts = optional(object({

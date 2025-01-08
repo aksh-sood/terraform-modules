@@ -12,6 +12,7 @@ variable "config_map" {}
 variable "url_prefix" {}
 variable "target_port" {}
 variable "domain_name" {}
+variable "node_selectors" {}
 variable "docker_registry" {}
 variable "health_endpoint" {}
 variable "subdomain_suffix" {}

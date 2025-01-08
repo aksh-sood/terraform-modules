@@ -47,6 +47,7 @@ module "baton_application" {
   subdomain_suffix     = each.value.subdomain_suffix
   image_tag            = each.value.image_tag
   command              = each.value.command
+  node_selectors       = each.value.node_selectors
   security_context     = each.value.security_context
   config_map           = each.value.config_map
   config_map_file_path = each.value.config_map_file_path
