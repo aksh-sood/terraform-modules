@@ -1,5 +1,6 @@
 locals {
 
+#Changing the command to start the docker application for swift service in case of external SWIFT Connectivity
   baton_application_namespaces = {
     for ns_key, ns_value in var.baton_application_namespaces : ns_key => merge(
       ns_value,
@@ -34,6 +35,9 @@ EOT
 
   env_secrets = var.env_secrets != "" && var.env_secrets != null ? jsondecode(data.aws_secretsmanager_secret_version.env_secrets[0].secret_string) : {}
 
+  pagerduty_integration_key = try(var.cloudwatch_alerts_pagerduty_integration_key, "")
+
+ #Cloudwatch alerts for FX ADMIN Infra
   cloudwatch_alerts = merge(
     {
       "RDS Connections" = {
@@ -129,6 +133,4 @@ EOT
       }
     },
   )
-
-  pagerduty_integration_key = try(var.cloudwatch_alerts_pagerduty_integration_key, "")
 }

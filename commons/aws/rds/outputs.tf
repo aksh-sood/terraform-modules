@@ -52,3 +52,7 @@ output "db_cluster_parameter_group_id" {
 output "security_group_id" {
   value = module.rds_cluster.security_group_id
 }
+
+output "global_rds_identifier" {
+  value = var.create_global_cluster ?aws_rds_global_cluster.this[0].id:null
+}

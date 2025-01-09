@@ -1,3 +1,13 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "=5.82.2"
+      configuration_aliases = [ aws.primary ]
+    }
+  }
+}
+
 data "aws_vpc" "rds" {
   id = var.vpc_id
 }
@@ -46,9 +56,9 @@ module "rds_cluster" {
   engine                                      = "aurora-mysql"
   engine_version                              = var.mysql_version
   instance_class                              = var.rds_instance_type
-  master_username                             = var.master_username
   manage_master_user_password                 = false
-  master_password                             = random_password.password.result
+  master_username                             = var.create_global_cluster?var.master_username:null
+  master_password                             = var.create_global_cluster?random_password.password.result:null
   deletion_protection                         = var.enable_deletion_protection
   kms_key_id                                  = var.kms_key_id
   auto_minor_version_upgrade                  = var.enable_auto_minor_version_upgrade
@@ -83,9 +93,11 @@ module "rds_cluster" {
   db_cluster_parameter_group_family     = var.parameter_group_family
   db_cluster_parameter_group_parameters = try(var.db_cluster_parameter_group_parameters, [])
 
-  skip_final_snapshot       = true # For prod env should be set to false. In that case final_snapshot_identifier is required. Set to true in test scenarios
+  skip_final_snapshot       = false # For prod env should be set to false. In that case final_snapshot_identifier is required. Set to true in test scenarios
   final_snapshot_identifier = "snapshot-made-while-deletion-of-${var.name}-rds-cluster"
 
+  # Global RDS config
+  global_cluster_identifier = var.create_global_cluster ? null : var.global_rds_identifier
   instances = {
     1 = {
       promotion_tier = 0
@@ -185,8 +197,14 @@ resource "aws_rds_cluster_instance" "reader_instance" {
   performance_insights_retention_period = var.enable_performance_insights ? var.performance_insights_retention_period : null
   auto_minor_version_upgrade            = var.enable_auto_minor_version_upgrade
 
-  tags = merge(var.tags, {
-    Name      = "${var.name}-RDS"
-    Terraform = "true"
-  })
+  tags = var.tags
+}
+
+# RDS Global Cluster Creation
+resource "aws_rds_global_cluster" "this" {
+  count = var.create_global_cluster ? 1:0
+
+  global_cluster_identifier = "${var.name}-global"
+  source_db_cluster_identifier = module.rds_cluster.cluster_arn
+  force_destroy = true
 }

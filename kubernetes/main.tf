@@ -83,6 +83,7 @@ module "istio" {
 module "gchat_lambda" {
   source                    = "../commons/aws/gchat-lambda"
   count                     = var.gchat_webhook != null ? 1 : 0
+
   slack_webhook_url         = ""
   name                      = var.environment
   environment               = var.environment
@@ -96,7 +97,6 @@ module "gchat_lambda" {
 module "monitoring" {
   source = "./modules/monitoring"
 
-  isito_dependency = module.istio
 
   gchat_lambda_url = var.gchat_webhook != null ? module.gchat_lambda[0].url : null
 

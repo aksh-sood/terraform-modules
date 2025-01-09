@@ -1,4 +1,6 @@
 resource "random_password" "activemq_password" {
+  count = 2
+
   length      = 16
   special     = false
   lower       = true
@@ -96,7 +98,8 @@ resource "aws_mq_broker" "activemq" {
   broker_name = "${var.name}-activemq"
 
   configuration {
-    id = aws_mq_configuration.mq_configuration.id
+    id       = aws_mq_configuration.mq_configuration.id
+    revision = aws_mq_configuration.mq_configuration.latest_revision
   }
 
   logs {
@@ -114,17 +117,27 @@ resource "aws_mq_broker" "activemq" {
   subnet_ids                 = var.subnet_ids
   security_groups            = [aws_security_group.activemq_sg.id]
   deployment_mode            = var.deployment_mode
-
-  user {
-    console_access = true
-    username       = var.username
-    password       = random_password.activemq_password.result
-  }
+  data_replication_mode               = var.data_replication_mode
+  data_replication_primary_broker_arn = var.primary_broker_arn  
 
   maintenance_window_start_time {
     day_of_week = var.maintenance_window.day
     time_of_day = var.maintenance_window.time
     time_zone   = var.maintenance_window.time_zone
+  }
+
+  user {
+    console_access = true
+    username       = var.username
+    password       = random_password.activemq_password[0].result
+  }
+
+  ## Configuring Replication
+
+  user {
+    username         = var.replica_username
+    password         = var.replica_password == null ? random_password.activemq_password[1].result : var.replica_password
+    replication_user = true
   }
 
   tags = var.tags

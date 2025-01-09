@@ -132,6 +132,18 @@ variable "snapshot_identifier" {
   default     = null
 }
 
+variable "global_rds_identifier" {
+  description = "Global RDS Cluster  identifier"
+  type=string
+  default = null
+}
+
+variable "create_global_cluster" {
+  description = "True if global rds cluster is to be created"
+  type=bool
+  default = false
+}
+
 variable "apply_immediately" {
   type    = bool
   default = false

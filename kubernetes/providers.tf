@@ -35,17 +35,50 @@ provider "aws" {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/${var.environment}-${var.region}"
-}
-
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/${var.environment}-${var.region}"
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.environment]
+    command     = "aws"
   }
 }
 
+# provider "kubernetes" {
+#   config_path = "~/.kube/${var.environment}-${var.region}"
+# }
+
+# provider "helm" {
+#   kubernetes {
+#     config_path = "~/.kube/${var.environment}-${var.region}"
+#   }
+# }
+
+provider "helm" {
+  kubernetes {
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.environment]
+    command     = "aws"
+  }
+}
+}
+
+# provider "kubectl" {
+#   config_path = "~/.kube/${var.environment}-${var.region}"
+#   alias       = "this"
+# }
+
 provider "kubectl" {
-  config_path = "~/.kube/${var.environment}-${var.region}"
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.environment]
+    command     = "aws"
+  }
   alias       = "this"
 }
 

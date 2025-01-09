@@ -31,6 +31,7 @@ env: ${jsonencode(var.env)}
 command: ${jsonencode(var.command)}
 volumes: ${jsonencode(concat(var.volumes, local.app_cm.volume))}
 mounts: ${jsonencode(concat(var.mounts, local.app_cm.mount))}
+nodeSelector: ${jsonencode(var.node_selectors)}
 EOT
   ]
 

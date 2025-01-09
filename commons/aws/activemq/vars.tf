@@ -31,6 +31,26 @@ variable "broker_connections" {
   default = {}
 }
 
+variable "replica_username" {
+  type    = string
+  default = "replica_user"
+}
+
+variable "data_replication_mode" {
+  type    = string
+  default = "NONE"
+}
+
+variable "primary_broker_arn" {
+  type    = string
+  default = null
+}
+
+variable "replica_password" {
+  type    = string
+  default = null
+}
+
 variable "name" {}
 variable "region" {}
 variable "vpc_id" {}

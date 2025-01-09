@@ -15,6 +15,7 @@ variable "environment" {
 }
 
 variable "is_dr" {
+  description = "If the script is being executed for DR setup and in DR region"
   type    = bool
   default = false
 }
@@ -49,6 +50,7 @@ variable "cost_tags" {
     cost-center = "overhead"
   }
 }
+
 variable "dr_tags" {
   description = "Customer Cost and Environment tags for all the DR resources.Merged with `cost_tags` attribute"
   type        = map(string)
@@ -68,7 +70,7 @@ variable "rds_config" {
     backup_retention_period               = number
     enable_deletion_protection            = optional(bool, true)
     engine_version                        = optional(string, "8.0.mysql_aurora.3.05.2")
-    instance_type                         = optional(string, "db.t4g.large")
+    instance_type                         = optional(string, "db.r5.large")
     master_username                       = optional(string, "master")
     parameter_group_family                = optional(string, "aurora-mysql8.0")
     enable_performance_insights           = optional(bool, true)
@@ -116,15 +118,25 @@ variable "rds_config" {
   }
 }
 
-variable "primary_rds_cluster_arn" {
-  description = "Parameters to configure RDS cluster"
+variable "global_rds_identifier" {
+  description = "Global RDS cluster ID"
   type        = string
   default     = null
 }
 
 variable "enable_activemq_cluster" {
   type    = bool
-  default = false
+  default = true
+}
+
+variable "primary_activemq_broker_arn" {
+  type    = string
+  default = null
+}
+
+variable "activemq_replica_user_password" {
+  type    = string
+  default = null
 }
 
 variable "create_activemq" {
@@ -170,7 +182,7 @@ variable "activemq_apply_immediately" {
 
 variable "activemq_auto_minor_version_upgrade" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "activemq_publicly_accessible" {
@@ -293,6 +305,7 @@ variable "baton_application_namespaces" {
       subdomain_suffix     = optional(string, "")
       env                  = optional(map(string), {})
       image_tag            = optional(string, "latest")
+      node_selectors       = optional(map(string), {})
       volumeMounts = optional(object({
         volumes = list(any)
         mounts = list(object({
@@ -441,27 +454,6 @@ variable "additional_secrets" {
   type        = map(any)
   default     = {}
 }
-
-variable "create_tgw" {
-  type    = bool
-  default = true
-}
-
-variable "tgw_shared_accounts" {
-  type    = list(string)
-  default = []
-}
-
-variable "tgw_region_routes" {
-  type = map(list(string))
-  default = {
-    "us-east-1"      = [],
-    "us-west-2"      = [],
-    "ap-southeast-1" = [],
-    "eu-west-1"      = []
-  }
-}
-
 
 variable "opensearch_username" {
   description = "Admin username for OpenSearch"
@@ -638,19 +630,11 @@ variable "vendor" {
   type = string
 }
 
-variable "dr_central_vpc_subnet_ids" {
-  type    = list(string)
-  default = null
-}
-
-variable "dr_central_vpc_id" {
-  type    = string
-  default = null
-}
-
 variable "vpc_id" {}
 variable "eks_security_group" {}
 variable "kms_key_arn" {}
 variable "eks_node_role_arn" {}
 variable "eks_cluster_role_arn" {}
 variable "external_loadbalancer_url" {}
+variable "cluster_endpoint" {}
+variable "cluster_ca_cert" {}

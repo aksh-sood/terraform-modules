@@ -421,4 +421,40 @@ variable "custom_s3_bucket_for_curator" {
   description = "User provided s3 bucket that curator should use for backing up"
 }
 
+variable "is_dr" {
+  description = "If the script is being executed for DR setup and in DR region"
+  type    = bool
+  default = false
+}
+
+variable "create_tgw" {
+  type    = bool
+  default = true
+}
+
+variable "tgw_shared_accounts" {
+  type    = list(string)
+  default = []
+}
+
+variable "tgw_region_routes" {
+  type = map(list(string))
+  default = {
+    "us-east-1"      = [],
+    "us-west-2"      = [],
+    "ap-southeast-1" = [],
+    "eu-west-1"      = []
+  }
+}
+
+variable "dr_central_vpc_subnet_ids" {
+  type    = list(string)
+  default = null
+}
+
+variable "dr_central_vpc_id" {
+  type    = string
+  default = null
+}
+
 variable "vendor" {}

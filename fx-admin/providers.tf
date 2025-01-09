@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "=5.20.1"
+      version = "=5.82.2"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
@@ -34,18 +34,52 @@ provider "aws" {
   alias  = "primary"
 }
 
+# provider "kubernetes" {
+#   config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+# }
+
+# provider "helm" {
+#   kubernetes {
+#     config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+#   }
+# }
+
+# provider "kubectl" {
+#   config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+#   alias       = "this"
+# }
+
+
 provider "kubernetes" {
-  config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.k8s_cluster_name]
+    command     = "aws"
+  }
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.k8s_cluster_name]
+    command     = "aws"
   }
+}
 }
 
 provider "kubectl" {
-  config_path = "~/.kube/${var.k8s_cluster_name}-${var.region}"
+  host                   = var.cluster_endpoint
+  cluster_ca_certificate = base64decode(var.cluster_ca_cert)
+  exec {
+    api_version = "client.authentication.k8s.io/v1beta1"
+    args        = ["eks", "get-token", "--cluster-name", var.k8s_cluster_name]
+    command     = "aws"
+  }
   alias       = "this"
 }
 

@@ -87,7 +87,7 @@ resource "aws_opensearch_domain" "domain" {
 }
 
 resource "time_sleep" "domain_policy" {
-  create_duration = "2m"
+  create_duration = "5m"
 
   depends_on = [aws_opensearch_domain.domain]
 }

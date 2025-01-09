@@ -7,11 +7,15 @@ output "activemq_password" {
   sensitive = true
 }
 
+output "activemq_replica_user_password" {
+  value     = module.activemq[0].replica_password
+  sensitive = true
+}
+
 output "activemq_username" {
   value     = var.activemq_username
   sensitive = true
 }
-
 
 output "rabbitmq_password" {
   value     = module.rabbitmq.password
@@ -76,12 +80,7 @@ output "fx_env_kms_key_arn" {
   value       = module.kms_sse.key_arn
 }
 
-output "crr_cluster_endpoint" {
-  description = "Writer endpoint for the cluster"
-  value       = var.setup_dr && (!var.is_dr && var.create_rds) ? module.rds_crr[0].cluster_endpoint : null
-}
-
-output "crr_cluster_reader_endpoint" {
-  description = "A read-only endpoint for the cluster, automatically load-balanced across replicas"
-  value       = var.setup_dr && (!var.is_dr && var.create_rds) ? module.rds_crr[0].cluster_reader_endpoint : null
+output "global_rds_identifier" {
+  description = "Global RDS identifier if created"
+  value = (!var.is_dr && var.create_rds) ? module.rds_cluster[0].global_rds_identifier :null
 }

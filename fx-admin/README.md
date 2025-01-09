@@ -125,28 +125,29 @@ terraform apply
 | region                                    | AWS region to configure provider and provision the resources                                               | string                             | `"us-east-1"`                                                                |
 |dr_region | AWS region for DR setup | string| `us-west-2` |
 |setup_dr| Whether to setup DR replcation for not(works only if run on the primary infra side) | bool| `false`|  
-|is_dr| Whether the currently being infrastrcture is for DR purpose or not | bool | `false` |
+|is_dr| Whether the currently being infrastrcture is for DR purpose and execution region is  DR region | bool | `false` |
 | dr_kms_key_arn | KMS key ARN for the FX ADMIN resources in the DR region(required if `setup_dr` is true)(Has the following alias `resource-{environment}-{region}`)| string | `null` |
 | create_rds | Wheather to create RDS cluster or not (conflicts with `is_dr`)| bool | `true`|
 | k8s_cluster_name | EKS cluster name in which the applicaitons should run | string|`"test"`|
 | environment                               | Environment for which the resources are being provisioned                                                  | string                             | `"test"`                                                                     |
 | cost_tags                                 | Tags associated with specifc customer and environment                                                      | map(string)                        | `{ env-type = "test" customer = "internal" cost-center = "overhead"}`        |
 | dr_tags                                 | Tags associated for RDS CRR resources   | map(string)                        | `{}`        |
-| vendor\*                                  | Name of the vendor hosting applications                                                                    | string                             |                                                                              |
+| vendor\*| Name of the vendor hosting applications| string|`-`|
 | directory_service_data_s3_bucket_name| Name of the S3 bucket to mount to EKS| string | `null`|
 | directory_service_data_s3_bucket_path| File path for the sql dump file to import |string|`null`|
 | directory_service_data_s3_bucket_region|region of the S3 bucket|string|`"us-east-1"`|
 | activemq_ingress_whitelist_ips | CIDR to whitelist to activeMQ security group on ingress | list(string) | `[]` |
 | activemq_egress_whitelist_ips | CIDR to whitelist to activeMQ security group on egress | list(string) | `[]` |
-| activemq_engine_version                   | Version of ActiveMQ engine                                                                                 | String                             | `"5.17.6"`                                                                  |
-| activemq_storage_type                     | Preferred storage type for ActiveMQ                                                                        | String                             | `"efs"`                                                                      |
-| activemq_instance_type                    | ActiveMQ host's instance type                                                                              | String                             | `"mq.t2.micro"`                                                              |
-| activemq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window  | bool                               | `true`                                                                       |
-| activemq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | bool                               | `false`                                                                      |
-| activemq_publicly_accessible              | Specify whether the ActiveMQ instance should be publicly accessible                                        | bool                               | `true`                                                                       |
-| activemq_username                         | Username to authenticate into the ActiveMQ server                                                          | String                             | `"admin"`                                                                    |
-| tgw_ram_principals                         | List of accounts to which tgw needs to be shared                                                      | list(string)                             | `[]`                                                                    |
-| rabbitmq_engine_version                   | Version of the RabbitMQ broker engine                                                                      | String                             | `3.11.20`                                                                    |
+|primary_activemq_broker_arn|ARN of the primary Broker from whcih the replication pair is to be created| string|   `null`  |
+|activemq_replica_user_password| Password of the replica user for broker from which the rreplication is to be carried out| string| `null`|
+| activemq_engine_version| Version of ActiveMQ engine| string | `"5.17.6"`|
+| activemq_storage_type| Preferred storage type for ActiveMQ| string | `"efs"` |
+| activemq_instance_type| ActiveMQ host's instance type| string | `"mq.t2.micro"` |
+| activemq_apply_immediately                | Specifies whether any broker modifications are applied immediately, or during the next maintenance window  | bool| `true` |
+| activemq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | bool | `false` |
+| activemq_publicly_accessible              | Specify whether the ActiveMQ instance should be publicly accessible | bool | `true` |
+| activemq_username | Username to authenticate into the ActiveMQ server | string | `"admin"` |
+| rabbitmq_engine_version                   | Version of the RabbitMQ broker engine | string| `3.11.20`|
 | rabbitmq_enable_cluster_mode              | Enable RabbitMQ Cluster Mode.                                                                              | Bool                               | `false`                                                                      |
 | rabbitmq_instance_type                    | Broker's instance type                                                                                     | String                             | `"mq.t3.micro"`                                                                |
 | rabbitmq_auto_minor_version_upgrade       | Whether to automatically upgrade to new minor versions of brokers as Amazon MQ makes releases available.   | Bool                               | `false`                                                                      |
@@ -198,6 +199,7 @@ This object is used to configure the RDS cluster to be created in primary region
 |rds_ca_cert_identifier| RDS certificate identifier | string| `"rds-ca-rsa2048-g1"`|
 |rds_db_cluster_parameter_group_parameters|Cluster paramter group values|list(map(string))|`[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {,name = "binlog_format", value = "MIXED", apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]` |
 |rds_db_parameter_group_parameters| Parameters for the parameter group of DB | list(map(string))| `[{name="log_bin_trust_function_creators", value = 1, apply_method = "pending-reboot", }, {name         = "long_query_time", value = "10", apply_method = "immediate"}]`|
+|global_rds_identifier| ID for global RDS cluster with which the cluster needs to be associated with. This property is required if running the script in DR region and RDS cluster needs to be setup as secondary cluster.| string| `null`| 
 
 ### Baton Application Namespaces
 
@@ -229,6 +231,7 @@ This object taked the paramters needed by a single service to run and are passed
 | subdomain_suffix  | Suffix to append to the environment name in sub domain for a service| string  |`""` |
 |replicas| Number of replicas to provision for a deployment | number | `1` |
 | url_prefix\*      | Prefix for the service URL  | string      |          |
+| node_selectors | Node Selectors to add to deployment file| map(string) | `{}` |
 | image_tag         | Version of the image to be used| string      | `latest` |
 | env\*             | Env mapping for deployment object . The key provided is supplied to the `name` parameter and value provided goes to `value` parameter. | map(string) |          |
 |volumeMounts | Different volume and mounts configuration to add to the deployment | object(volumeMounts) | [Volume Mounts](#markdown-headers-volume-mounts) | 
@@ -317,6 +320,7 @@ Object parameters for adding mounts to  [Volume Mounts](#markdown-headers-volume
           health_endpoint = "/health"
           target_port     = 8080
           subdomain_suffix= "-api"
+          node_selectors = {"selector1" = "value1", "selector2" = "value2"}
           url_prefix      = "/app2"
           env             = { "key3" = "v3", "key4" = "v4" }
           image_tag       = "latest"

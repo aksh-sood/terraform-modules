@@ -234,3 +234,25 @@ module "waf" {
 
   tags = var.cost_tags
 }
+
+#Creates Transit gateway, linking to DR VPC, and Cross Account Resource Sharing.
+module "transit_gateway" {
+  source = "../commons/aws/transit-gateway"
+  count  = (var.create_tgw && !var.is_dr) ? 1 : 0
+
+  central_vpc_id            = module.vpc.id
+  central_vpc_subnet_ids    = module.vpc.private_subnets
+  region_routes             = var.tgw_region_routes
+  dr_central_vpc_id         = var.dr_central_vpc_id
+  dr_central_vpc_subnet_ids = var.dr_central_vpc_subnet_ids
+  shared_accounts           = var.tgw_shared_accounts
+
+  providers = {
+    aws.us-east-1      = aws.us-east-1
+    aws.us-west-2      = aws.us-west-2
+    aws.ap-southeast-1 = aws.ap-southeast-1
+    aws.eu-west-1      = aws.eu-west-1
+  }
+
+  cost_tags                 = var.cost_tags
+}
